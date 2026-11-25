@@ -1,11 +1,19 @@
 # Appends the verification records of what lands on `main` to the `records` branch
-# (docs/GITHUB_PLATFORM.md in the core, "Environments"). It reads the result the merge queue's
-# `gate` run produced for this commit, checks its shape, and runs no Lean.
+# (docs/GITHUB_PLATFORM.md in the core, "Environments"). For each recent commit of `main` not yet
+# recorded, it reads the result the merge queue's `gate` run produced for it, checks its shape, and
+# runs no Lean.
+#
+# It runs on push to `main`, and every 10 minutes in case a merge did not trigger the push (a merge
+# made with the workflow's own token triggers no workflow). Appending is idempotent, so a commit
+# seen by both runs is recorded once. When it records something, it starts `index`.
 name: records
 
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
 
 permissions: {}
 
@@ -21,14 +29,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write
-      actions: read
+      contents: write        # push the records branch
+      actions: write         # read the gate's results; start `index`
       pull-requests: read
     steps:
       - name: Check out main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          ref: main
           path: dag
+          persist-credentials: false
+      - name: Check out the records (to see which commits are recorded)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: records
+          path: seen
           persist-credentials: false
       - name: Read the default environment
         id: env
@@ -46,29 +62,41 @@ jobs:
           ref: ${{ steps.env.outputs.core_rev }}
           path: core
           persist-credentials: false
-      - name: Find the merge queue's verification of this commit
-        id: run
+      - name: Find the merge queue's verifications of recent commits
+        id: find
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.sha }}
         run: |
-          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$SHA&event=merge_group" \
-            --jq '[.workflow_runs[] | select(.name == "gate" and .conclusion == "success")][0].id // empty')
-          if [ -z "$run" ]; then echo "no verified merge group for $SHA (a maintainer's push?)"; exit 0; fi
-          gh run download "$run" -R "$GITHUB_REPOSITORY" -n result -D result
-          [ "$(cat result/exit)" = 0 ] || { echo "the verification did not pass"; exit 1; }
-          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[0].number // empty')
-          author=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[0].user.login // empty')
-          { echo "found=1"; echo "run=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run";
-            echo "pr=$pr"; echo "author=$author"; } >> "$GITHUB_OUTPUT"
+          mkdir -p seen results
+          # Commits already recorded (records name their commit).
+          cat seen/*.jsonl 2>/dev/null | python3 -c '
+          import json, sys
+          print("\n".join(sorted({json.loads(l).get("commit") or "" for l in sys.stdin if l.strip()})))
+          ' > recorded.txt
+          # The recent commits of main, oldest first.
+          gh api "repos/$GITHUB_REPOSITORY/commits?sha=main&per_page=30" --jq '.[].sha' | tac > commits.txt
+          bad=0
+          while read -r sha; do
+            grep -qx "$sha" recorded.txt && continue
+            run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha&event=merge_group" \
+              --jq '[.workflow_runs[] | select(.name == "gate" and .conclusion == "success")][0].id // empty')
+            [ -n "$run" ] || continue        # not from the merge queue (a maintainer's change)
+            gh run download "$run" -R "$GITHUB_REPOSITORY" -n result -D "results/$sha" || { bad=1; continue; }
+            if [ "$(cat "results/$sha/exit")" != 0 ]; then
+              echo "::error::the verification of $sha did not pass"; rm -rf "results/$sha"; bad=1; continue
+            fi
+            gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" \
+              --jq '(.[0].number // "" | tostring) + " " + (.[0].user.login // "")' > "results/$sha/pr"
+            echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run" > "results/$sha/run"
+            echo "$sha" >> todo.txt
+          done < commits.txt
+          [ -s todo.txt ] && echo "found=1" >> "$GITHUB_OUTPUT"
+          echo "bad=$bad" >> "$GITHUB_OUTPUT"
       - name: Append the records
-        if: steps.run.outputs.found == '1'
+        id: append
+        if: steps.find.outputs.found == '1'
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.sha }}
-          RUN: ${{ steps.run.outputs.run }}
-          PR: ${{ steps.run.outputs.pr }}
-          AUTHOR: ${{ steps.run.outputs.author }}
           ENV_ID: ${{ steps.env.outputs.env_id }}
         run: |
           url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
@@ -81,12 +109,27 @@ jobs:
             if ! git clone -q --branch records --single-branch "$url" records; then
               git init -q -b records records && git -C records remote add origin "$url"
             fi
-            python3 core/python/dag_tools.py records --result result/result.json --records records \
-              --env "$ENV_ID" --commit "$SHA" --run "$RUN" ${PR:+--pr "$PR"} ${AUTHOR:+--author "$AUTHOR"}
+            while read -r sha; do
+              read -r pr author < "results/$sha/pr" || true
+              python3 core/python/dag_tools.py records --result "results/$sha/result.json" \
+                --records records --env "$ENV_ID" --commit "$sha" --run "$(cat "results/$sha/run")" \
+                ${pr:+--pr "$pr"} ${author:+--author "$author"}
+            done < todo.txt
             git -C records add -A
             git -C records diff --cached --quiet && exit 0
-            git -C records commit -q -m "records for $SHA"
-            git -C records push -q origin records && exit 0
+            git -C records commit -q -m "records for $(wc -l < todo.txt) commit(s) of main"
+            if git -C records push -q origin records; then
+              echo "pushed=1" >> "$GITHUB_OUTPUT"; exit 0
+            fi
             sleep $((attempt * 5))
           done
           echo "could not publish the records"; exit 1
+      - name: Update the index
+        if: steps.append.outputs.pushed == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # A push with the workflow's token triggers no workflow; a dispatch does.
+        run: gh workflow run index.yml -R "$GITHUB_REPOSITORY" --ref main
+      - name: Every verification found was usable
+        if: steps.find.outputs.bad == '1'
+        run: exit 1

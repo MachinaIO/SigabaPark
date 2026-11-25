@@ -5,8 +5,9 @@ name: index
 on:
   push:
     branches: [main]
+  # `records` starts this workflow itself (with a dispatch) when it has recorded something.
   workflow_run:
-    workflows: [records, reverify]
+    workflows: [reverify]
     types: [completed]
   workflow_dispatch:
 

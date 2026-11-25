@@ -5,9 +5,11 @@
 #   precheck  reads the pull request's added files through the API, as data (no checkout of it);
 #   verify    builds them in a container without network, token or secrets, where Lean runs as an
 #             unprivileged user apart from the verifier;
-#   decide    the only job with write access (a GitHub App token in the `gate` Environment); it
-#             runs no pull request code, and accepts `verify`'s schema-checked result only if it is
-#             about this commit and environment and covers exactly the added nodes.
+#   decide    runs no pull request code, and accepts `verify`'s schema-checked result only if it
+#             is about this commit and environment and covers exactly the added nodes; read only;
+#   report    the only job with write access (the workflow's own token, for pull_request_target
+#             only): it comments the decision, sets the gate's labels and enables auto-merge. It
+#             runs no pull request code and reads nothing but `decide`'s decision.
 #
 # Nothing closes a pull request: a decision is about one commit, and a newer commit gets its
 # own run. Require the check `gate / decide` (from the GitHub Actions app) in the ruleset of `main`, with
@@ -167,9 +169,6 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The App's key is in the `gate` Environment, which only `main` may use (pull_request_target
-    # runs on the base branch). Merge groups run on gh-readonly-queue/… and need no key.
-    environment: ${{ github.event_name == 'pull_request_target' && 'gate' || '' }}
     permissions:
       contents: read
     steps:
@@ -210,17 +209,47 @@ jobs:
           open("labels.txt", "w").write("".join(f"{l}\n" for l in d["labels"]))
           open("flags.txt", "w").write(f"{d['conclusion']} {int(d['automerge'])}\n")
           PY
-      - name: A token of the gate's GitHub App
-        id: app
-        if: github.event_name == 'pull_request_target'
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          app-id: ${{ vars.GATE_APP_ID }}
-          private-key: ${{ secrets.GATE_APP_KEY }}
+          name: decision
+          path: |
+            decision.json
+            comment.md
+            labels.txt
+            flags.txt
+          retention-days: 14
+      - name: Conclusion
+        run: |
+          read -r conclusion automerge < flags.txt
+          [ "$conclusion" = success ]
+
+  # Write access, for pull requests only (a merge group has nothing to report on). The token is the
+  # workflow's own, which expires with the job; there is no long-lived key. This job runs no pull
+  # request code: it reads `decide`'s decision and the core's tools at the pinned revision.
+  report:
+    needs: [precheck, decide]
+    if: always() && github.event_name == 'pull_request_target' && needs.precheck.outputs.pr != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write        # enable auto-merge
+      pull-requests: write   # comment, label, enable auto-merge
+      issues: write          # create and set labels
+    steps:
+      - name: Check out the core's tools at the pinned revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ needs.precheck.outputs.core_repo }}
+          ref: ${{ needs.precheck.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: decision
+          path: .
       - name: Report on the pull request
-        if: github.event_name == 'pull_request_target'
         env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           PR: ${{ needs.precheck.outputs.pr }}
           REVISION: ${{ needs.precheck.outputs.revision }}
         run: |
@@ -243,7 +272,3 @@ jobs:
           if [ "$automerge" = 1 ]; then
             gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --auto --squash --match-head-commit "$REVISION"
           fi
-      - name: Conclusion
-        run: |
-          read -r conclusion automerge < flags.txt
-          [ "$conclusion" = success ]
