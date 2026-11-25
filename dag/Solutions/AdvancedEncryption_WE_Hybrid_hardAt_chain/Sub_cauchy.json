@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Hybrid.hardAt_chain", "proof_type": "prove", "explanation": "Telescope the advantage over the T hops and apply Cauchy-Schwarz (sq_sum_le_card_mul_sum_sq): gain(D 0, D T) <= T * sum of hop gains; each hop gain is at most cost / 2^k by HardAt, so the sum is at most T * cost / 2^k."}
