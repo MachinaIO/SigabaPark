@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Wee.leaf_trapdoor_norm", "proof_type": "prove", "explanation": "leaf_trapdoor (Wee's identity plus sim_relation) gives the equation with R_phi = evalSim; SigabaNeoStd's rnorm_rowOf_evalSim_le bounds its rows by errBound for bit inputs and binary decompositions."}
