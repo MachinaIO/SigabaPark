@@ -25,36 +25,6 @@ runs the trusted `#sigaba_neo_check`.
 | `meta/assumptions.json`, `meta/promotions.json` | claim metadata, nodes promoted to std | maintainers |
 | branch `records` | verification records, `<env>.jsonl` | CI |
 
-## GitHub settings (maintainers)
-
-The workflows assume these settings. Without them the gate is not a boundary.
-
-1. **Permissions.** Nobody but the maintainers has write access; agents and people work from
-   forks. Settings → Actions → General: workflow permissions "Read repository contents";
-   "Require approval for all outside collaborators" for fork pull request workflows (the gate uses
-   `pull_request_target`, which does not need it, but other workflows would). While the
-   repository is private, allow forking and "Run workflows from fork pull requests".
-2. **No App is needed.** The gate's `report` job comments, labels and enables auto-merge with the
-   workflow's own token. Only the optional `formalpedia.yml` needs a GitHub App ("Contents" and
-   "Pull requests: read & write"), with the variable `GATE_APP_ID` and the secret `GATE_APP_KEY`
-   in an Environment `gate` restricted to `main`, and the App's bot login in `meta/trusted.json`;
-   without it, disable that workflow (`gh workflow disable formalpedia`).
-3. **Labels.** The gate labels pull requests `not-accepted` (an author not in
-   `meta/trusted.json`), `rejected` (a failing check) and `needs-maintainer` (passed, not on the
-   automerge list). It creates them if they are missing; to create them beforehand:
-   `for l in not-accepted rejected needs-maintainer; do gh label create "$l" --force; done`.
-4. **Ruleset of `main`.** Require a pull request; require the status check `decide` from the
-   GitHub Actions app; require the merge queue (squash); require review from code owners; block
-   force pushes and deletions. Let the Repository admin role bypass it for pull requests only, so
-   that maintainers can merge changes to `env/`, `meta/` and `.github/` (which the gate always
-   rejects). Allow auto-merge (squash only) in the repository's settings.
-5. **Ruleset of `records`.** Block force pushes and deletions. Only maintainers and GitHub Actions
-   can push to it, since nobody else has write access (a repository ruleset cannot name GitHub
-   Actions as its only writer).
-6. **Pages.** Source: GitHub Actions.
-7. **Pinned actions.** The workflows pin every action by commit SHA (the version is in a comment),
-   and the core pins the image's base by digest. Update a pin deliberately, never to a moving tag.
-
 ## Environments and std
 
 A new base environment (a cslib-frontier, Mathlib or Lean update, or a new core tag) is a new entry
