@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Wee.wee_identity", "proof_type": "prove", "explanation": "Distribute the product, replace each W_i T_W[j] by delta_ij G - B T_B[i,j] using the block identity, and collect: the delta sum leaves w_j G and the remaining terms factor through B."}
