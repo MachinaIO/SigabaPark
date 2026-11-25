@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Leaf.leafKey_real_eq_sim", "proof_type": "prove", "explanation": "Both trapdoors have the same public map (B Tm G^{-1}(A+G) = A + G = B R), so leafKey_apply_some gives the same explicit value on every some-output; PMF.ext_option concludes."}
