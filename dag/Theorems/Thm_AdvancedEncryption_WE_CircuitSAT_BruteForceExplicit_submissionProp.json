@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.CircuitSAT.BruteForceExplicit.submissionProp",
+ "title": "Submission proposition of the explicit-cost brute-force WE submission",
+ "statement": "The brute-force witness-encryption submission for NAND-circuit SAT with explicit tape-program machines and explicit cost bound N (about 2^188) satisfies the Submission proposition of WE_CircuitSAT: it is correct and false-statement secure with no premises, and its cost is at most N."
+}
