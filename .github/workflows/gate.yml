@@ -7,9 +7,13 @@
 #             unprivileged user apart from the verifier;
 #   decide    runs no pull request code, and accepts `verify`'s schema-checked result only if it
 #             is about this commit and environment and covers exactly the added nodes; read only;
-#   report    the only job with write access (the workflow's own token, for pull_request_target
-#             only): it comments the decision, sets the gate's labels and enables auto-merge. It
-#             runs no pull request code and reads nothing but `decide`'s decision.
+#   report    comments the decision and sets the gate's labels, with the workflow's own token
+#             (pull_request_target only);
+#   merge     enables auto-merge for a passing pull request of an `automerge` author, with the
+#             gate's GitHub App token (in the `gate` Environment, which only `main` may use). It
+#             must not be the workflow's own token: GitHub starts no workflow for what that token
+#             does, so the merge queue's own run of this gate would never start.
+# Neither report nor merge runs pull request code; both read only `decide`'s decision.
 #
 # Nothing closes a pull request: a decision is about one commit, and a newer commit gets its
 # own run. Require the check `gate / decide` (from the GitHub Actions app) in the ruleset of `main`, with
@@ -171,6 +175,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    outputs:
+      automerge: ${{ steps.decision.outputs.automerge }}
     steps:
       - name: Check out the core's tools at the pinned revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -190,6 +196,7 @@ jobs:
           name: result
           path: result
       - name: Decide
+        id: decision
         env:
           AUTHOR: ${{ needs.precheck.outputs.author }}
           EVENT: ${{ github.event_name }}
@@ -209,6 +216,8 @@ jobs:
           open("labels.txt", "w").write("".join(f"{l}\n" for l in d["labels"]))
           open("flags.txt", "w").write(f"{d['conclusion']} {int(d['automerge'])}\n")
           PY
+          read -r conclusion automerge < flags.txt
+          echo "automerge=$automerge" >> "${GITHUB_OUTPUT:-/dev/null}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: decision
@@ -224,16 +233,15 @@ jobs:
           [ "$conclusion" = success ]
 
   # Write access, for pull requests only (a merge group has nothing to report on). The token is the
-  # workflow's own, which expires with the job; there is no long-lived key. This job runs no pull
-  # request code: it reads `decide`'s decision and the core's tools at the pinned revision.
+  # workflow's own, which expires with the job. This job runs no pull request code: it reads
+  # `decide`'s decision and the core's tools at the pinned revision.
   report:
     needs: [precheck, decide]
     if: always() && github.event_name == 'pull_request_target' && needs.precheck.outputs.pr != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write        # enable auto-merge
-      pull-requests: write   # comment, label, enable auto-merge
+      pull-requests: write   # comment, label
       issues: write          # create and set labels
     steps:
       - name: Check out the core's tools at the pinned revision
@@ -268,7 +276,28 @@ jobs:
               gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --remove-label "$label"
             fi
           done < label-ops.txt
-          # Only the verified commit: if the pull request has moved on, nothing is merged.
-          if [ "$automerge" = 1 ]; then
-            gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --auto --squash --match-head-commit "$REVISION"
-          fi
+
+  # Puts a passing pull request of an `automerge` author into the merge queue. The App's token is
+  # needed: GitHub starts no workflow for an event caused by the workflow's own token, so a pull
+  # request queued with it would wait for this gate's merge group run forever.
+  merge:
+    needs: [precheck, decide]
+    if: github.event_name == 'pull_request_target' && needs.decide.outputs.automerge == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: gate
+    permissions: {}
+    steps:
+      - name: A token of the gate's GitHub App
+        id: app
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: ${{ vars.GATE_APP_ID }}
+          private-key: ${{ secrets.GATE_APP_KEY }}
+      - name: Enable auto-merge for the verified commit
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ needs.precheck.outputs.pr }}
+          REVISION: ${{ needs.precheck.outputs.revision }}
+        # Only the verified commit: if the pull request has moved on, nothing is merged.
+        run: gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --auto --squash --match-head-commit "$REVISION"
