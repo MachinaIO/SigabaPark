@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Wee.leaf_trapdoor", "proof_type": "prove", "explanation": "Wee's identity puts each A_j in the form B R_j + w_j G; SigabaNeoStd's sim_relation (BTVW17 4.2) then gives EvalF(phi, A) = B evalSim + phi(w) G, and phi(w) = 0 removes the G term."}
