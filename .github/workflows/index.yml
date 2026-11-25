@@ -1,0 +1,70 @@
+# Publishes the index (statuses per environment, open leaves, needs port, notes, std candidates)
+# to GitHub Pages. It parses files and records only, and runs no Lean.
+name: index
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [records, reverify]
+    types: [completed]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: index
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          path: dag
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: records
+          path: records
+          persist-credentials: false
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("dag/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          print(f"core_repo={re.sub(r'^https://github.com/|[.]git$', '', e['core_url'])}\ncore_rev={e['core']}")
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ steps.env.outputs.core_repo }}
+          ref: ${{ steps.env.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - run: |
+          mkdir -p records
+          python3 core/python/dag_tools.py index --dag dag --records records --core core --out site
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

@@ -1,0 +1,92 @@
+# Appends the verification records of what lands on `main` to the `records` branch
+# (docs/GITHUB_PLATFORM.md in the core, "Environments"). It reads the result the merge queue's
+# `gate` run produced for this commit, checks its shape, and runs no Lean.
+name: records
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+# One writer of the records branch at a time, shared with reverify.yml; every waiting writer is
+# kept (`queue: max`), none replaced by a newer one.
+concurrency:
+  group: records-branch
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  records:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+      pull-requests: read
+    steps:
+      - name: Check out main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: dag
+          persist-credentials: false
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("dag/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          print(f"core_repo={re.sub(r'^https://github.com/|[.]git$', '', e['core_url'])}\ncore_rev={e['core']}\nenv_id={e['id']}")
+          PY
+      - name: Check out the core's tools
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ steps.env.outputs.core_repo }}
+          ref: ${{ steps.env.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - name: Find the merge queue's verification of this commit
+        id: run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$SHA&event=merge_group" \
+            --jq '[.workflow_runs[] | select(.name == "gate" and .conclusion == "success")][0].id // empty')
+          if [ -z "$run" ]; then echo "no verified merge group for $SHA (a maintainer's push?)"; exit 0; fi
+          gh run download "$run" -R "$GITHUB_REPOSITORY" -n result -D result
+          [ "$(cat result/exit)" = 0 ] || { echo "the verification did not pass"; exit 1; }
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[0].number // empty')
+          author=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[0].user.login // empty')
+          { echo "found=1"; echo "run=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run";
+            echo "pr=$pr"; echo "author=$author"; } >> "$GITHUB_OUTPUT"
+      - name: Append the records
+        if: steps.run.outputs.found == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          RUN: ${{ steps.run.outputs.run }}
+          PR: ${{ steps.run.outputs.pr }}
+          AUTHOR: ${{ steps.run.outputs.author }}
+          ENV_ID: ${{ steps.env.outputs.env_id }}
+        run: |
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config --global user.name "dag-records"
+          git config --global user.email "dag-records@users.noreply.github.com"
+          # Append to the latest tip, and start again from it if another writer pushed first
+          # (appending is idempotent).
+          for attempt in 1 2 3 4 5; do
+            rm -rf records
+            if ! git clone -q --branch records --single-branch "$url" records; then
+              git init -q -b records records && git -C records remote add origin "$url"
+            fi
+            python3 core/python/dag_tools.py records --result result/result.json --records records \
+              --env "$ENV_ID" --commit "$SHA" --run "$RUN" ${PR:+--pr "$PR"} ${AUTHOR:+--author "$AUTHOR"}
+            git -C records add -A
+            git -C records diff --cached --quiet && exit 0
+            git -C records commit -q -m "records for $SHA"
+            git -C records push -q origin records && exit 0
+            sleep $((attempt * 5))
+          done
+          echo "could not publish the records"; exit 1

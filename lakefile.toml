@@ -1,0 +1,17 @@
+name = "dag"
+srcDir = "dag"
+leanOptions = { autoImplicit = false }
+
+[[require]]
+name = "SigabaNeo"
+git = "https://github.com/MachinaIO/SigabaNeo"
+rev = "v0.1.1"
+
+[[lean_lib]]
+name = "Definitions"
+
+[[lean_lib]]
+name = "Theorems"
+
+[[lean_lib]]
+name = "Solutions"

@@ -1,0 +1,9 @@
+# Maintainers only. A pull request that touches these is never merged automatically: the gate
+# rejects any change outside dag/, and these paths need a maintainer's review.
+/.github/        @SoraSuegami
+/env/            @SoraSuegami
+/meta/           @SoraSuegami
+/lakefile.toml   @SoraSuegami
+/lean-toolchain  @SoraSuegami
+/README.md       @SoraSuegami
+/SKILL.md        @SoraSuegami

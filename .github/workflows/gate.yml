@@ -1,0 +1,249 @@
+# The gate (docs/GITHUB_PLATFORM.md in the core, "Workflows"). It always runs the base branch's
+# copy of this file (`pull_request_target`), and never runs a pull request's code outside the
+# sandbox:
+#
+#   precheck  reads the pull request's added files through the API, as data (no checkout of it);
+#   verify    builds them in a container without network, token or secrets, where Lean runs as an
+#             unprivileged user apart from the verifier;
+#   decide    the only job with write access (a GitHub App token in the `gate` Environment); it
+#             runs no pull request code, and accepts `verify`'s schema-checked result only if it is
+#             about this commit and environment and covers exactly the added nodes.
+#
+# Nothing closes a pull request: a decision is about one commit, and a newer commit gets its
+# own run. Require the check `gate / decide` (from the GitHub Actions app) in the ruleset of `main`, with
+# the merge queue.
+name: gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  merge_group:
+    types: [checks_requested]
+
+permissions: {}
+
+concurrency:
+  group: gate-${{ github.event.pull_request.number || github.event.merge_group.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      ok: ${{ steps.precheck.outputs.ok }}
+      env_id: ${{ steps.env.outputs.env_id }}
+      image: ${{ steps.env.outputs.image }}
+      core_repo: ${{ steps.env.outputs.core_repo }}
+      core_rev: ${{ steps.env.outputs.core_rev }}
+      author: ${{ steps.who.outputs.author }}
+      pr: ${{ steps.who.outputs.pr }}
+      revision: ${{ steps.precheck.outputs.revision }}
+    steps:
+      - name: Check out the base branch (never the pull request)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("base/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          repo = re.sub(r"^https://github\.com/|\.git$", "", e["core_url"])
+          assert re.fullmatch(r"[\w.-]+/[\w.-]+", repo) and re.fullmatch(r"[\w./-]+", e["core"])
+          assert re.fullmatch(r"[\w./:-]+@sha256:[0-9a-f]{64}", e["image"]), "pin the image by digest"
+          print(f"env_id={e['id']}\nimage={e['image']}\ncore_repo={repo}\ncore_rev={e['core']}")
+          PY
+      - name: Check out the core's tools at the pinned revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ steps.env.outputs.core_repo }}
+          ref: ${{ steps.env.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - name: The author
+        id: who
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.merge_group.head_ref }}
+        run: |
+          if [ -n "$PR_NUMBER" ]; then
+            echo "author=$PR_AUTHOR" >> "$GITHUB_OUTPUT"
+            echo "pr=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            n=$(printf '%s' "$HEAD_REF" | sed -nE 's#^.*/pr-([0-9]+)-[0-9a-f]+$#\1#p')
+            [ -n "$n" ] || { echo "cannot read the pull request of $HEAD_REF"; exit 1; }
+            echo "author=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n" --jq .user.login)" >> "$GITHUB_OUTPUT"
+            echo "pr=$n" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Fetch the added files (as data)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          # The event's commits, which do not move: the files, their modes and their contents are
+          # read at HEAD_SHA, and everything after this step is about HEAD_SHA.
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: |
+          python3 core/python/dag_tools.py fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
+            --head "$HEAD_SHA" --out fetched
+      - name: Precheck
+        id: precheck
+        env:
+          AUTHOR: ${{ steps.who.outputs.author }}
+        run: python3 core/python/dag_tools.py precheck --dag base --fetched fetched --author "$AUTHOR" --out fetched/precheck.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: fetched
+          path: fetched
+          retention-days: 14
+
+  verify:
+    needs: precheck
+    if: needs.precheck.outputs.ok == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the records (hints only)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: records
+          path: records
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fetched
+          path: fetched
+      - name: Verify in the sandbox
+        env:
+          IMAGE: ${{ needs.precheck.outputs.image }}
+          ENV_ID: ${{ needs.precheck.outputs.env_id }}
+          REVISION: ${{ needs.precheck.outputs.revision }}
+        run: |
+          mkdir -p out records fetched/files
+          docker pull "$IMAGE"
+          # The verifier runs as root with no capability but changing its user; every Lean and
+          # Lake process runs as uid 1000, which cannot touch the sources, the verifier or its
+          # output. The result is the verifier's standard output; its exit status is recorded
+          # here, outside the container.
+          set +e
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --user 0:0 -e SIGABA_LEAN_UID=1000 \
+            --memory 14g --cpus 4 --pids-limit 4096 \
+            --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
+            -v "$PWD/base:/base:ro" -v "$PWD/fetched/files:/new:ro" -v "$PWD/records:/records:ro" \
+            "$IMAGE" verify --dag /base --new /new --out - --env "$ENV_ID" --revision "$REVISION" \
+              --records /records --workdir /work/ws > out/result.json 2> out/log.txt
+          echo $? > out/exit
+          tail -c 20000 out/log.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: result
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 90
+
+  decide:
+    needs: [precheck, verify]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The App's key is in the `gate` Environment, which only `main` may use (pull_request_target
+    # runs on the base branch). Merge groups run on gh-readonly-queue/… and need no key.
+    environment: ${{ github.event_name == 'pull_request_target' && 'gate' || '' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the core's tools at the pinned revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ needs.precheck.outputs.core_repo }}
+          ref: ${{ needs.precheck.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: fetched
+          path: fetched
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: result
+          path: result
+      - name: Decide
+        env:
+          AUTHOR: ${{ needs.precheck.outputs.author }}
+          EVENT: ${{ github.event_name }}
+          ENV_ID: ${{ needs.precheck.outputs.env_id }}
+          REVISION: ${{ needs.precheck.outputs.revision }}
+        run: |
+          mkdir -p fetched result
+          [ -f fetched/precheck.json ] || echo '{"ok": false, "accepted": true, "automerge": false, "problems": ["the precheck did not finish"], "added": []}' > fetched/precheck.json
+          python3 core/python/dag_tools.py decide --precheck fetched/precheck.json \
+            --result result/result.json --exit-code result/exit --env "$ENV_ID" \
+            --revision "$REVISION" --author "$AUTHOR" --event "$EVENT" --out decision.json || true
+          python3 - <<'PY'
+          import json
+          d = json.load(open("decision.json"))
+          open("comment.md", "w").write(d["comment"][:60000])
+          # Every line ends in a newline: `read` fails on a last line without one.
+          open("labels.txt", "w").write("".join(f"{l}\n" for l in d["labels"]))
+          open("flags.txt", "w").write(f"{d['conclusion']} {int(d['automerge'])}\n")
+          PY
+      - name: A token of the gate's GitHub App
+        id: app
+        if: github.event_name == 'pull_request_target'
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: ${{ vars.GATE_APP_ID }}
+          private-key: ${{ secrets.GATE_APP_KEY }}
+      - name: Report on the pull request
+        if: github.event_name == 'pull_request_target'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ needs.precheck.outputs.pr }}
+          REVISION: ${{ needs.precheck.outputs.revision }}
+        run: |
+          read -r conclusion automerge < flags.txt
+          gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file comment.md
+          # The gate's labels follow the latest decision (others are left alone); a missing label
+          # is created, and a failure to label is a failure of this step, never silent.
+          current=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]')
+          python3 core/python/dag_tools.py labels --decision decision.json --current "$current" \
+            > label-ops.txt
+          while read -r op label; do
+            if [ "$op" = add ]; then
+              gh label create "$label" -R "$GITHUB_REPOSITORY" --force >/dev/null
+              gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --add-label "$label"
+            elif [ "$op" = remove ]; then
+              gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --remove-label "$label"
+            fi
+          done < label-ops.txt
+          # Only the verified commit: if the pull request has moved on, nothing is merged.
+          if [ "$automerge" = 1 ]; then
+            gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --auto --squash --match-head-commit "$REVISION"
+          fi
+      - name: Conclusion
+        run: |
+          read -r conclusion automerge < flags.txt
+          [ "$conclusion" = success ]

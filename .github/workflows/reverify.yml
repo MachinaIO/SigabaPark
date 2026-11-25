@@ -1,0 +1,203 @@
+# Checks existing nodes again in every active environment: solutions without a counting record
+# there (a new environment, or a new std release) and nodes without a semantic ID there. Lean runs
+# only in the sandbox; the job that writes the records runs no Lean.
+name: reverify
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "the environment's id (default: every active environment)"
+        required: false
+      limit:
+        description: "at most this many nodes per environment"
+        required: false
+        default: "200"
+
+permissions: {}
+
+concurrency:
+  group: reverify
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      envs: ${{ steps.envs.outputs.envs }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: dag
+          persist-credentials: false
+      - id: envs
+        env:
+          ONLY: ${{ inputs.env }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, re
+          envs = [e for e in json.load(open("dag/env/environments.json"))["environments"]
+                  if e["state"] != "frozen" and (not os.environ.get("ONLY") or e["id"] == os.environ["ONLY"])]
+          out = [{"id": e["id"], "image": e["image"], "core_rev": e["core"],
+                  "core_repo": re.sub(r"^https://github.com/|[.]git$", "", e["core_url"])} for e in envs]
+          print("envs=" + json.dumps(out))
+          PY
+
+  verify:
+    needs: plan
+    if: needs.plan.outputs.envs != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        env: ${{ fromJSON(needs.plan.outputs.envs) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: base
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: records
+          path: records
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ matrix.env.core_repo }}
+          ref: ${{ matrix.env.core_rev }}
+          path: core
+          persist-credentials: false
+      - name: Plan
+        id: plan
+        env:
+          ENV_ID: ${{ matrix.env.id }}
+          LIMIT: ${{ inputs.limit || '200' }}
+        run: |
+          mkdir -p records plan out
+          python3 core/python/dag_tools.py reverify-plan --dag base --records records --env "$ENV_ID" \
+            --limit "$LIMIT" --out plan/plan.json
+          if python3 -c 'import json,sys; sys.exit(0 if json.load(open("plan/plan.json")) else 1)'; then
+            echo "todo=1" >> "$GITHUB_OUTPUT"; echo 1 > out/planned
+          else
+            echo 0 > out/planned
+          fi
+      - name: Verify in the sandbox
+        if: steps.plan.outputs.todo == '1'
+        env:
+          IMAGE: ${{ matrix.env.image }}
+          ENV_ID: ${{ matrix.env.id }}
+        run: |
+          docker pull "$IMAGE"
+          set +e
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --user 0:0 -e SIGABA_LEAN_UID=1000 \
+            --memory 14g --cpus 4 --pids-limit 4096 \
+            --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
+            -v "$PWD/base:/base:ro" -v "$PWD/plan:/plan:ro" -v "$PWD/records:/records:ro" \
+            "$IMAGE" verify --dag /base --reverify /plan/plan.json --out - --env "$ENV_ID" \
+              --revision "$GITHUB_SHA" --records /records --workdir /work/ws \
+              > out/result.json 2> out/log.txt
+          echo $? > out/exit
+          echo "$ENV_ID" > out/env
+          tail -c 20000 out/log.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()       # every environment reports, so a lost result is noticed
+        with:
+          name: result-${{ matrix.env.id }}
+          path: out/
+          if-no-files-found: error
+
+  records:
+    needs: [plan, verify]
+    if: always() && needs.plan.outputs.envs != '[]'
+    runs-on: ubuntu-latest
+    # One writer of the records branch at a time, shared with records.yml; every waiting writer
+    # is kept (`queue: max`), none replaced by a newer one.
+    concurrency:
+      group: records-branch
+      cancel-in-progress: false
+      queue: max
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: dag
+          persist-credentials: false
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("dag/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          print(f"core_repo={re.sub(r'^https://github.com/|[.]git$', '', e['core_url'])}\ncore_rev={e['core']}")
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ steps.env.outputs.core_repo }}
+          ref: ${{ steps.env.outputs.core_rev }}
+          path: core
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: result-*
+          path: results
+      - name: Every planned environment has its result
+        env:
+          ENVS: ${{ needs.plan.outputs.envs }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          missing = []
+          for e in json.loads(os.environ["ENVS"]):
+              d = f"results/result-{e['id']}"
+              planned = open(f"{d}/planned").read().strip() if os.path.exists(f"{d}/planned") else None
+              if planned is None:
+                  missing.append(f"{e['id']}: no report from its verification job")
+              elif planned == "1" and subprocess.run(
+                      ["python3", "core/python/dag_tools.py", "check-result", f"{d}/result.json"]
+                      ).returncode != 0:
+                  missing.append(f"{e['id']}: its result is missing or malformed")
+          if missing:
+              sys.exit("\n".join(missing))
+          PY
+      - name: Append the records
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config --global user.name "dag-records"
+          git config --global user.email "dag-records@users.noreply.github.com"
+          # Append to the latest tip, and start again from it if another writer pushed first
+          # (appending is idempotent).
+          for attempt in 1 2 3 4 5; do
+            rm -rf records
+            if ! git clone -q --branch records --single-branch "$url" records; then
+              git init -q -b records records && git -C records remote add origin "$url"
+            fi
+            for d in results/result-*; do
+              [ "$(cat "$d/planned")" = 1 ] || continue
+              env_id="${d#results/result-}"        # from the artifact's name, set by this workflow
+              python3 core/python/dag_tools.py records --result "$d/result.json" --records records \
+                --env "$env_id" --commit "$GITHUB_SHA" --run "$RUN" --author reverify
+            done
+            git -C records add -A
+            git -C records diff --cached --quiet && exit 0
+            git -C records commit -q -m "reverify $GITHUB_SHA"
+            git -C records push -q origin records && exit 0
+            sleep $((attempt * 5))
+          done
+          echo "could not publish the records"; exit 1
