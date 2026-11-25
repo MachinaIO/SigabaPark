@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.leafView_close_zmod_multi", "proof_type": "prove", "explanation": "Instantiates leafView_close_multi at Z_q, with coverage discharged by leafCover_zmod exactly as in leafView_close_zmod. Self-contained."}
