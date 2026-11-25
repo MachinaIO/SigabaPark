@@ -34,18 +34,23 @@ The workflows assume these settings. Without them the gate is not a boundary.
    "Require approval for all outside collaborators" for fork pull request workflows (the gate uses
    `pull_request_target`, which does not need it, but other workflows would). While the
    repository is private, allow forking and "Run workflows from fork pull requests".
-2. **The gate's App.** Create a GitHub App with "Contents: read & write", "Pull requests: read &
-   write" and "Issues: read & write" (labels), installed on this repository. Create the Environment `gate`, restricted to the `main`
-   branch, with the variable `GATE_APP_ID` and the secret `GATE_APP_KEY`. Add the App's bot login
-   to `meta/trusted.json` (`accept` and `automerge`) if `formalpedia.yml` is used.
+2. **No App is needed.** The gate's `report` job comments, labels and enables auto-merge with the
+   workflow's own token. Only the optional `formalpedia.yml` needs a GitHub App ("Contents" and
+   "Pull requests: read & write"), with the variable `GATE_APP_ID` and the secret `GATE_APP_KEY`
+   in an Environment `gate` restricted to `main`, and the App's bot login in `meta/trusted.json`;
+   without it, disable that workflow (`gh workflow disable formalpedia`).
 3. **Labels.** The gate labels pull requests `not-accepted` (an author not in
    `meta/trusted.json`), `rejected` (a failing check) and `needs-maintainer` (passed, not on the
    automerge list). It creates them if they are missing; to create them beforehand:
    `for l in not-accepted rejected needs-maintainer; do gh label create "$l" --force; done`.
 4. **Ruleset of `main`.** Require a pull request; require the status check `decide` from the
    GitHub Actions app; require the merge queue (squash); require review from code owners; block
-   force pushes and deletions. Allow auto-merge in the repository's settings.
-5. **Ruleset of `records`.** Only GitHub Actions may push; block force pushes and deletions.
+   force pushes and deletions. Let the Repository admin role bypass it for pull requests only, so
+   that maintainers can merge changes to `env/`, `meta/` and `.github/` (which the gate always
+   rejects). Allow auto-merge (squash only) in the repository's settings.
+5. **Ruleset of `records`.** Block force pushes and deletions. Only maintainers and GitHub Actions
+   can push to it, since nobody else has write access (a repository ruleset cannot name GitHub
+   Actions as its only writer).
 6. **Pages.** Source: GitHub Actions.
 7. **Pinned actions.** The workflows pin every action by commit SHA (the version is in a comment),
    and the core pins the image's base by digest. Update a pin deliberately, never to a moving tag.
