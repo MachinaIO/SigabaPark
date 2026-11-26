@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.encryptor_leafGood_failure", "title": "Direct entry-tail bound for the encryptor-generated trapdoor", "statement": "For positive dimension M and width sigma at least one, the actual encryptor fails leafGood with probability at most 6 b M 4^(-M) if the entry threshold covers sigma sqrt(M) plus the column-count shift."}
