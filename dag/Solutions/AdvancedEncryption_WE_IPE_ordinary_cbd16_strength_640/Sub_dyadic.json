@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.ordinary_cbd16_strength_640", "proof_type": "prove", "explanation": "Apply the CBD estimator lower-bound theorem and discharge every block-size interval by kernel reduction."}
