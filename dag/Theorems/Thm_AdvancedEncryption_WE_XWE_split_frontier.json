@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.split_frontier", "title": "Exact resource frontier for the three-block XWE witness split", "statement": "Simultaneous caps on encryption, decryption and the challenge-index exponent are achievable precisely when five linear inequalities hold."}
