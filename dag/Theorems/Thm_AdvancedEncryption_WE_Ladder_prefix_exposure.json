@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Ladder.prefix_exposure", "title": "Prefix exposure in key-switching ladders that reproduce BGG+ evaluation", "statement": "Let K = s^T B + e - s'^T G', c = s^T (A - P G) + e_c (a BGG+ encoding of value P) and y = s'^T M_p + eps. If G X = M_p, G' X' = M_p and B X' = A X, then y + K X' - c X = P (s^T M_p) + (eps + e X' - e_c X)."}

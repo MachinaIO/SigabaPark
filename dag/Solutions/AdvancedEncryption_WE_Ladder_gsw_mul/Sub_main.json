@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Ladder.gsw_mul", "proof_type": "prove", "explanation": "Associate t^T (C_1 X_2) = (t^T C_1) X_2, substitute the first hypothesis, use G X_2 = C_2 and then the second hypothesis."}

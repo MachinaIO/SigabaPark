@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Ladder.hint_collision", "proof_type": "prove", "explanation": "Expand both sides; s^T A cancels and the gadget terms combine to (P s - s')^T G."}
