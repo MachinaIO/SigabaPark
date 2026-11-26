@@ -405,3 +405,61 @@ for n in range(1,7):
             assert terminals=={t for t in (0,1) if attainable(n,layers,start,t)}
 print("600 schedules; 2400 start/target decisions agree with exhaustive evaluation")
 ~~~
+
+## Which three-state transitions are needed?
+
+Identify the states with F_3. Every permutation of the three states is s -> a s+c with a=1 or -1; there are exactly six such affine permutations. Constant maps are resets. Suppose each fixed input answer at each layer selects either a permutation or a constant. There is a polynomial test for acceptance even when the public schedule rereads variables arbitrarily. This is a statement about final-state acceptance. Related complexity questions for programs over monoids are studied in [Barrington, McKenzie, Moore, Tesson and Therien](https://sfi-edu.s3.amazonaws.com/sfi-edu/production/uploads/sfi-com/dev/uploads/filer/aa/b3/aab31b7d-bc95-4394-9d6b-21460c31e6aa/00-04-026.pdf).
+
+Enumerate the last reset position and answer, or the no-reset case. Pin the reset answer and require a permutation at every later position. These are unary restrictions on actual bit variables; intersect all domains and skip inconsistent branches. The start of the suffix has a known state. Eliminate pinned variables. On this subcube the suffix consists entirely of affine permutations. Write chi_S(x)=(-1)^(sum_(j in S) x_j) over F_3. Every slope depending on one free bit is a signed character, while each intercept has at most two character coefficients (since 2 is invertible). The final state is the initial state times the product of slopes, plus one term per layer consisting of its intercept times the slopes of all later layers. Products of signed characters stay single signed characters, with supports combined by symmetric difference. A suffix of length L thus gives at most 2L+1 terms before combining equal supports, regardless of rereads.
+
+For terminal t form the character dictionary of 1-(s_final-t)^2. It equals one exactly on the assignments ending at t. It is nonzero somewhere iff some coefficient is nonzero: the binary character matrix has orthogonal rows of squared norm 2^f, invertible in F_3 for f free bits. Squaring uses at most O((L+1)^2) term pairs per last-reset branch. There are at most 2L+1 branches; support bitsets, dictionary operations, coefficient addition mod three and unary-domain checks all have polynomial bit cost. Test the accepting terminals separately. As previously, a positive decision lets Enc output the bit and a negative decision gives a constant one-bit ciphertext. There is no hardness premise. This gives no comparable algorithm if a transition merges two states while preserving a distinct third image: such a map has image size two and is not affine on F_3. The NP-complete clause/equality program uses those partial mergers, for example sending both live states to the satisfying live state and keeping failure absorbing.
+
+More generally, for k positions that may contain a partial merger, guess an answer bit and an entering state for each of these positions (at most 6^k choices), impose consistent pins, and compute the corresponding outgoing states. The k+1 intervening segments enforce specified terminal states on the *same* assignment. Enumerate last resets in each segment, intersect all the unary restrictions, and multiply their terminal-indicator dictionaries before the nonzero test. Testing each segment for feasibility separately would be unsound. This takes (L+1)^O(k+1) times polynomial bit overhead, allowing all constant k. This bound applies to the number of exceptional positions, not the number of different transition tables. No polynomial bound for arbitrary k or fixed-assumption general WE follows.
+
+~~~python
+from itertools import product
+from random import Random
+def possible(n, layers, start, target):
+    cases=[(-1,0,start)]
+    for i,(v,ab) in enumerate(layers):
+        cases.extend((i,b,c) for b,(a,c) in enumerate(ab) if a==0)
+    for i,b,s in cases:
+        dom=[3]*n
+        if i>=0: dom[layers[i][0]]=1<<b
+        for v,ab in layers[i+1:]:
+            dom[v]&=sum(1<<j for j,(a,c) in enumerate(ab) if a)
+        if 0 in dom: continue
+        coeff={0:(-target)%3}
+        mask,sign=0,1
+        def add(m,c):
+            coeff[m]=(coeff.get(m,0)+c)%3
+        for v,ab in reversed(layers[i+1:]):
+            (a,c),(aa,cc)=ab if dom[v]==3 else [ab[int(dom[v]==2)]]*2
+            add(mask,sign*2*(c+cc))
+            add(mask^(1<<v),sign*2*(c-cc))
+            sign=sign*a%3
+            if a!=aa: mask^=1<<v
+        add(mask,sign*s)
+        ind={0:1}
+        for u,cu in coeff.items():
+            for v,cv in coeff.items():
+                ind[u^v]=(ind.get(u^v,0)-cu*cv)%3
+        if any(ind.values()): return True
+    return False
+
+rng=Random(318)
+for _ in range(250):
+    n=rng.randrange(1,7)
+    layers=[(rng.randrange(n),[(rng.choice((0,1,1,2,2)),rng.randrange(3)) for b in range(2)])
+            for _ in range(rng.randrange(16))]
+    for start in range(3):
+        ends=set()
+        for x in product(range(2),repeat=n):
+            s=start
+            for v,ab in layers:
+                a,c=ab[x[v]]
+                s=(a*s+c)%3
+            ends.add(s)
+        assert ends=={t for t in range(3) if possible(n,layers,start,t)}
+print("2250 start/target tests on three-state schedules with repeats, permutations and resets")
+~~~
