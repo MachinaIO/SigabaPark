@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.pivot_quotient_residual", "title": "Delete shared pivot coordinates from a syndrome-key decryption residual", "statement": "Over a commutative ring, subtracting a known row combination from the ciphertext and its syndrome pairing from the scalar preserves the decryption residual after deleting the zeroed coordinates."}
