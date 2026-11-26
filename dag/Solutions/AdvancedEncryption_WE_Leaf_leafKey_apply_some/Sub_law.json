@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Leaf.leafKey_apply_some", "proof_type": "prove", "explanation": "boxSample_some of SigabaNeoStd with the gadget map z -> -(G z) and the decomposition y -> dec(-y); the target condition F x + F(T z) - G z = u rewrites to B x + A z = u."}
