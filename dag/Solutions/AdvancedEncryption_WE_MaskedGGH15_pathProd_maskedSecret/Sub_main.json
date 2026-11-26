@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedGGH15.pathProd_maskedSecret", "proof_type": "prove", "explanation": "Block multiplication with zero off-diagonal blocks and the mixed-product property of the Kronecker product give multiplicativity of maskedSecret; the empty product is maskedSecret 1 1 1 1 1 = 1 (one_kronecker_one, fromBlocks_one); induction on h."}

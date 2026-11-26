@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.MaskedGGH15.cnfMat_pathProd_eq_zero_iff", "title": "CNF branching program: M_x = 0 iff x satisfies the CNF (CVW18 Construction 6.4)", "statement": "For the read-once diagonal branching program cnfMat of a CNF Psi (M_{i,b} = diag_j[literal x_i = b not in clause j]), the subset product along x is the zero matrix iff x satisfies every clause of Psi."}

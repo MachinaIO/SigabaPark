@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedGGH15.leftDiff_mul_maskedSecret", "proof_type": "prove", "explanation": "Entrywise computation by the three column blocks: sums over the sum and product row types (Fintype.sum_sum_type, Fintype.sum_prod_type), Kronecker entries, the identity parts of J_O and J_C cancel."}
