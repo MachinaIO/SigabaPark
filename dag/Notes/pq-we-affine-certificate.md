@@ -263,3 +263,33 @@ for rhs in product(range(2), repeat=m):
         assert found == cert
 print("64 address/restriction cases; all 16384 source traces and both response bits checked")
 ~~~
+
+## Packing unequal branch certificates into a single ABE setup
+
+The padded address in the preceding construction wastes certificate slots when branch ranks differ. Use the disjoint union instead. For each public arm i, let s_i=2^k_i be its number of response strings (or another certified positive cardinality with efficient ranking and unranking). Compute offsets o_i=sum_(j<i) s_j and S=sum_i s_i. An original witness for branch i with local certificate t uses the integer z=o_i+rank_i(t). For any public L>=1 use K=ceil(S/L) policy keys and L attributes; take L<=S. Key a on attribute b forms z=aL+b, rejects if z>=S, locates the unique half-open interval [o_i,o_i+s_i), and evaluates that arm's *full* consistency verifier on unrank_i(z-o_i). The actual witness picks a=z div L and b=z mod L. There is no requirement that a row or a column alone identify an arm. Every cross pair either rejects or denotes one well-formed trial. On an original NO every pair is unauthorized; on an original YES each original accepting witness supplies its own authorized pair. The ordinary split-ABE proof applies with the actual K and L and its original adversary and multi-key conditions. No additional security assumption is needed for indexing.
+
+Only the explicit list of arms, offsets and verifier descriptions is needed. Offset generation takes polynomial bit time in m and max k_i, even when S is exponential. Compile interval comparisons, subtraction and the local verifier selection as Boolean circuits, with polynomial size in the list and bit lengths. A sequential machine can scan the list; a binary comparison tree on its own is not a logarithmic-size Boolean circuit for arbitrary verifiers. Include policy circuit sizes, setup, entry lengths and indexing work in total cost estimates. For fixed per-entry weights A and B, any L gives weighted entry cost A ceil(S/L)+BL. Testing the clipped integers adjacent to sqrt(AS/B) gives a feasible size, while comparisons for the discrete optimum should use the actual ceiling function. For equal weights a near-square rectangle gives O(sqrt(S)) entries per side. No existential search or census of the accepting certificates is needed. Thus a few long branches pay in proportion to their own capacity rather than replicating that capacity for every arm.
+
+For example, with 255 arms of rank 8 and one of rank 32, S=2^32+65280. The previous padded 40-bit certificate required 2^20 keys and 2^20 attributes in a balanced split. Choosing L=65536 now gives K=65537 and L=65536. This is a count of cryptographic entries, not a measured byte or time reduction. More generally, if every arm is small enough for affordable public enumeration, direct decision remains preferable. Within a public time budget one may also test selected cheap arms before packing: on finding any valid certificate emit the payload directly with a public mode bit so *every* original witness can decode it; drop an arm only after exhaustive rejection or another sound rejection certificate. Keep incompletely checked arms in the packed domain. This test uses only the statement, hence on NO its mode and chosen layout are independent of the payload. Empty residual domain after exhaustive rejection permits a fixed dummy ciphertext. Neither packing nor partial enumeration bounds S for general circuits.
+
+~~~python
+from itertools import product
+for ranks in product(range(4), repeat=3):
+    sizes = [1<<k for k in ranks]
+    S = sum(sizes)
+    for L in range(1,S+1):
+        K = (S+L-1)//L
+        seen = set()
+        for a,b in product(range(K),range(L)):
+            z = a*L+b
+            if z>=S:
+                continue
+            i = next(i for i in range(len(sizes)) if z<sum(sizes[:i+1]))
+            t = z-sum(sizes[:i])
+            assert divmod(sum(sizes[:i])+t,L)==(a,b)
+            seen.add((i,t))
+        assert seen=={(i,t) for i,s in enumerate(sizes) for t in range(s)}
+S = (1<<32)+255*256
+assert (S+65535)//65536==65537
+print("64 rank profiles; all rectangular widths and cross pairs checked")
+~~~
