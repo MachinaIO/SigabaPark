@@ -261,3 +261,55 @@ for rows in product(range(4),repeat=3):
                        for h in range(1,8))
 print("512 feature/offset systems; exact image criterion and short separating parities")
 ~~~
+
+## An explicit response basis, and when its generation decides the source language
+
+Flatten the public augmented row f(z)=(T_x(z),g_x(z)) into p+1 bits. If the sender can find representative tuples z_1,...,z_s whose rows span all query rows, it can publish just V_b(z_i) for i=1,...,s. Use a uniform p-bit mask in this construction: LPN is unnecessary. A receiver expresses f(z) in the representative basis by public elimination and XORs the indicated response bits. Correctness is exact for every query, because the full response is the evaluation of a linear functional on f(z). On NO the offset condition from above makes the joint responses perfectly hiding by translating the mask. Representatives must be chosen independently of mask and message. If both parties deterministically generate the representatives from x, the response payload is at most p+1 bits and no tuples need be transmitted. Otherwise include the polynomial-size list or its public seed. Enumeration of the whole tuple domain would give a short payload but can make Enc exponential.
+
+One constructive case is an ordered read-once matrix product for the *augmented features*. Suppose f(z)=u M_1(z_1)...M_r(z_r)H, with polynomial layer widths and polynomially enumerable symbols per layer, each admissible tuple drawn from their Cartesian product. At layer zero retain the starting row if nonzero. At each subsequent layer extend every retained row by every allowed symbol, then keep a maximal independent subset of the resulting rows. Save a prefix realizing each retained row. Inductively these rows span all realizable prefix rows: right multiplication by the same next matrix preserves every prior linear dependence. Apply H and remove redundant projected rows at the end. This produces actual representative tuples in deterministic polynomial time, with at most the layer width many live prefixes and at most rank(H) final tuples. The argument needs the common reading order and the ability to extend every prefix by each symbol; repeated-variable consistency cannot simply be dropped. Dense binary elimination and matrix multiplication at each layer suffice for a polynomial sender and receiver. This provides a public ciphertext implementation of the specified linear evaluation interface on this structured family.
+
+There is a sharp diagnostic for the proposed witness decoder f(w)=(0,1). With the complete basis, test if e_last belongs to its span. On YES, any accepting witness forces membership. On NO, (D,1) annihilates the basis by the offset condition but evaluates to one on e_last, so membership is impossible. Thus polynomial-time basis construction under these two promises already gives a polynomial-time source decider and hence a one-bit direct encryption. The same test works if the representatives span just e_last on YES and are all genuine on NO. Random discovery with a bounded two-sided error gives a BPP decider. This identifies a concrete cost overlooked by merely counting p+1 representatives. For the previous one-feature example with a unique accepting n-bit tuple, any list of Q independent uniform tuples spans e_last only if it samples that witness, with probability 1-(1-2^-n)^Q. This is a limitation of that sampling strategy, not a lower bound on other compilers. To extend to general NP without the implied decision algorithm one must change either the decoding criterion or the NO security mechanism.
+
+~~~python
+from itertools import product
+from random import Random
+rng=Random(281)
+def transform(v,rows):
+    ans=0
+    for i,row in enumerate(rows):
+        if (v>>i)&1: ans ^= row
+    return ans
+def independent(entries):
+    pivots={}
+    out=[]
+    for address,v in entries:
+        h=v
+        while h and h.bit_length() in pivots:
+            h ^= pivots[h.bit_length()]
+        if h:
+            pivots[h.bit_length()]=h
+            out.append((address,v))
+    return out
+for trial in range(100):
+    layers=[[[rng.randrange(8) for i in range(3)] for a in range(2)] for j in range(6)]
+    proj=[rng.randrange(4) for i in range(3)]
+    reps=[((),1)]
+    for layer in layers:
+        reps=independent([(w+(a,),transform(v,m)) for w,v in reps for a,m in enumerate(layer)])
+    reps=independent([(w,transform(v,proj)) for w,v in reps])
+    combos={0:0}
+    for j,(_,v) in enumerate(reps):
+        combos.update({u^v:mask^(1<<j) for u,mask in list(combos.items())})
+    def evaluate(w):
+        v=1
+        for a,m in zip(w,layers): v=transform(v,m[a])
+        return transform(v,proj)
+    assert all(evaluate(w)==v for w,v in reps)
+    for w in product(range(2),repeat=6):
+        v=evaluate(w)
+        for secret in range(4):
+            reconstructed=sum((val&secret).bit_count() for j,(_,val) in enumerate(reps)
+                              if combos[v]>>j&1)%2
+            assert reconstructed==(v&secret).bit_count()%2
+print("100 ordered matrix programs; 25600 reconstructed evaluations")
+~~~
