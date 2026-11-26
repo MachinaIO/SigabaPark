@@ -37,6 +37,25 @@ The sweep runs all t in [1,512] and r=ceil(512/k) for k=1,...,64. Smaller costs 
 
 This changes both the retained vector lengths and their widths. On the first profile the new scalar width is larger than the previous 343 bits, but the new attribute blocks are shorter. Neither table includes framing or preprocessing clocks.
 
+### Sampling the two key blocks at different widths
+
+The base part of a simulated key pays for the shear R, while the attribute part only pays for the radix gadget. An isotropic coset sampler makes both blocks pay the larger width. Instead target density proportional to exp(-pi (||y_A||²/sigma_A² + ||y_G||²/sigma_G²)) in the original coset. Both setup and simulation sample this same, publicly specified density. One exact implementation applies the integral diagonal map diag(I_m, (sigma_A/sigma_G) I_d) to the basis and coset point, invokes the isotropic finite sampler with sigma_A on that image lattice, and divides the last d output coordinates back exactly. The word lengths below take sigma_A and sigma_G as powers of two with sigma_A>=sigma_G.
+
+Use t_S bits per setup half-entry and t_R per encryption-mask half-entry. In the PR 96 hash proof choose slack_S=ceil(log2 e)+2(384+ceil(log2(d+1))) with no leakage and take a=max(n+slack_S,ceil((ne+slack_S)/t_S)). For the challenge retain slack_R=e+ceil(log2 e)+2(384+ceil(log2(pd+1))), require m>=n+slack_R, and take t_R=ceil((ne+slack_R)/m). The fresh challenge blinding has m rows available, whereas setup has a. This does not change the CBD(16) secret or either LWE error distribution.
+
+Write B=2^r. The net argument above gives simultaneous good bounds Rmax=8·2^t_R sqrt(p(m+d+p+400)) and Smax=8·2^t_S sqrt(a+d+400). Choose sigma_G=64B and sigma_A a power of two at least 64B max(Smax,Rmax). In the metric that divides each block by its width, the first simulated right-kernel Gram–Schmidt lengths are at most sqrt(B²+1)(Rmax/sigma_A+1/sigma_G) < 1/16. This follows by applying the shear and diagonal map to the residual after subtracting the previous right-basis columns. The remaining top lengths are at most gcd(score,q)/sigma_A by the projection argument of PR 96. The real right-kernel vectors involve only base coordinates, because the shear from the real gadget lands in the A0 block and has zero component at C_v. Their normalized lengths are at most sqrt(B²+1)(1+Smax)/sigma_A. Modulo their span the remaining top representatives are unit vectors in either block (the real top kernel has modulus one), hence bounded by max(1/sigma_A,1/sigma_G). The displayed parameter rows meet the 1/16 bound in every case. Abort a sampler that fails its exact width test. The finite sampler's normalizer and timeout estimates now apply in the transformed metric. Every completed output satisfies ||y_A||<=Y_A=16 sigma_A sqrt(L) and ||y_G||<=Y_G=16 sigma_G sqrt(L).
+
+Use Y_A in the base-noise estimate and Y_G in the mask estimate, using the fresh width t_R for the masks. Stochastically round retained base ciphertext coordinates to h_A bits and attribute blocks to h_G bits. Round the scalar to six bits (either adjacent endpoint costs at most q/64). Set 2^(2h_A)>=81920 Y_A² and 2^(2h_G)>=20480 p Y_G², with exact transport if the required width reaches e. Hoeffding then bounds the additional base and attribute tails at thresholds q/32 and q/16 respectively, each by 2^-159. With the two q/16 original-error thresholds and the scalar this totals at most 15q/64. The four error events contribute at most 4·2^-159 for a fixed witness, before adding the small setup and sampler errors. Independently Rice-code and pad the two key blocks with their respective widths and retained lengths m-n,d.
+
+At the same 640-bit registry row and fixed counts of PR 96, the sweep now finds the following slot sizes. Both profiles choose r=256, t_S=210, t_R=116, m=581714, d=262144, (log2 sigma_A,log2 sigma_G)=(485,262), (b_A,b_G)=(490,267), and 292606814 bits per key. The effective LWE sample use m+1 is below 2^21.
+
+| p | base/attribute transport bits | bits per ciphertext | complete table bits per WE bit | change from PR 96 |
+|---:|---:|---:|---:|---:|
+| 1076 | 508 / 289 | 81746272958 | 98659667163722752 | 40.85% smaller |
+| 831 | 508 / 288 | 62967325374 | 7625451277813120262 | 36.16% smaller |
+
+These counts price the same instances before the domain reductions. The smaller table is still 10.953 PiB. This sampler and its concentration bounds are a construction argument with checked integer parameters and a toy execution; the committed Lean theorem proves the pivot identity only.
+
 ### Filtering each side with the entire formula
 
 For a designated side S, branch only on unassigned variables in S, but propagate units from the *whole* residual CNF until fixed point after every branch. Any global witness extending the guesses agrees with each forced bit, including those on the opposite side. Discard contradictions. At the depth bound, construct a relaxation over the surviving S variables: keep residual side-local clauses; if opposite literals z and -z have guarded requests (z or D) and (-z or E) with both guards entirely in S, add the consequence D or E. Skip tautologies. The experiment retains up to four shortest guards of each sign per variable before pairing; this only weakens the filter. Select an incidence forest from the entailed side clauses and count/rank its satisfying assignments by tree messages. Assigned side bits are stored on the path. Opposite bits are deliberately left out of the address.
@@ -355,5 +374,89 @@ def rice_test():
         errors=[8*(lo+(z<r))-value for z in range(8)]
         assert sum(errors)==0 and max(errors)-min(errors)<=8
 if __name__=='__main__':rice_test()
+
+~~~
+
+For the two-width sweep replace the calc function in the preceding listing with this one.
+
+~~~python
+def calc(p,K,C,t,r):
+    n=1<<17;e=512;d=n*ceildiv(e,r);M=1<<21
+    slack=e+(e-1).bit_length()+2*(384+(p*d).bit_length())
+    setup_slack=(e-1).bit_length()+2*(384+d.bit_length())
+    a=max(n+setup_slack,ceildiv(n*e+setup_slack,t));m=a+d
+    t_enc=ceildiv(n*e+slack,m)
+    if m<n+slack or t_enc>e:return None
+    if m+1>M:return None
+    lg=lambda x:(x-1).bit_length()
+    s=r+9+max(t+ceildiv(lg(a+d+400),2),
+              t_enc+ceildiv(lg(p*(m+d+p+400)),2))
+    L=m+d; J=m-n; sg=r+6
+    Y2=256*(1<<(2*s))*L; G2=256*(1<<(2*sg))*L
+    # Condition on the sampled key. Three errors: base noise, mask noise, wire rounding.
+    # For each, enforce 2 exp(-2 threshold^2 / sum widths^2) <= 2^-159
+    # using exponent >=160 and e>=2 as the natural exponential base.
+    q=1<<e
+    lim=q//16
+    if 2*lim**2 < 160*32**2*(1+Y2):return None
+    if 2*lim**2 < 160*(2<<t_enc)**2*256*m*p*G2:return None
+    half_log=lambda x:ceildiv(lg(x),2)
+    ha=min(e,half_log(81920*Y2)); hg=min(e,half_log(20480*p*G2))
+    def best_slot(length,exponent):
+        def slot(b):return length*(b+1)+(32*(1<<exponent)*ceilroot(length*L))//(1<<b)
+        return min((slot(b),b) for b in range(exponent+2,exponent+12))
+    ka,ba=best_slot(J,s);kg,bg=best_slot(d,sg)
+    key=ka+kg;ct=6+J*ha+p*d*hg
+    return (key*K+ct*C,r,t,t_enc,s,sg,ba,bg,ha,hg,m,d,key,ct)
+
+~~~
+
+The following Sage/SymPy smoke test takes the small kernel/coset sampler listing of [PR 96](https://github.com/MachinaIO/SigabaPark/blob/9cc63482575bafbec9d17315f1f570f79ebc9b10/dag/Notes/pq-we-dyadic-afv.md) as its sole argument. It checks both bases in the scaled metric, the rejecting score two, corrected ciphertext generation, block rounding and both message bits.
+
+~~~python
+import runpy,sys
+from random import Random
+from sympy import Matrix,eye,zeros,diag
+
+def weighted_check(path):
+    K=runpy.run_path(path); basis_for=K['right_basis']; klein=K['klein']
+    rng=Random(532);e=64;q=1<<e;r=8;n=1;d=8;a=4;m=a+d;p=3
+    G=K['gadget'](n,e,r)
+    def uniform(h,w):return Matrix(h,w,lambda i,j:rng.randrange(q))
+    def wide(h,w):return Matrix(h,w,lambda i,j:rng.randrange(4)-rng.randrange(4))
+    def cbd():return rng.getrandbits(16).bit_count()-rng.getrandbits(16).bit_count()
+    A0=uniform(n,a);S=wide(a,d);A=A0.row_join((G-A0*S)%q)
+    Ai=[uniform(n,d) for _ in range(p)];u=uniform(n,1);C=Ai[0]+Ai[1]
+    sa=1<<20; sg=1<<14
+    scale=diag(eye(m),(sa//sg)*eye(d))
+    def sample(basis,point):
+        z=klein(scale*basis,scale*point,sa,rng)
+        assert all(int(x)%(sa//sg)==0 for x in z[m:,:])
+        return z[:m,:].col_join(z[m:,:]/(sa//sg))
+    B,f=basis_for(A0.row_join(C),e,r,-1,(-S).col_join(zeros(d,d)),u)
+    order=list(range(a))+list(range(a+d,a+2*d))+list(range(a,a+d))
+    key=sample(B[order,:],f[order,:])
+    assert all(int(x)%q==0 for x in A.row_join(C)*key-u)
+    pivot=next(i for i in range(m) if int(A[0,i])%2)
+    keep=[i for i in range(m) if i!=pivot]
+    for msg in (0,1):
+        s=Matrix([cbd()]);x=Matrix([cbd() for _ in range(m)])
+        s0=Matrix([(-int(x[pivot])*pow(int(A[0,pivot]),-1,q))%q])
+        def quant(z,h):
+            step=q>>h;lo,rem=divmod(int(z)%q,step)
+            return (step*(lo+(rng.randrange(step)<rem)))%q
+        base=(A.T*s0+x)[keep,:].applyfunc(lambda z:quant(z,60))
+        blocks=[(M.T*s0+wi*G.T*s+wide(m,d).T*x).applyfunc(lambda z:quant(z,52))
+                for wi,M in zip((0,0,1),Ai)]
+        label=quant(u.dot(s0)+cbd()+msg*(q//2),6)
+        residual=int(label-key[keep+list(range(m,m+d)),:].dot(base.col_join(blocks[0]+blocks[1])))%q
+        assert int(q//4<=residual<3*q//4)==msg
+    Rs=[wide(m,d) for _ in range(p)]
+    sim=[A*R-b*G for R,b in zip(Rs,(1,1,0))]
+    B,f=basis_for(A,e,r,2,Rs[0]+Rs[1],u)
+    sk=sample(B,f)
+    assert all(int(x)%q==0 for x in A.row_join(sim[0]+sim[1])*sk-u)
+    print('weighted real and even-score simulated bases; both bits passed')
+if __name__=='__main__':weighted_check(sys.argv[1])
 
 ~~~
