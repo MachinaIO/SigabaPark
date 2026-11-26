@@ -102,3 +102,62 @@ for _ in range(200):
     assert decode(adj,code,U)==maximal(adj,x)
 print('200 full-size round trips passed')
 ~~~
+
+## Full-size registered-format controls
+
+The following independently compiles a 218-clause dual-rail verifier and its matching guard to 1,934 NAND gates, padding to 4,096 gates before the output. It compares the emitted circuit with the source evaluator on 201 complete rail selections in each case. The planted assignment proves satisfiability of the first instance. For the second, eight clauses on the first three variables exclude all eight total assignments. Monotonicity and the matching extension argument then exclude every independent partial selection as well. This checks a concrete subclass at the requested size; it does not benchmark ABE.
+
+~~~python
+from itertools import product
+from random import Random
+
+def compile_rails(clauses):
+    gates = []
+    def nand(a, b):
+        gates.append((a, b))
+        return 128 + len(gates)
+    def both(a, b):
+        t = nand(a, b)
+        return nand(t, t)
+    def either(a, b):
+        return nand(nand(a, a), nand(b, b))
+    def reduce_tree(items, op):
+        while len(items) > 1:
+            items = [op(items[i], items[i+1]) if i+1<len(items) else items[i]
+                     for i in range(0,len(items),2)]
+        return items[0]
+    guard = reduce_tree([nand(2*i+1, 2*i+2) for i in range(64)], both)
+    body = reduce_tree([reduce_tree(c, either) for c in clauses], both)
+    used = len(gates)+2
+    gates.extend([(0,0)]*(4096-used))
+    both(guard, body)
+    return used,gates
+
+def eval_gates(g, x):
+    w = [True]+[bool(x>>j&1) for j in range(128)]
+    for a,b in g:w.append(not(w[a] and w[b]))
+    return w[-1]
+
+rng=Random(2971)
+codes=[rng.getrandbits(64) for _ in range(201)]
+def rails(c):return sum(1<<(2*i+(c>>i&1)) for i in range(64))
+def clause():
+    vs=rng.sample(range(64),3)
+    terms=[2*i+1+rng.randrange(2) for i in vs]
+    if not any(rails(codes[0])>>(v-1)&1 for v in terms):
+        terms[0]=2*vs[0]+1+((codes[0]>>vs[0])&1)
+    return terms
+base=[clause() for _ in range(218)]
+for reject in (False,True):
+    cs=list(base)
+    if reject:cs[:8]=[[2*i+1+t for i,t in enumerate(bits)] for bits in product(range(2),repeat=3)]
+    used,g=compile_rails(cs)
+    assert len(g)==4096
+    for c in codes:
+        x=rails(c)
+        expected=all(any(x>>(v-1)&1 for v in row) for row in cs)
+        assert eval_gates(g,x)==expected
+        if reject:assert not expected
+    assert eval_gates(g,rails(codes[0]))!=reject
+    print('UNSAT' if reject else 'SAT',used,'active construction gates, 4096 total; 201 evaluations')
+~~~
