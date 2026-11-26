@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Tree.path_expansion", "proof_type": "prove", "explanation": "Induction on d. The product over range (d+1) is the product over range d times P_d; substitute K_{d+1} = K_d P_d + Q_d, rewrite H_{d+1} by the step identity and H_d by the induction hypothesis, and close with noncomm_ring."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Tree.key_mul", "proof_type": "prove", "explanation": "Write G M_f = f G + Z H_f and G M_g = g G + Z H_g. Then G M_f M_g = f (g G + Z H_g) + Z H_f M_g = (f g) G + Z (f H_g + H_f M_g); rearrange."}
