@@ -1207,3 +1207,48 @@ for mask in range(1,256):
                 checks+=1
 print(checks,"offset/list cases; errors only at unsampled completely empty fibers")
 ~~~
+
+## Deterministic isolation by counting linear hash buckets
+
+The sampler in the previous compiler can be replaced with a deterministic list of at most floor(2e/m) labels, with no probability of missing an empty fiber. Write F(t) for the number of holes of label t. Every completely empty fiber meeting H has F(t)=m; no label has larger mass. The case e<m was already resolved. Let d be the bit length of a binary parity-check label for C. Choose a power of two q>2 ceil(e/m) max(1,d), and regard the d label bits as the coefficients of a polynomial over F_q (a zero-length label just gives zero). For each field element a compute the bucket index h_a(t) by evaluation at a. Distinct labels collide for at most d-1 values of a when d>0. Each bucket index is binary-linear in the level word. A representation of F_q can be obtained deterministically in time polynomial in q by testing degree-log2(q) binary polynomials for irreducibility.
+
+Compute the hole count N(a,v) per bucket. For each label coordinate also count the holes with that coordinate one in the same bucket. These counts require no enumeration of holes. Count words of H satisfying the bucket and optional bit constraints by binary elimination; subtract the accepting-word count under the same constraints. For the latter, augment each automaton state by the running field sum for h_a and optionally one running parity bit, then count paths by dynamic programming. All accepting words are in H. One run computes all buckets for a fixed a and auxiliary bit. This takes O((d+1)*q^2*L*w) transitions plus polynomial bit arithmetic, preprocessing the linear forms, and the affine counts. Use polynomial budgets for q and the explicit verifier. All counts have O(L+1) bits.
+
+In each bucket of mass at least m, take the bitwise majority among its holes (arbitrary tie convention) as a candidate label. Keep a candidate t only when min_a N(a,h_a(t))>=m. For *every* t, including candidates not occurring among the holes, the mean collision mass over a from other labels is at most e*max(0,d-1)/q < m/2. In at least one bucket for t the foreign mass is therefore below m/2. If F(t)=m, the majority there recovers every bit of t and the minimum-count filter always passes. Conversely any candidate passing the filter must have F(t)>m/2. Summing actual masses bounds the size of the deduplicated list by floor(2e/m). With d=0 there is a single label and the same conclusion follows directly.
+
+Use this list in the previous XOR-share construction. A representative for a listed label can be *any* point in H with that label, found by elimination; a sampled hole is unnecessary. The large-mass guarantee ensures the system is consistent. Nonlisted labels meeting H are guaranteed an accepting completion, for every shared offset. The security hybrid has no additional statistical term from selection and uses at most 1+floor(2e/m) false-instance challenges. Honest decryption still selects one branch and makes at most two backend decryptions. The gain is deterministic false-instance coverage and a smaller worst-case branch count; sender-side bucket counting can cost more than sampling. For large e/m or large residual witness lengths this does not yield a general polynomial WE.
+
+~~~python
+from itertools import product
+# Label bits are polynomial coefficients. Use GF(16), characteristic two.
+def mul(x,y):
+    v=0
+    while y:
+        if y&1: v^=x
+        y>>=1
+        x<<=1
+        if x&16: x^=19
+    return v
+def hash_at(t,a):
+    return mul(t>>1,a)^(t&1)
+for f in product(range(4),repeat=4):
+    m=3
+    e=sum(f)
+    if not m<=e or 2*e>=16*m: continue
+    rows=[]
+    possible=set()
+    for a in range(16):
+        counts=[0]*16
+        ones=[[0,0] for v in counts]
+        for t,n in enumerate(f):
+            v=hash_at(t,a)
+            counts[v]+=n
+            for j in range(2): ones[v][j]+=n*((t>>j)&1)
+        rows.append(counts)
+        for v,total in enumerate(counts):
+            if total>=m: possible.add(sum((2*x>total)<<j for j,x in enumerate(ones[v])))
+    kept={t for t in possible if min(row[hash_at(t,a)] for a,row in enumerate(rows))>=m}
+    assert {t for t,n in enumerate(f) if n==m}<=kept
+    assert all(2*f[t]>m for t in kept) and len(kept)<=2*e//m
+print("all four-label mass profiles through weight three; coverage and list bound verified")
+~~~
