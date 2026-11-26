@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Span.pair_flip_packing",
+  "title": "Packing single-party masking directions under pair reconstruction",
+  "statement": "For linear observations, if the views of every distinct pair recover the secret then the total cardinality of the single-view unit-secret invisible directions is at most the number of unit-secret directions."
+}

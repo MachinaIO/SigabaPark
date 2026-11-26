@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Span.mask_fiber",
+  "title": "Equal observation fibers along a unit secret shift",
+  "statement": "A linear direction changing a scalar secret by one while fixing the observed linear map induces equal counts in every observation fiber at every message value."
+}
