@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.NativeHop.kron_noise_cross", "title": "Kronecker products of noisy samples: (Y1+E1) kron (Y2+E2) = Y1 kron Y2 plus the cross terms E1 kron Y2, Y1 kron E2, E1 kron E2", "statement": "Over a commutative ring, the Kronecker product of Y1+E1 and Y2+E2 equals Y1 kron Y2 + (E1 kron Y2 + Y1 kron E2 + E1 kron E2)."}

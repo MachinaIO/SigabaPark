@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NativeHop.zero_entry_hint", "proof_type": "prove", "explanation": "Distribute, reassociate S A D to S (A D), and rewrite A D = E."}

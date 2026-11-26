@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.NativeHop.lex_prefix_cubes", "title": "Lexicographic prefixes are unions of at most n subcubes: w < k iff at some bit j, k has 1, w has 0, and all higher bits agree", "statement": "For natural numbers w, k: w < k iff there is j with testBit k j = true, testBit w j = false and testBit w i = testBit k i for all i > j."}

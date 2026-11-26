@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NativeHop.gsw_path_product", "proof_type": "prove", "explanation": "Induction on the list. If the tail product is A R' + x' G, then (A R + x G) Ginv(A R' + x' G) = A R Ginv(.) + x (A R' + x' G) using G Ginv Y = Y, which is A (R Ginv(.) + x R') + (x x') G."}
