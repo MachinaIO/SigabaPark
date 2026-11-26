@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedEval.otp_hop", "proof_type": "prove", "explanation": "Sums over Y are invariant under y -> y + mu (Fintype.sum_equiv with Equiv.addRight), so both ideal terms equal the same quantity I; the claim is then the triangle inequality |a - b| <= |a - I| + |b - I|."}
