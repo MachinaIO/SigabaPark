@@ -295,3 +295,141 @@ def audit(front,cut):
     print('oppositely oriented stars:',3+cut['profile'](cut['supports'](cs),o)[0],widths)
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
+
+### Eliminating gate-trace variables with bounded Boolean tables
+
+The previous compiler consumes one path bit per input or retained gate. First build a public acyclic network of bounded-input Boolean tables equivalent to the circuit. This is a use of established lookup-table technology mapping; [Cong and Ding](https://doi.org/10.1109/43.273754) study depth-optimal mapping. Our bounded heuristic selects by the induced WE matrix cost across several arities and uses the final output predicate directly as a CNF. The table entries describe public gates and do not depend on the encrypted message or witness.
+
+Process gates in topological order. A wire is represented by a table over distinct earlier wires. For each NAND try composing its two input tables; either input which is an earlier gate can instead be referenced by its original gate wire. Take a combination whose union has at most K inputs, preferring fewer cut inputs, then fewer essential variables after exact simplification. Referencing both earlier gate wires always gives at most two inputs. Evaluate the small truth table and delete variables on which it is independent. Unavailable reads and wire zero use the circuit's true convention. At the end, retain only table definitions transitively referenced from the output. The greedy choice can miss beneficial cuts; preserve the original layout as a candidate. For a fixed cap (the listing supports 2 through 5) the gate pass costs polynomial time even for circuits with unbounded fanout.
+
+For an internal table z=f(B), cover each monochromatic part f(B)=b by cubes, then emit the implications cube => (z=b). Covering is deterministic: enumerate ternary patterns on B, reject nonmonochromatic cubes, then greedily cover uncovered assignments. Complete assignments are available as singleton cubes. For the final output f(B) emit only the clauses excluding the zero cubes. This removes the final output wire as well. Per table the loop emits at most 2^K clauses of length at most K+1. Standard compact indexing handles sparse input labels. For each fixed original input, implication completeness and induction on the retained gates force their unique true values. Therefore an accepting input has exactly its projected gate trace, a rejecting input has no satisfying extension, and a NO circuit stays NO on all matrix paths. The supplied witness extends by ordinary circuit evaluation followed by projection. Invalid projected witnesses need not have the same *number* of violations as the original NAND CNF; the count compiler uses the new CNF and its own clause count when setting the modulus. The full cryptographic parameter check and backend assumptions continue to apply.
+
+Compare the candidate shapes at the same scale m=a w, measuring the coefficient (H-2)w² of interior square blocks per branch (also the coefficient for selected interior one-row dense Dec and for scalar draws in column sampling at their respective scale factors). The endpoints and compilation are charged separately. For the existing 128-input 4096-NAND stream, the previous first-use shared-slot layout has H=4224, w=7, coefficient 206878. At K=2,3,4 the coefficients are 6300, 4725 and 4200. K=4 emits 212 clauses, H=170 and w=5. This is about 49.3 times fewer interior residues and one-dimensional draws, and the same factor for selected interior Dec multiply-adds. For example with one retained root, t=16 and a=128, total transmitted residue counts including both endpoints are given by 2m+2(H-2)m²+2mt. These are matrix-backend counts; no end-to-end time or secure instantiation is assumed.
+
+On a second control built from 127 four-NAND XORs computing 128-input parity, the untouched, K=2, K=3 and K=4 coefficients are 40576, 12348, 22869 and 60648. The program with the fewest levels is worse than the original here: width grows to 19. Choose K by compiled cost and include the baseline. Both controls have special public structure; the improvements concern matrix compilation on them, not the cheapest method of deciding those particular predicates.
+
+Save the third listing as lut.py and run python lut.py frontend.py cut.py mixed.py. The audit exhaustively tries all projected auxiliary assignments on 1440 circuit/input/cap combinations and tests sixteen complete original traces for each large control and arity. The full witness is only needed for Dec.
+
+~~~python
+from functools import lru_cache
+from itertools import product
+from random import Random
+import sys,runpy
+
+def variable(i):return ((i,),2)
+
+@lru_cache(maxsize=4096)
+def join_shape(left,lt,right,rt):
+    # left/right contain positions in the merged support.
+    size=max((*left,*right),default=-1)+1
+    vals=[]
+    for word in range(1<<size):
+        def value(ports,table):
+            idx=sum(((word>>p)&1)<<i for i,p in enumerate(ports))
+            return (table>>idx)&1
+        vals.append(1-value(left,lt)*value(right,rt))
+    keep=[j for j in range(size) if any(vals[x]!=vals[x^(1<<j)] for x in range(1<<size))]
+    return keep,sum(vals[sum(((x>>i)&1)<<p for i,p in enumerate(keep))]<<x for x in range(1<<len(keep)))
+
+def compose(f,g,cap):
+    ports=sorted(set(f[0])|set(g[0]))
+    if len(ports)>cap:return None
+    keep,t=join_shape(tuple(ports.index(v) for v in f[0]),f[1],tuple(ports.index(v) for v in g[0]),g[1])
+    return tuple(ports[p] for p in keep),t
+
+@lru_cache(maxsize=4096)
+def cover(k,table,want):
+    # Cover each monochromatic part by cubes, with deterministic greedy selection.
+    todo={x for x in range(1<<k) if (table>>x)&1==want}
+    cubes=[]
+    for pat in product((-1,0,1),repeat=k):
+        cells={x for x in range(1<<k) if all(v==-1 or ((x>>i)&1)==v for i,v in enumerate(pat))}
+        if cells<=todo:cubes.append((pat,cells))
+    result=[]
+    while todo:
+        pat,cells=max(cubes,key=lambda pc:(len(todo&pc[1]),pc[0].count(-1)))
+        result.append(pat);todo-=cells
+    return result
+
+def frontend(n,gates,cap):
+    assert 2<=cap<=5
+    functions={0:((),1)}
+    for z,(a,b) in enumerate(gates,n+1):
+        a=a if 0<a<z else 0;b=b if 0<b<z else 0
+        f=functions.get(a,variable(a));g=functions.get(b,variable(b))
+        opts=[]
+        for mask in range(4):
+            left=variable(a) if a>n and mask&1 else f
+            right=variable(b) if b>n and mask&2 else g
+            value=compose(left,right,cap)
+            if value is not None:
+                opts.append(((mask.bit_count(),len(value[0]),mask),value))
+        functions[z]=min(opts)[1]
+    top=n+len(gates) if gates else 0
+    needed=set();stack=[top];clauses=[];order=[];seen=set()
+    while stack:
+        z=stack.pop()
+        if z in needed:continue
+        needed.add(z)
+        stack.extend(v for v in functions[z][0] if v>n)
+    for z in sorted(needed):
+        ports,t=functions[z]
+        for v in ports:
+            if v not in seen:seen.add(v);order.append(v)
+        if z!=top and z not in seen:seen.add(z);order.append(z)
+        for want in ([0] if z==top else [0,1]):
+            for pat in cover(len(ports),t,want):
+                cl=[p if val==0 else -p for p,val in zip(ports,pat) if val>=0]
+                if z!=top:cl.append(z if want else -z)
+                clauses.append(tuple(cl))
+    return clauses,order
+
+def trace(n,gates,word):
+    vals=[1]+list(word)
+    for a,b in gates:vals.append(1-(vals[a] if 0<a<len(vals) else 1)*(vals[b] if 0<b<len(vals) else 1))
+    return vals
+
+def audit(front,cut,mixed):
+    rng=Random(83278);checks=0
+    for n in range(1,5):
+        for _ in range(24):
+            gates=[(rng.randrange(-1,n+j+3),rng.randrange(-1,n+j+3)) for j in range(rng.randrange(7))]
+            for cap in (2,3):
+                cs,order=frontend(n,gates,cap)
+                aux=[z for z in order if z>n]
+                for word in product((0,1),repeat=n):
+                    vals=trace(n,gates,word)
+                    expected=vals[-1] if gates else 1
+                    sols=[]
+                    for av in product((0,1),repeat=len(aux)):
+                        assign=dict(enumerate(word,1));assign.update(zip(aux,av))
+                        if all(any(assign[abs(x)]==(x>0) for x in c) for c in cs):sols.append(av)
+                    assert sols==([tuple(vals[z] for z in aux)] if expected else [])
+                    checks+=1
+    print('projected witness checks',checks)
+    n=128
+    def parity():
+        gates=[];a=1
+        for b in range(2,n+1):
+            t=n+len(gates)+1
+            gates.extend([(a,b),(a,t),(b,t),(t+1,t+2)])
+            a=t+3
+        return gates
+    stream=[];prev=0
+    for i in range(1,n+1):
+        for j in range(32):
+            stream.append((prev,i if j%3==0 else prev));prev=n+len(stream)
+    for name,gates in [('stream',stream),('parity',parity())]:
+        for cap in (0,2,3,4):
+            if cap:cs,order=frontend(n,gates,cap)
+            else:cs=front['nand_cnf'](n,gates);order=cut['first_use'](n,gates)
+            cs=cut['canonical'](cs);paths=mixed['cuts'](cs,order)
+            program=mixed['compile_mixed'](cs,order,1,paths,mixed['choose'](paths,len(order)))
+            H=len(program[1]);w=len(program[0])
+            for _ in range(16):
+                vals=trace(n,gates,[rng.randrange(2) for i in range(n)])
+                out=front['eval_program'](program,[vals[v] for v in order])
+                assert (out[1]==0)==bool(vals[-1]) and out[2]==1
+            print(name,cap,'clauses/levels/width/interior coefficient',len(cs),H,w,max(0,H-2)*w*w)
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
