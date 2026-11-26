@@ -18,6 +18,25 @@ A direct implementation can avoid a second set of matrix products. Put s0=s-d an
 
 At fixed PR 96 parameters n=131072, q=2^512, let k and h be the transmitted bit widths per key and ciphertext coordinate, and K,C the table counts. The exact saving, excluding framing, is n(kK+hC) bits for one WE message bit. On the 1076-coordinate profile (k,h)=(319,343) the table drops from 166786968291757568 to 158027131437305344 bits (18.517 to 17.545 PiB). On the 831-coordinate profile (386,409), it drops from 11945295824085201989 to 11487423147759121477 bits (3.83%). No public-matrix transmission charge is introduced by the change. These are serialization estimates. The combined scheme's reduction clock and quantum security remain open.
 
+### Smaller fixed slots and a per-witness correctness budget
+
+A second parameter sweep keeps the same certified ordinary-LWE row (n=2^17, M=2^21, e=512). It bounds the trapdoor spectral norm with high probability, encodes signed keys losslessly in fixed slots, and spends part of the WE correctness error on unbiased ciphertext rounding. This is an analytic variant; the preceding pivot identity is the part checked in Lean.
+
+**Trapdoor width.** For independent centered entries U-V with magnitude below 2^t, a fixed pair of Euclidean unit vectors x,y and a fixed nonempty v give a scalar x^T(sum v_i R_i)y. The sum of squared summand range widths is at most 4·2^(2t) p, since sum(x_j² y_k²)=1. Apply [Hoeffding's inequality, Theorem 2](https://doi.org/10.1080/01621459.1963.10500830). For L=m+d, put T=4·2^t sqrt(p(L+p+400)). The scalar exceeds T in absolute value with probability at most 2 exp(-8(L+p+400)). A maximal 1/4-separated net of each unit sphere has at most 9^m and 9^d points respectively by the disjoint-ball volume bound. Approximating both unit vectors by net points loses at most half the operator norm. A union bound over the nets and all 2^p predicates thus gives ||sum v_i R_i|| <= 2T simultaneously, except with probability below 2^-400. The zero selector is automatic. The same bound covers the real a-by-d S with a single matrix by a separate application. Each hybrid charges its corresponding bad draw. In the key sampler check the computed basis widths, and abort if a width exceeds the cap. The algorithm need not enumerate a net or all selectors. For the table rows, sigma=2^s with s=r+9+t+ceil(log2(p(L+p+400))/2) covers 16 times the good Gram–Schmidt ceiling max(p,(1+2T)sqrt(2^(2r)+1)). This retains PR 96's one-dimensional sampler width condition and its completed-key norm Y <= 16 sigma sqrt(L).
+
+**Decryption error.** For a fixed valid witness and its selected completed key, charge three tails. First, x'-x^T y_base is centered with squared range-width sum bounded by 32²(1+Y²). Second, conditional on x and this key, the mask error sum_i v_i x^T R_i y_attr is centered and has squared range-width sum at most (2·2^t)²·256 m p Y². Here the real encryption masks are fresh and independent of the key. For both errors use threshold q/16. Finally, independently round each *corrected* coordinate on a grid of spacing Delta=q/2^h. If the low remainder is z, choose the upper endpoint with probability z/Delta by comparing fresh fair bits to z; reduce the endpoint modulo q for transport. The centered modular error has a lift of range width at most Delta. Conditional on the original full ciphertext and key, the rounded decryption residual has extra squared range-width sum at most Delta²(1+pY²). Use threshold q/8. Whenever each tail is strictly within its threshold the total is strictly below q/4. The final listing requires the exponent 2 threshold² / sum(width²) to be at least 160 in each application. Each two-sided failure probability is then at most 2^-159, so the sum of the three errors leaves room below 2^-128 for basis and sampler failures. WE correctness is per fixed witness; simultaneous correctness of every pair would require a different budget. The security hybrid uses a public randomized output map with independent rounding coins. Account for the additional e-h fair bits per transmitted scalar in the clock.
+
+**Fixed key slots.** Let J=L-n be the retained key length. Zig-zag encode signed y_j as 2y_j for y_j>=0 and -2y_j-1 otherwise. Rice-code each value with b low bits, followed or preceded consistently by its unary high quotient and terminator. Cauchy–Schwarz gives sum |y_j| <=16 sigma sqrt(J L). Pad every key to exactly J(b+1)+floor(32 sigma ceil(sqrt(J L))/2^b) bits. The decoder stops after J words. Rank lookup uses the same public slot size even when a particular key is unusually compressible. This bound is deterministic for every completed truncated key; it adds no probability of key loss.
+
+The sweep runs all t in [1,512] and r=ceil(512/k) for k=1,...,64. Smaller costs may exist outside these choices. The helper checks m+1<=M and all three integer tail thresholds. Both winners have r=256, d=262144. They use the same K,C as the fixed PR 96 profiles, before any pruning:
+
+| p | t | m | log2 sigma | low key bits b | ciphertext width h | bits per key slot | table bits per WE bit | saving from PR 96 |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1076 | 94 | 976083 | 375 | 380 | 401 | 422996914 | 140455882421480448 | 15.79% |
+| 831 | 91 | 999619 | 371 | 376 | 397 | 427464938 | 10730002534920127160 | 10.17% |
+
+This changes both the retained vector lengths and their widths. On the first profile the new scalar width is larger than the previous 343 bits, but the new attribute blocks are shorter. Neither table includes framing or preprocessing clocks.
+
 ### Filtering each side with the entire formula
 
 For a designated side S, branch only on unassigned variables in S, but propagate units from the *whole* residual CNF until fixed point after every branch. Any global witness extending the guesses agrees with each forced bit, including those on the opposite side. Discard contradictions. At the depth bound, construct a relaxation over the surviving S variables: keep residual side-local clauses; if opposite literals z and -z have guarded requests (z or D) and (-z or E) with both guards entirely in S, add the consequence D or E. Skip tautologies. The experiment retains up to four shortest guards of each sign per variable before pairing; this only weakens the filter. Select an incidence forest from the entailed side clauses and count/rank its satisfying assignments by tree messages. Assigned side bits are stored on the path. Opposite bits are deliberately left out of the address.
@@ -267,5 +286,74 @@ def check():
                     cases+=1
     return cases
 if __name__=='__main__': print(check())
+
+~~~
+
+The following standalone sweep also tests signed-word round trips and exact rounding means on small inputs.
+
+~~~python
+from math import isqrt
+from itertools import product
+
+def ceildiv(x,y):return (x+y-1)//y
+def ceilroot(x):
+    r=isqrt(x)
+    return r+(r*r<x)
+def calc(p,K,C,t,r):
+    n=1<<17;e=512;d=n*ceildiv(e,r);M=1<<21
+    slack=e+(e-1).bit_length()+2*(384+(p*d).bit_length())
+    a=max(n+slack,ceildiv(n*e+slack,t));m=a+d
+    if m+1>M:return None
+    lg=lambda x:(x-1).bit_length()
+    s=r+9+t+ceildiv(lg(p*(m+d+p+400)),2)
+    L=m+d;J=L-n;Y2=256*(1<<(2*s))*L
+    # Condition on the sampled key. Three errors: base noise, mask noise, wire rounding.
+    # For each, enforce 2 exp(-2 threshold^2 / sum widths^2) <= 2^-159
+    # using exponent >=160 and e>=2 as the natural exponential base.
+    q=1<<e
+    lim=q//16
+    if 2*lim**2 < 160*32**2*(1+Y2):return None
+    if 2*lim**2 < 160*(2<<(t))**2*256*m*p*Y2:return None
+    h=0
+    while (1<<(2*h)) < 5120*(1+p*Y2):h+=1
+    h=min(e,h)
+    # Sum the unary high parts after zig-zag, pad each vector to the public slot bound.
+    def slot(b):return J*(b+1)+(32*(1<<s)*ceilroot(J*L))//(1<<b)
+    keybits,b=min((slot(b),b) for b in range(s+2,s+8))
+    ct=1+m-n+p*d
+    return (keybits*K+h*ct*C,r,t,s,b,h,m,d,keybits,ct)
+
+if __name__=='__main__':
+    for p,K,C in [(1076,209012224,458752),(831,8965806142,79437951),
+                  (831,123070763,8749398)]:
+        rows=(calc(p,K,C,t,ceildiv(512,k)) for k in range(1,65) for t in range(1,513))
+        print(p,min(a for a in rows if a))
+
+def rice_test():
+    def encode(values,b):
+        out=[]
+        for y in values:
+            z=2*y if y>=0 else -2*y-1
+            out.extend([1]*(z>>b)+[0])
+            out.extend((z>>j)&1 for j in range(b))
+        return out
+    def decode(stream,b,length):
+        it=iter(stream);values=[]
+        for _ in range(length):
+            high=0
+            while next(it):high+=1
+            z=(high<<b)+sum(next(it)<<j for j in range(b))
+            values.append(z//2 if not z%2 else -(z//2)-1)
+        return values
+    for b in range(1,5):
+        for ys in product(range(-4,5),repeat=3):
+            bits=encode(ys,b)
+            assert decode(bits+[0]*13,b,len(ys))==list(ys)
+            assert len(bits)<=len(ys)*(b+1)+(2*ceilroot(len(ys)*sum(y*y for y in ys)))//(1<<b)
+    for value in range(32):
+        lo,r=divmod(value,8)
+        errors=[8*(lo+(z<r))-value for z in range(8)]
+        assert sum(errors)==0 and max(errors)-min(errors)<=8
+if __name__=='__main__':rice_test()
 
 ~~~
