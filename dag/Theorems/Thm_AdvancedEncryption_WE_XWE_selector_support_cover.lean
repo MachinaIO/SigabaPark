@@ -1,4 +1,5 @@
-import SigabaNeoStd
+import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Tactic.Choose
 
 theorem AdvancedEncryption.WE.XWE.selector_support_cover (K : Type*) [Field K] {m n : ℕ} (S : Fin m → Finset (Fin n)) (d : ℕ) :
     (∃ A : Matrix (Fin m) (Fin n) K, A.rank ≤ d ∧

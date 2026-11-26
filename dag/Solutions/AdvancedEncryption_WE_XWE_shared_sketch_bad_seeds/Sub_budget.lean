@@ -1,4 +1,6 @@
-import SigabaNeoStd
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.Data.Finset.Union
 
 theorem solution {T V S : Type*} [DecidableEq V] [DecidableEq S]
     (cert : Finset T) (res : T → Finset V) (bad : V → Finset S) (B D : ℕ)

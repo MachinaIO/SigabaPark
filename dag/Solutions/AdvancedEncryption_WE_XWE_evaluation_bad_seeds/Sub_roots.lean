@@ -1,4 +1,5 @@
-import SigabaNeoStd
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Data.Finset.Union
 
 open Polynomial
 
