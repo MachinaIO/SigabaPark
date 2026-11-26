@@ -771,3 +771,136 @@ def audit():
             print('dimension / root rows / certified bits against row loss alone',n,l,b)
 if __name__=='__main__':audit()
 ~~~
+
+### Sending short preimages at their actual width
+
+The internal and terminal branches in the polynomial chain contain sampled short preimages. Storing each coefficient as a full-width residue discards their magnitude advantage. Use the following reversible encoding on the already public ciphertext. Let L=ceil(log2(q)). Keep the root residues at L bits. On each other branch center every residue at zero and map the signed integer x to 2x for nonnegative x and -2x-1 otherwise. Let b be the maximum bit length in that branch (zero on an all-zero branch); transmit exactly b bits per entry. This bijection on centered representatives yields codes in [0,q) for even and odd moduli, hence b<=L on every possible input. A fixed-width directory gives b for each nonroot branch, using ceil(log2(L+1)) bits per width or a whole number of bytes. Given the public shapes, offsets follow by prefix sums; byte-aligning each branch costs fewer than eight bits per branch. The root needs no width header. This encoding works also when H=1, by retaining only the fixed-width root convention.
+
+For H>=2 and l retained rows the payload bit count before byte rounding and directory costs is 2lmL + sum_j k_j b_j, over nonroot branches, where k_j is m² on internal branches and mt on final branches. Its worst case is the ordinary packed-residue bound plus the directory and rounding, thus polynomial independently of any tail bound. If every sampled coordinate has absolute value at most D then b_j<=ceil(log2(2D+1)) for these branches. When a sampler proof gives only a tail bound, charge a union bound over sampled coordinates for this improved size estimate. The coding itself is lossless on all draws. Message security follows by public deterministic postprocessing, including the directory and packet length, with no extra statistical term. Preimage sampling costs are unchanged. Enc computes the widths in one scan and writes each block in a second pass. Dec reads the directory and the selected branch payloads; a sequential-tape implementation must also charge crossing unselected bytes.
+
+Dense Dec may keep each current row entry as a residue of at most L bits and its selected matrix coefficients as signed small integers. A dot product can accumulate m signed products exactly, then reduce once. Allow L+b_j+ceil(log2(m))+1 accumulator bits. Schoolbook multiplication uses O(L max(1,b_j)) bit operations per coefficient plus additions and a final modular reduction per output. This gives an explicit way to exploit the shorter operands even when dense multiply counts stay the same. End-to-end time or speedup on a specific arithmetic library has not been measured.
+
+The sixth listing intercepts the actual lattice diagnostic's serialized leaf ciphertexts, packs each root at 79 bits and gives each terminal branch one byte for its width. The reference is already packed at 79 bits per coefficient, with the same per-branch byte rounding. Totals below are the five leaf payloads per outer bit, with the same public framing as the fourth listing. The encoder checks exact reconstruction modulo q of every branch. For every valid opening the decoder reads its two selected branches per leaf and checks its answer against the original decoder. The legacy-oracle comparison inside the test is excluded from the proposed decoder. Identical results were observed for both message values.
+
+| Tensor dimension | Root rows | Fixed-width bytes | New bytes | Maximum terminal width | Valid opens passed / total |
+|---:|---:|---:|---:|---:|---:|
+|4|1|48590|22360|15|96/108|
+|4|2|64780|38550|15|108/108|
+|8|1|95990|44160|15|108/108|
+
+Thus on the same dimension-four coins two root rows with compact coefficients actually take fewer bytes than the original single root row with tightly packed residues and repair the observed failure. Dimensions, distributions and coin limitations are those of the fourth listing. This does not certify the machine-clock cap in the proposed WE_CircuitSAT_Capped problem. To reproduce, save this listing as wire.py and run OPENBLAS_NUM_THREADS=1 python wire.py frontend.py pair.py lattice.py.
+
+~~~python
+"""Lossless per-branch bit packing for the two-level lattice WE diagnostic."""
+from math import ceil
+import runpy
+import sys
+
+def zig(x,q):
+    x=(x+q//2)%q-q//2
+    return 2*x if x>=0 else -2*x-1
+
+def signed(x):
+    return x//2 if x%2==0 else -(x//2)-1
+
+def pack(values,width):
+    result=bytearray()
+    buffer=bits=0
+    for x in values:
+        assert 0<=x<(1<<width)
+        buffer|=x<<bits
+        bits+=width
+        while bits>=8:
+            result.append(buffer&255)
+            buffer>>=8
+            bits-=8
+    if bits:result.append(buffer)
+    return result
+
+def unpack(blob,n,width):
+    assert len(blob)==(n*width+7)//8
+    offset=bits=buffer=0
+    mask=(1<<width)-1
+    for _ in range(n):
+        while bits<width:
+            buffer|=blob[offset]<<bits
+            offset+=1
+            bits+=8
+        yield buffer&mask
+        buffer>>=width
+        bits-=width
+    assert buffer==0
+
+def exercise(front,prefix,lattice,n,roots):
+    q=7**28
+    L=(q-1).bit_length()
+    old=(L+7)//8
+    t=2
+    u,_=front['compile_program']([(1,2)],2,0)
+    m=4+n*len(u)*old
+    lens=[roots*m]*2+[m*t]*2
+    stats=[]
+    def encode(branches):
+        chunks=[]
+        widths=[L,L]
+        for i,values in enumerate(branches):
+            if i>=2:
+                values=[zig(x,q) for x in values]
+                widths.append(max(values).bit_length())
+            chunks.append(pack(values,widths[i]))
+        return bytes(widths[2:])+b''.join(chunks)
+
+    def select(blob,i):
+        widths=[L,L,*blob[:2]]
+        assert all(w<=L for w in widths)
+        sizes=[(k*w+7)//8 for k,w in zip(lens,widths)]
+        assert len(blob)==2+sum(sizes)
+        start=2+sum(sizes[:i])
+        values=unpack(blob[start:start+sizes[i]],lens[i],widths[i])
+        return list(values) if i<2 else list(map(signed,values))
+
+    def encrypt(code,bit,coin,leaf):
+        def compact(i,msg):
+            raw=leaf(i,msg)
+            values=[int.from_bytes(raw[j:j+old],'little') for j in range(0,len(raw),old)]
+            assert len(values)==sum(lens)
+            blocks=[values[sum(lens[:j]):sum(lens[:j+1])] for j in range(4)]
+            blob=encode(blocks)
+            for j in range(4):assert [x%q for x in select(blob,j)]==blocks[j]
+            return blob
+        ct=prefix['encrypt'](code,bit,coin,compact)
+        leaves=[v for row in ct.values() for v in row]
+        stats.append((sum(map(len,leaves)),max(max(v[:2]) for v in leaves)))
+        return ct
+    def decrypt(code,ct,cert,unused):
+        def direct(i,blob,word):
+            row=select(blob,word&1)
+            mat=select(blob,2+((word>>1)&1))
+            out=[sum(row[a*m+j]*mat[j*t+c] for j in range(m))%q
+                 for a in range(roots) for c in range(t)]
+            # Check the legacy oracle with just these selected blocks populated.
+            raw=bytearray(sum(lens)*old)
+            for idx,block in [(word&1,row),(2+((word>>1)&1),mat)]:
+                offset=sum(lens[:idx])*old
+                raw[offset:offset+len(block)*old]=b''.join((x%q).to_bytes(old,'little') for x in block)
+            result=int(any(min(x,q-x)>q//4096 for x in out))
+            assert unused(i,raw,word)==result
+            return result
+        return prefix['decrypt'](code,ct,cert,direct)
+    failures=lattice['exercise'](front,{**prefix,'encrypt':encrypt,'decrypt':decrypt},n,roots)
+    tight=5*sum((k*L+7)//8 for k in lens)
+    print('n, rows, uncompressed bit-packed bytes, (compressed bytes, largest terminal width) per message:',n,roots,tight,stats)
+    assert all(size<tight for size,_ in stats)
+    return failures
+
+if __name__=='__main__':
+    for q in range(2,34):
+        for values in ([0]*17,list(range(q))):
+            v=[zig(x,q) for x in values]
+            b=max(v).bit_length()
+            assert [signed(x)%q for x in unpack(pack(v,b),len(v),b)]==values
+    front,prefix,lattice=map(runpy.run_path,sys.argv[1:])
+    assert exercise(front,prefix,lattice,4,1)==12
+    assert exercise(front,prefix,lattice,4,2)==0
+    assert exercise(front,prefix,lattice,8,1)==0
+~~~
