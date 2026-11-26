@@ -1,4 +1,6 @@
-import SigabaNeoStd
+import Mathlib.Algebra.Order.Chebyshev
+import Mathlib.Basic.Real.Basic
+import Mathlib.Tactic.Ring
 
 open Finset
 
