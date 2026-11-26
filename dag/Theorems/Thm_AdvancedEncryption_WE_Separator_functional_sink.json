@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Separator.functional_sink",
+  "title": "Directed and undirected reachability to a sink in a functional relation",
+  "statement": "If each vertex has at most one successor and the target is a sink, equivalence closure reaches the target exactly when reflexive transitive closure does."
+}
