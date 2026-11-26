@@ -504,3 +504,46 @@ for graph in range(64):
         assert (s==0)==all(tuple(sorted(pair)) in E for pair in combinations(picks,2))
 print("4096 graph/address triples; emitted ternary permutation and merger steps agree with CLIQUE")
 ~~~
+
+## One fixed merger per clause with at most eight controlled permutations
+
+There is a shorter boundary update than the two-merger construction above. Encode live as 0 and failed as 2 in F_3. For any Boolean badness bit f, first translate by -f, then apply the fixed M=(0,2,2). If f=0 both boundary states are unchanged. If f=1, the two boundary states 0 and 2 become 2 and 1 respectively; M sends both to 2. Thus no inverse translation is needed. For the clique construction this halves the merger count to binom(h,2). The invariant is needed only between checks.
+
+For a nonempty clause with u<=3 literals, use local query bits x_j equal to one when literal j is false. Its badness bit is f(x)=product_j x_j, including if occurrences happen to read the same original variable. Expand -f in F_3 characters chi_S. The coefficient c_S is -2^(-u)*(-1)^|S| since f is supported on the all-ones tuple. To implement the translation by sum_S c_S chi_S, visit the 2^u supports in cyclic binary reflected Gray order starting at the empty set. At each support translate by c_S and then conditionally negate on the unique bit toggled to the next support (including the final return to empty). For any assignment, induction gives a state after moving to support R equal to chi_R times the initial state plus accumulated character translations inside the same parentheses. Explicitly it is chi_R(x)*(s_initial + sum_{S visited} c_S chi_S(x)). Closing the tour therefore gives s_initial-f(x).
+
+All constant translations can be compiled away. Maintain the offset d in the invariant logical state = physical state + d, initially zero. A constant translation adds to d. A conditional negation becomes identity when its bit is zero and the reflection s -> -s-2d when its bit is one; d stays fixed. After the tour d=sum_S c_S=-f(0)=0. Negated literal inputs are handled by swapping the two public transitions. Thus only 2^u controlled permutations, each choosing between identity and a transposition, and exactly one input-independent M are emitted. Constants are compiled into the reflection tables. Reject an empty clause directly.
+
+An m-clause 3-CNF therefore takes at most 9m instructions with unrestricted rereads, accepting exactly its satisfying witnesses. More specifically the usual NAND Tseitin encoding with two binary clauses and one ternary clause per gate, and one output unit, needs at most 19g+3 instructions for g gates before simplification. A decryptor extends an original witness by the honest gate values. Conversely acceptance enforces each gate equation and the output pin. These are counts of verifier instructions, not cryptographic operations or ciphertext bytes. Schedules of this form suffice as a general-NP target for fixed-assumption WE. The same occurrence control must remain consistent across repeated reads; publishing both choices as freely composable paths drops that requirement. No hiding theorem for the compiled ciphertext is obtained.
+
+~~~python
+from itertools import product
+def program(u):
+    size=1<<u
+    d=0
+    steps=[]
+    for i in range(size):
+        gray=i^(i>>1)
+        j=(i+1)%size
+        next_gray=j^(j>>1)
+        d=(d-pow(size,-1,3)*(-1)**gray.bit_count())%3
+        steps.append(((gray^next_gray).bit_length()-1,(-2*d)%3))
+    assert d==0
+    return steps
+
+def run(s,bits,steps):
+    for j,c in steps:
+        if bits[j]: s=(c-s)%3
+    return (0,2,2)[s]
+
+checked=0
+for u in range(1,4):
+    steps=program(u)
+    for pins in product(range(3),repeat=u):
+        for signs in product(range(2),repeat=u):
+            for data in product(range(2),repeat=3):
+                bits=[data[j]^a for j,a in zip(pins,signs)]
+                for start in (0,2):
+                    assert run(start,bits,steps)==(2 if all(bits) else start)
+                    checked+=1
+print(checked,"signed/repeated-input boundary checks; clause lengths 3, 5 and 9")
+~~~
