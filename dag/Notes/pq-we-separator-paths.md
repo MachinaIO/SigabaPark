@@ -359,3 +359,37 @@ def geometry(front,local,paths):
         if chunk==64:print('local shape histogram',dict(sorted(hist.items())))
 if __name__=='__main__':geometry(*(runpy.run_path(f) for f in sys.argv[1:]))
 ~~~
+
+## Reusing a leaf ciphertext across directed transitions
+
+Suppose the public edge predicate is a conjunction of named local statements. The same statement may occur on many edges, even in different layers. This representation is exact only when a path plus all the required local witnesses implies one original witness (e.g. by the separator compatibility check above). Let J be the number of distinct named statements, E the number of directed edges, and I the total edge/statement incidences. Deduplicate repeated requirements on a single edge. Use disjoint namespaces for vertices, edges and local statements.
+
+Generate one independent k-bit key K_v per vertex and one independent k-bit key L_j per distinct statement. Publish K_s and encrypt L_j under statement j *once*, with fresh coins per leaf bit for a bit-only backend. Give each occurrence an exclusive k-bit pad obtained by expanding its statement key with a length-doubling PRG. Independently expand each vertex key for its outgoing edge slots. For e=(u,v) publish the clear k-bit word
+
+    W_e = K_v XOR pad(K_u,e) XOR sum_XOR_{j required by e} pad(L_j,e).
+
+Publish b masked with a separately allocated bit expanded from K_t. The witness decrypts a required statement's key once, derives its occurrence pads and follows the selected edges. An empty conjunction is a public unconditional edge. Distinct edge identifiers are essential even when endpoints coincide. Errors in a reused recovered key need only be counted once. A path that uses r distinct statements needs kr leaf-bit decryptions, with failure probability at most kr times the maximum leaf-bit error. With the earlier independently keyed leaf scheme the number of leaf-bit ciphertexts was kE for single-label edges; here it is kJ. The clear-data cost includes kE bits for W and k+1 header bits. Directory and predicate framing are extra if not derivable from the statement. Sender tree expansion uses O(I+E+1) PRG calls when each tree is pruned to its assigned slots; a receiver derives chosen pads in logarithmic tree depth. This improves expensive leaf work when J is small and does not automatically shorten every ciphertext.
+
+**Joint security with reused keys.** Fix a false instance, R the states accessible from s along true conjunctions, and one false requirement on each edge leaving R. Such a requirement exists even if different edges fail different local statements. Let F be the distinct chosen requirements. First replace each WE encryption of L_j for j in F by an encryption of zero (at most k|F| bit challenges). Then replace all occurrence pads of each of these keys by independent uniform strings, by the fixed PRG tree hybrid. This includes occurrences away from the cut. No other part now exposes L_j. Each edge leaving R has its own fresh uniform mask; the masked words on the cut can be sampled jointly independently of all vertex keys. Process every unreachable vertex in topological order as in the original directed construction. An incoming edge from R already has an independent mask. An incoming edge from an earlier unreachable vertex has a unique fresh source pad. In both cases its W can be reparametrized as independent uniform, without knowing the challenged seed at the current vertex. Thus the terminal bit can be replaced by uniform. The losses add over the expansions of F and of the unreachable vertices, plus the selected false leaf bits, for each message hybrid. The reduction can hardwire the cut and the chosen labels under nonuniform leaf security; it queries no quantum oracle. Hiding a single reused key under a false statement alone would not justify reusing *the same pad* on several edges.
+
+**A succinct directed routing case.** If a layer relation is given as a union of rectangles A_h times B_h with the same conjunction on each pair in rectangle h, introduce one private vertex for that rectangle. Add incoming edges from A_h carrying its conjunction and unconditional edges out to B_h. No cross-rectangle path is introduced, and every original edge has a realizing two-step path. A witness may find a valid rectangle by scanning the public list and checking its predicates with the witnesses it possesses; for a compiler using overlapping rectangles it must have a polynomial way to identify a satisfied one, for instance provenance from the original trace. This uses sum_h(|A_h|+|B_h|) clear edge words instead of sum_h |A_h||B_h| words in the unmerged occurrence list. Compare against the actual distinct-edge count before using it. For one 64-by-64 rectangle with a single shared predicate and k=128, the original pair scheme uses 524288 leaf-bit ciphertexts. The shared construction with the rectangle needs 128 leaf-bit ciphertexts plus 128 clear edge words (16384 bits), apart from header/framing. Receiver graph depth doubles in that layer. This comparison is an interface count; a publicly decidable predicate may instead be evaluated directly and an isolated one-rectangle terminal network may simplify further.
+
+If the leaf statements themselves lack a fixed-assumption polynomial WE, amortizing them cannot close general CircuitSAT. The new step removes repeated *uses* of a primitive and allows a polynomial directed graph with polynomially many incidences and tractable leaf statements to give an actual public ciphertext. It does not compile every circuit into such a graph with easy leaves.
+
+The following check exhausts two-edge cuts that reuse the same false statement key in the ideal-pad hybrid. It also compares directed reachability before and after splitting overlapping labeled rectangles for all 16 possible truth assignments to four requirements.
+~~~python
+from itertools import product
+from collections import Counter
+for key_pair in product(range(4),repeat=2):
+    hist=Counter((key_pair[0]^a,key_pair[1]^b) for a,b in product(range(4),repeat=2))
+    assert len(hist)==16 and max(hist.values())==1
+rects=[({0,1},{0,1},(0,1)),({1,2},{1,2},(1,2)),({2},{0,2},(3,))]
+for truth in product(range(2),repeat=4):
+    direct={(u,v) for A,B,req in rects if all(truth[j] for j in req)
+                  for u in A for v in B}
+    for u in range(3):
+        mid={i for i,(A,B,req) in enumerate(rects) if u in A and all(truth[j] for j in req)}
+        reached={v for i in mid for v in rects[i][1]}
+        assert reached=={v for a,v in direct if a==u}
+print("16 joint mask laws; 48 directed source/assignment comparisons")
+~~~
