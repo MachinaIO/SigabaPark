@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Reroute.comparator_span_finrank_le", "proof_type": "prove", "explanation": "The range lies in the range of the |S| vectors g s; Submodule.span_mono, Submodule.finrank_mono and finrank_range_le_card."}

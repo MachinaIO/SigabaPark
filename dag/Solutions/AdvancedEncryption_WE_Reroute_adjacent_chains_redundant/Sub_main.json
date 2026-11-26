@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Reroute.adjacent_chains_redundant", "proof_type": "prove", "explanation": "By contradiction: an element y of I above t puts t+1 between t and y, hence in I; an element y of J below t+1 puts t between y and t+1, hence in J."}

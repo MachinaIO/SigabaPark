@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Reroute.two_pass_cross_rank_le", "proof_type": "prove", "explanation": "Rewrite u.(P1 Q1 P2 Q2)v as ((u P1) Q1 P2).(Q2 v) and expand it as a sum over triples (a, b, c) of an X-only factor times a Y-only factor; the matrix is a product through a card(iota)^3-dimensional index, so Matrix.rank_mul_le_left and Matrix.rank_le_card_width."}

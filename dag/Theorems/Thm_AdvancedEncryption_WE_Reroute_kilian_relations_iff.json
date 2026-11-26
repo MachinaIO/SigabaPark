@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Reroute.kilian_relations_iff", "title": "Kilian re-randomization preserves the linear relations among prefix rows", "statement": "Over a field, if the prefix rows of two encodings satisfy XB x = XA x * T for every prefix x with T invertible, then for every coefficient vector c, sum_x c x XA x = 0 iff sum_x c x XB x = 0."}

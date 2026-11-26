@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Reroute.kilian_relations_iff", "proof_type": "prove", "explanation": "The XB-combination equals the XA-combination times T (Matrix.sum_vecMul, Matrix.smul_vecMul); multiplying by the inverse of T (Matrix.mul_nonsing_inv) shows that vecMul by T is injective."}

@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Reroute.kilian_partition_iff", "title": "Invertible re-randomization cannot change a comparator state partition", "statement": "Over a field, if an invertible T maps the indicator row of state kA x to the indicator row of state kB x for every prefix x, then kA x = kA y iff kB x = kB y for all prefixes x, y."}
