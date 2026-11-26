@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.SignNoise.ambiguous_prefix_count", "title": "CDF-prefix ambiguity is bounded by the number of interior thresholds", "statement": "Among equal-width bins in an integer sample space, the number with an internal cumulative-count threshold is at most the total number of thresholds."}

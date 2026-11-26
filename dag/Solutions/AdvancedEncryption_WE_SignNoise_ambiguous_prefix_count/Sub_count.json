@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.SignNoise.ambiguous_prefix_count", "proof_type": "prove", "explanation": "Send an internal threshold to its bin by division; every ambiguous bin lies in the image."}
