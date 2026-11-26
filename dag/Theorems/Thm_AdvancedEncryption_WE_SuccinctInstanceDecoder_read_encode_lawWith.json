@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.SuccinctInstanceDecoder.read_encode_lawWith", "title": "Exact readout and postprocessing of encoded succinct-LWE challenges", "statement": "Reading an encoded instance recovers every field. For every second-row law and randomized continuation, decoding a sampled challenge and continuing agrees exactly with continuing on the original joint sample."}
