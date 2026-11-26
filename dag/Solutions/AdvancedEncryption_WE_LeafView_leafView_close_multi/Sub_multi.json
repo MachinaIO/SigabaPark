@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.leafView_close_multi", "proof_type": "prove", "explanation": "Same proof as leafView_close with the key sampler replaced by the product (PMF.pi) of per-column box-rejection tries: each factor is trapdoor-independent (boxSample_eq), so the product is too, and the leftover-hash/shift argument is unchanged."}

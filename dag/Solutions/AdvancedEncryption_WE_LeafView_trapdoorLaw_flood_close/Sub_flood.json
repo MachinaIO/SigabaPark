@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.trapdoorLaw_flood_close", "proof_type": "prove", "explanation": "Pads d_W with zeros to a preimage map of [I_l (x) B | W] (the B-blocks contribute nothing), applies the generic flooding lemma to each column, and combines the columns with SigabaNeoStd's closeTo_sampleOptList; trapdoorLaw unfolds to Trapdoor.preimage for sigma > 0."}

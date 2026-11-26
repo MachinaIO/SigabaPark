@@ -1,0 +1,10 @@
+{
+ "name": "WE_CircuitSAT_Impl_BruteForceExplicit",
+ "title": "Brute-force WE for NAND-circuit SAT with an explicit cost (about 2^188)",
+ "description": "AdvancedEncryption.WE.CircuitSAT.BruteForceExplicit.u : Submission P R for WE_CircuitSAT, with no premises and the explicit cost bound N = 381461057563519853491131165268104433667487467501207004940 (about 2^187.96). Enc and Dec are explicit tape programs (SigabaNeo.Tape.Prog, compiled with XProg.toMachineT): Enc streams its input through a frame decoder evaluating evalGates on a 4225-bit wire register for each of the 2^128 assignments (8 nested loops of 2^16 rounds over a 128-bit counter) and outputs [beta && sat(phi)]; Dec outputs the last three bits of its input (the frame of the ciphertext).",
+ "tags": [
+  "submission",
+  "witness-encryption",
+  "machines"
+ ]
+}

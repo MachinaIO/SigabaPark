@@ -88,8 +88,25 @@ jobs:
           else
             n=$(printf '%s' "$HEAD_REF" | sed -nE 's#^.*/pr-([0-9]+)-[0-9a-f]+$#\1#p')
             [ -n "$n" ] || { echo "cannot read the pull request of $HEAD_REF"; exit 1; }
-            echo "author=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n" --jq .user.login)" >> "$GITHUB_OUTPUT"
+            author=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n" --jq .user.login)
+            echo "author=$author" >> "$GITHUB_OUTPUT"
             echo "pr=$n" >> "$GITHUB_OUTPUT"
+          fi
+      - name: The author's permission on the repository
+        id: perm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTHOR: ${{ steps.who.outputs.author }}
+        # For meta/trusted.json's `collaborators` mode. GitHub reports admin, write, read or none;
+        # a user who is not a collaborator gets 404, which is `none`. Any other failure fails
+        # the job, so the gate never decides on a permission it could not read.
+        run: |
+          if out=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR/permission" --jq .permission 2>err.txt); then
+            echo "permission=$out" >> "$GITHUB_OUTPUT"
+          elif grep -q "HTTP 404" err.txt; then
+            echo "permission=none" >> "$GITHUB_OUTPUT"
+          else
+            cat err.txt; exit 1
           fi
       - name: Fetch the added files (as data)
         env:
@@ -105,7 +122,8 @@ jobs:
         id: precheck
         env:
           AUTHOR: ${{ steps.who.outputs.author }}
-        run: python3 core/python/dag_tools.py precheck --dag base --fetched fetched --author "$AUTHOR" --out fetched/precheck.json
+          PERMISSION: ${{ steps.perm.outputs.permission }}
+        run: python3 core/python/dag_tools.py precheck --dag base --fetched fetched --author "$AUTHOR" --permission "$PERMISSION" --out fetched/precheck.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
@@ -117,7 +135,7 @@ jobs:
     needs: precheck
     if: needs.precheck.outputs.ok == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     permissions:
       contents: read
     steps:
