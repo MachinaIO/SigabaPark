@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Separator.support_insert",
+  "proof_type": "prove",
+  "explanation": "If an old support dominates the new one, use transitivity. Otherwise retain old supports incomparable from below by the new one and replace every removed feasible superset with the new support."
+}
