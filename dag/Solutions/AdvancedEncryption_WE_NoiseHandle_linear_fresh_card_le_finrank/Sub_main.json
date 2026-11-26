@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NoiseHandle.linear_fresh_card_le_finrank", "proof_type": "prove", "explanation": "Choose such an x_w for each w in S. They are linearly independent: applying phi_w to a vanishing combination kills every term except c_w x_w, and phi_w(x_w) != 0 forces c_w = 0. Hence |S| <= finrank."}

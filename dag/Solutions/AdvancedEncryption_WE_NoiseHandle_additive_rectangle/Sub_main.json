@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NoiseHandle.additive_rectangle", "proof_type": "prove", "explanation": "Combine the two sums on each side into one sum of pairs and compare termwise: each pair is the same up to order."}

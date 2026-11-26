@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NoiseHandle.fresh_paths_le_bits", "proof_type": "prove", "explanation": "Apply two_pow_le_card_of_locally_fresh to the image of Y, whose size is at most |Omega| <= 2^N, and cancel the powers of 2. The counting lemma is reproved inline, so the proof is complete."}
