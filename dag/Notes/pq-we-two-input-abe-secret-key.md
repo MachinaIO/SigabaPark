@@ -875,3 +875,66 @@ for trial in range(80):
             assert bool(ok)==any(cs.values())==any(z in ok for z,row in reps)
 print("3840 direct evaluations; 960 exact projections and witness-list checks")
 ~~~
+
+## Projecting private parities by their intersection across a cut
+
+For queries of the form a_i z + b_i y + c_i over F_2 the preceding character dictionaries can be dense even in a simple suffix. There is a different exact compiler whose exponential factor depends only on private parities shared across each cut. Put P_i=span(a_1,...,a_i), Q_i=span(a_(i+1),...,a_L), and I_i=P_i intersect Q_i. Write h=max_i dim I_i. This uses the linear trellis principle also described in the separator note, now compiling an *ordinary residual Boolean verifier on symbolic shared inputs y*. No enumeration of shared inputs or Fourier expansion is needed.
+
+At cut i index Boolean reachability gates by machine state and a functional on I_i (one bit per basis vector). Start with the incoming machine state and the unique empty assignment. Given a cut entry, extend to the private query value d=a_(i+1) z. If a_(i+1) is in I_i its value is already forced, otherwise try both bits. For each option the next boundary assignment is unique: every v in I_(i+1) has form p+e a_(i+1) with p in P_i, and both v and a_(i+1) belong to Q_i, hence p is in I_i. Compute the new values from these public basis coordinates. Drive the actual successor state using d+b_(i+1)y+c_(i+1), and OR all incoming contributions at the destination. Build the shared parity once per layer. A circuit may implement each edge by two Boolean guards, one per possible shared parity value.
+
+For soundness maintain that each reachable entry is realized by a single prefix functional on P_i leading to its machine state and matching its recorded values. Since a_(i+1) lies in Q_i, membership in P_i is equivalent to membership in I_i. Thus a free choice extends *any* prefix realizing that entry. The next boundary agrees with the extended functional by the containment just proved. At the end every functional on P_L extends to the ambient space and is evaluation against some z. Conversely every z follows a realizing path. This proves the existential projection for every fixed y and incoming state. To construct z one can backtrack a successful path, then solve the resulting linear equations. The base case and final acceptance allow empty suffixes and zero/private-free query rows.
+
+Elimination to find bases and coordinate maps is polynomial in the input dimensions. With w states there are at most 2*w*2^h private transitions per layer, before the two shared-bit guards. Enumerating them also costs polynomially many bit operations per transition for basis arithmetic. Thus the residual circuit is polynomial for h logarithmic in input size, including arbitrary numbers of three-state partial mergers and arbitrary affine shared ports computed by a retained hard core. It need not materialize a universal list of accepting private assignments. For example the two-state suffix checking z_i=y_i by successive discrepancy queries and accumulating an OR of failures always has a unique accepting private assignment z=y for target no-failure. Here h=0 in coordinate order, yet a fixed witness list covering all y would need 2^n entries. The projection removes the private bits exactly. Worst-case intersection dimension is still linear (e.g. two full passes over an independent basis), and the remaining backend's cryptographic obligations are unchanged.
+
+~~~python
+from random import Random
+rng=Random(819)
+def span(rows):
+    vals={0}
+    for x in rows: vals|={v^x for v in vals}
+    return vals
+def basis(space):
+    chosen=[]
+    built={0}
+    for v in sorted(space):
+        if v not in built:
+            chosen.append(v)
+            built|={w^v for w in built}
+    return chosen
+def par(x): return x.bit_count()%2
+for trial in range(100):
+    L=rng.randrange(13)
+    rows=[rng.randrange(16) for i in range(L)]
+    shared=[rng.randrange(8) for i in rows]
+    maps=[[[rng.randrange(3) for s in range(3)] for b in range(2)] for i in rows]
+    cuts=[basis(span(rows[:i]) & span(rows[i:])) for i in range(L+1)]
+    edges=[]
+    for i,a in enumerate(rows):
+        generators=cuts[i]+[a]
+        express={0:0}
+        for j,v in enumerate(generators):
+            express.update({u^v:t^(1<<j) for u,t in list(express.items()) if u^v not in express})
+        olddim=len(cuts[i])
+        layer=[]
+        for entry in range(1<<olddim):
+            for d in (0,1):
+                ext=entry+(d<<olddim)
+                if d!=par(ext&express[a]): continue
+                dest=sum(par(ext&express[v])<<j for j,v in enumerate(cuts[i+1]))
+                layer.append((entry,d,dest))
+        edges.append(layer)
+    for y in range(8):
+        for start in range(3):
+            reached={(0,start)}
+            for i,layer in enumerate(edges):
+                reached={(dest,maps[i][d^par(shared[i]&y)][s])
+                         for u,d,dest in layer for s in range(3) if (u,s) in reached}
+            actual=set()
+            for z in range(16):
+                s=start
+                for i,a in enumerate(rows):
+                    s=maps[i][par(a&z)^par(shared[i]&y)][s]
+                actual.add((0,s))
+            assert reached==actual
+print("2400 residual reachable-state sets checked against 38400 private executions")
+~~~
