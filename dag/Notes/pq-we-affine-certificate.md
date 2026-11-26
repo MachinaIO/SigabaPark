@@ -232,3 +232,34 @@ for n in range(len(planes)+1):
             checked += 1
 print(checked,"families/budgets agree with exhaustive subspace enumeration")
 ~~~
+
+## Adaptive certificates for publicly selected subcircuits
+
+A fixed space meeting every operand plane can be unnecessarily large when a circuit selects which checks matter. Use a publicly specified polynomial-time rule that at each step requests the value of an affine form on the original trace or finishes with an affine feasibility system. Restrict the system by every requested equality. In simplifying the verifier allow substitution, pruning a multiplexer with a fixed address, and deletion of gates that no longer feed the output. When deleting gates, retain enough definitions to justify any already requested internal-wire equality. Equivalently keep those equalities as additional outputs of the original verifier during simplification. Each terminal system must be equisatisfiable with the restricted original verifier; a contradiction is a valid rejecting terminal. Every satisfying trace must reach a terminal in at most d requests. This last requirement is about *every witness supplied to Dec*, even if a different witness reaches an earlier terminal. It follows structurally in the multiplexer case below.
+
+Compile one verifier on d response bits: replay the rule, accept exactly if it finishes within the budget and its terminal affine system is consistent; ignore trailing bits. Dec obtains its certificate by evaluating the original accepting trace and answering each request, padding to d bits. A forged response string can choose any history, but cannot pass a terminal with inconsistent requested values. Any accepting terminal has an original satisfying trace by the terminal equivalence. These two implications prove ordinary WE transport, without requiring a NO trace to finish within d. Defining the verifier on a timeout to reject is essential. A mere heuristic bound seen on sampled accepting traces cannot justify correctness. The replay requires at most d polynomial-time steps plus one affine solve; a uniform Boolean verifier can simulate this bounded computation without unrolling an exponential decision tree. Its circuit size and depth must still be included in backend costs.
+
+For an explicit family let the d0 address bits select one of m=2^d0 public predicate circuits P_i, all on the same primary input vector. A source witness consists of address and data and is accepted by P_address. Each arm has its own static selector certificate of dimension k_i, without a common space across arms. Take the address followed by max_i k_i bits, and evaluate the chosen arm's consistency verifier on just its own prefix. The total certificate length is d0+max_i k_i. Building a circuit with all m branch verifiers and a final multiplexer costs their total size, polynomial in the explicit arm descriptions. Splitting this single certificate for the existing two-half backend uses 2^floor(d/2) key entries and 2^ceil(d/2) attribute entries for d=d0+max_i k_i. No exponential search over all data bits or semantic recognition of arbitrary multiplexers is required. Irregular policies can instead use the general bounded replay if its accepting-depth guarantee is proved.
+
+For P_i(u,v)=u_i v_i, the m product planes on disjoint coordinates form a direct sum. A single space meeting all m therefore needs rank at least m, even before counting any selector logic. After fixing the address only one product remains, so the preceding compiler uses at most log2(m)+1 response bits. The arm can even decide its own satisfiability without the final bit in this simple example; the example only separates simultaneous and branch-specific linearization on this representation. If a concrete witness must satisfy additional conditions shared across arms, include them inside every chosen verifier or prove them separately; ignoring them would change the language. General CircuitSAT has no established sublinear or logarithmic bound on accepting depth. The optimization uses no new assumption and retains the false-statement security of the selected backend.
+
+~~~python
+from itertools import product
+m = 4
+# Extra affine restrictions are shared by all branches and must survive pruning.
+for rhs in product(range(2), repeat=m):
+    for i in range(m):
+        def valid(data):
+            u,v = data[:m],data[m:]
+            return all((a^b)==r for a,b,r in zip(u,v,rhs)) and u[i]*v[i]==1
+        # After guessing z=u_i, enforce u_i=z, z*v_i=1, and all affine rows.
+        # Eliminate each u_j=v_j XOR rhs_j. Solve the remaining one-bit system.
+        cert = [any((v^rhs[i])==z and z*v==1 for v in range(2)) for z in range(2)]
+        found = [False,False]
+        for data in product(range(2),repeat=2*m):
+            if valid(data):
+                found[data[i]]=True
+                assert cert[data[i]]
+        assert found == cert
+print("64 address/restriction cases; all 16384 source traces and both response bits checked")
+~~~
