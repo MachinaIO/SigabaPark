@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.IPE.affine_key_offset",
+  "title": "Affine offsets in the predicate key",
+  "statement": "The difference of combined encryption and key matrices is the affine score times the gadget."
+}

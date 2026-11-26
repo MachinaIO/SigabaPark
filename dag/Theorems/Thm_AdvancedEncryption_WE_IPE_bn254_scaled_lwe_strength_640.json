@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.IPE.bn254_scaled_lwe_strength_640",
+  "title": "Registry estimator bound at the BN254 scalar subgroup modulus",
+  "statement": "The registered LWE estimator returns at least 640 at dimension 131072, sample budget 2097152, CBD16 secret and errors and modulus 2^259 times the BN254 scalar prime."
+}

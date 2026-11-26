@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IPE.subgroup_score_gcd",
+  "proof_type": "prove",
+  "explanation": "Cancel the positive factor for divisibility and factor it out of the gcd."
+}
