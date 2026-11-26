@@ -1,0 +1,1 @@
+{"name": "WE_WirePolarity", "title": "NAND polarity analysis, mixed-input lifting and deterministic one-bit encryption", "description": "Propagate positive and negative input sets in the registered wire order, enumerate only their intersection, and evaluate at the extremal completion.", "tags": ["witness-encryption", "circuit-sat", "preprocessing"]}
