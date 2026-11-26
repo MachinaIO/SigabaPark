@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PadSlots.point_complement_cover_card", "proof_type": "prove", "explanation": "For each i the neighbour p with bit i flipped lies in some cube f i; that cube avoids p, so it fixes coordinate i to the flipped value. A cube fixing coordinate i to the flipped value cannot contain the neighbour of another coordinate j, so f is injective."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.RingGGH15.module_adjugate_break", "proof_type": "prove", "explanation": "Move the matrix into the left vector (dotProduct_mulVec, vecMul_vecMul), use adjugate_mul to get det S1 * det S0 \u2022 (u \u2b1d\u1d65 a) on both sides, commute the determinants and cancel."}
