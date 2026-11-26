@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.succinctIdeal_augmented", "title": "The ideal succinct-LWE instance as a single augmented uniform matrix", "statement": "The registered encoded ideal law is exactly the law obtained by splitting a uniform matrix into B and a spare row, then sampling W and the challenge trapdoor."}
