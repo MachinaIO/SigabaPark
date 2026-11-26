@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Attacks_Bkw_BinaryVote", "title": "# Binary one-stage BKW with a majority vote, end to end", "description": "Moved from the standard library module SigabaNeoStd.Lattices.Attacks.Bkw.BinaryVote (core v0.1.2).", "tags": ["lattice-attack"]}

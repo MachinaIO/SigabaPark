@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Attacks_Dual_PhaseBounds", "title": "Finite-law signed cosine bounds and a shared binary phase.", "description": "Moved from the standard library module SigabaNeoStd.Lattices.Attacks.Dual.PhaseBounds (core v0.1.2).", "tags": ["lattice-attack"]}
