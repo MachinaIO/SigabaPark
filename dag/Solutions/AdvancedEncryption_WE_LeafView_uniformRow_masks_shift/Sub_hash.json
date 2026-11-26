@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.uniformRow_masks_shift", "proof_type": "prove", "explanation": "Apply the multi-column leftover hash lemma to the augmented matrix in each world. Translating only the extra row preserves the uniform ideal hash law and all ordinary rows."}
