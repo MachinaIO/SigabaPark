@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.signed_binary_feature_square_bound", "proof_type": "prove", "explanation": "Each signed column sum on binary inputs lies between the negative mass and positive mass of the column. Square the larger bound and sum over columns."}
