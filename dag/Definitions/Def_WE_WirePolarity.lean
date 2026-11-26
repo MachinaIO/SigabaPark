@@ -8,12 +8,11 @@ structure Signs (n : ℕ) where
   pos : Finset (Fin n)
   neg : Finset (Fin n)
 
-def run {α : Type} (one : α) (op : α → α → α) :
-    GateList → List α → α → α
-  | [], _, last => last
-  | (a,b) :: rest, wires, _ =>
-    let v := op (wires.getD a one) (wires.getD b one)
-    run one op rest (wires ++ [v]) v
+def run {α : Type} (one : α) (op : α → α → α) (gs : GateList) :
+    List α → α → α :=
+  gs.foldr (fun g next wires _ ↦
+    let v := op (wires.getD g.1 one) (wires.getD g.2 one)
+    next (wires ++ [v]) v) (fun _ last ↦ last)
 
 def combine {n : ℕ} (a b : Signs n) : Signs n :=
   ⟨a.neg ∪ b.neg, a.pos ∪ b.pos⟩

@@ -11,7 +11,8 @@ private theorem run_map {α β : Type} (h : α → β) (one : α) (op : α → �
   | nil => rfl
   | cons g gs ih =>
     rcases g with ⟨a,b⟩
-    simp only [run, ih, List.map_append, List.map_cons, List.map_nil, hop, List.getD_map]
+    change h (run one op gs _ _) = run (h one) op' gs _ _
+    simp only [ih, List.map_append, List.map_cons, List.map_nil, hop, List.getD_map]
 
 private theorem run_bool (gs : GateList) (w : List Bool) (last : Bool) :
     run true (fun a b ↦ !(a && b)) gs w last = (gs.foldl estep (w,last)).2 := by
