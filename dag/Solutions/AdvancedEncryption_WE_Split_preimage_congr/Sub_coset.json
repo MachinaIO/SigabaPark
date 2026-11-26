@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Split.preimage_congr", "proof_type": "prove", "explanation": "Coset Gaussians are determined by their coset: cosetGauss_apply gives mass rho(x)/M on the coset, and summing to 1 forces equal normalizers, so two equal cosets give equal laws; preimage is a map of the list of column laws. "}
