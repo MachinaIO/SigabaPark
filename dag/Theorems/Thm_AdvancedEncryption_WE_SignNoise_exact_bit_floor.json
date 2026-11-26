@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.SignNoise.exact_bit_floor", "title": "An exact bounded fair-bit simulator of independent sign counts needs the full bit budget", "statement": "Matching just the all-maximal atom for d independent m-sign counts forces any deterministic simulator on b uniform tape bits to have b at least m*d."}
