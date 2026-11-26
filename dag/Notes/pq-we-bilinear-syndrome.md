@@ -78,3 +78,35 @@ For a direct finite-distribution test, use the `check` listing above through con
                     2*sum(counts.values()))
 ~~~
 The exact message distances returned are 9765/65536 and 0, respectively.
+
+### Joint observations on connected false circuits
+
+There is a constraint on extending the preceding filter to general NAND inputs. Start with the three-gate false core above and its known rank-three feasible matrix Y0, on homogeneous coordinate and wires (x,t,f,o). Add m independent input wires z_i. Form t_i=NAND(z_i,z_i) and h_i=NAND(z_i,t_i). Conjoin the old output o and all h_i by a chain of two-NAND ANDs, pinning the last output to one. Every gate now has a path to the pinned output. The circuit remains identically false. This family tests the given syntax-level compiler; a compiler that recognizes and simplifies these gadgets is a different map.
+
+For any binary m-by-5 matrix W, construct B by placing the identity on the core rows. The z_i row is W_i, the t_i row is W_i+e0 and the h_i row is e0. Each chain AND receives pseudo-values both one; use zero for its first NAND output and e0 for its second. For the first chain input o its row is the core output basis vector and its first moment is one. Then Y(W)=B Y0 B^T is feasible and of rank three, deterministically for every W. Indeed Y0 is symmetric with diag(Y0)=Y0 e0, so l Y0 l^T=l Y0 e0 for every binary l and l Y0(l+e0)^T=0. These identities check both padding gates, as well as diagonal and homogeneous consistency. The top identity rows preserve rank. We do not impose extra moment rows beyond the compiler defined at the start of this note.
+
+For one fixed ciphertext with j active outer products (u_i,v_i) and aggregate private tag flip F, each parity using Y(W) reads b+F plus the sum of the j bilinear errors with vectors B^T u_i,B^T v_i. Take W fresh and uniform for each parity calculation *on that same ciphertext*. The coefficient of W_l in each projected vector is the corresponding factor's bit at z_l plus its bit at t_l. Conditional on branch choices these coefficients form a uniform 2j-by-m matrix A. Except with probability at most 2^(2j-m), A has full row rank. On that event, for fixed private factors, varying W makes all 2j projected vectors independently uniform on five bits: their joint matrix is a constant plus AW, column by column. Consequently the repeated readings have correlation exactly 2^(-3j) with b+F and are independent over fresh choices of W, conditional on the complete encryption randomness.
+
+For the filter with k=O(log lambda) positions, choose m>=2k+lambda. A majority of ceil(2 lambda 64^k) readings recovers b+F except with probability at most 2^-lambda+exp(-lambda) including setup failure. This is polynomial work and uses only the given ciphertext and public circuit. The probability all factors use the outer-product branch is at least 1-sum_r 2^-r >= 5/6, on which F=0. Thus the raw bit is predictable with probability at least 5/6 minus the indicated error, even if rank three is among the canceled classes. For an asymptotic family one may simply set m=lambda when k=O(log lambda), obtaining the same negligible setup error up to a polynomial factor. This leaves the exact rank-cover promise intact but rules out a universal weak-bit bound for this logarithmic filter and the literal moment compiler. No computational assumption can establish that particular bound.
+
+More generally, for a sampler choosing at most k such outer products and a tag flip correlated only with the count or independent branch coins, the magnitude of the conditional reading bias identifies j as well: adjacent values 2^(-3j) differ by at least 2^(-3k). Estimating the signed mean within 2^(-3k)/3 takes O(lambda 64^k) fresh W choices. Given b+F and j, a decoder can flip its answer with the publicly samplable parity of j independent products of two fair bits. It then reproduces the rank-one witness channel's bit-error law up to negligible additive error. Changing only the probabilities of the private branches cannot produce a correctness/security gap on this family. Avoiding such correlated feasible matrices, or using noise that does not permit averaging their parities on one transcript, is a concrete requirement for a different compiler.
+
+The small check verifies every row choice for one added input against all seven NAND equations, and counts the exact projected single-factor bias used in the amplification argument.
+~~~python
+from itertools import product
+core=[1,0,1,0,1]
+def paired(a,b):
+    p=sum(x for i,x in enumerate(core) if (a>>i)&1)%2
+    q=sum(x for i,x in enumerate(core) if (b>>i)&1)%2
+    return (p*q) ^ ((a>>1 & 1)*(b>>2 & 1)) ^ ((a>>2 & 1)*(b>>1 & 1))
+base=[1<<i for i in range(5)]
+for w in range(32):
+    rows=base+[w,w^1,1,0,1]
+    gates=[(1,1,2),(1,2,3),(3,3,4),(5,5,6),(5,6,7),(4,7,8),(8,8,9)]
+    assert all(paired(r,r)==paired(r,1) for r in rows)
+    assert all(paired(rows[a],rows[b])^paired(rows[c],1)==1 for a,b,c in gates)
+    assert paired(rows[-1],1)==1
+signed=sum((-1)**paired(a,b) for a,b in product(range(32),repeat=2))
+assert signed*8==32**2
+print(32,signed,32**2)
+~~~
