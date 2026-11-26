@@ -35,6 +35,18 @@ except with probability eps. Handle h=0 directly. For p=117 and eps=2^-129 the m
 
 For the 67/61 split, the projected AFV ciphertext has 118m+1 residues per entry and the single-challenge floor in #64 is ceil(128+2 log2 C)=222 bits before reduction inflation. The table is enormous. It trades more entries than the repair code in #85 for a much simpler cryptographic predicate. No end-to-end timing advantage over either #85 or the Ring-LWE BGG+ scheme in #83 has been established. Two independent model counters (component-cached branching and variable elimination) agreed on both 64/64 rows. The reference below uses variable elimination, with induced widths 8/6 and 22/23 respectively for its specified tie order. Both ranking directions were tested on the planted witness and sampled indices. The full key and ciphertext tables were not materialized.
 
+**Reduce entries while keeping the same 117-coordinate predicate.** On the 67/61 cut, two inputs per side do not appear in any crossing endpoint. Eliminate them existentially from the local clauses by resolution: for a variable x keep clauses not mentioning it and add all non-tautological resolvents between its positive and negative clauses. For any assignment to the surviving variables, these conditions are necessary and sufficient for some choice of x. A public cap on resolution growth can revert to the unprojected calculation. Rank just the extendible surviving assignments by the same exact local index. This gives 1,799,247,130,578,720 keys and 66,019,523,484,510 ciphertexts.
+
+Further replace any crossing subclause t that contains a variable used by no other crossing subclause (and t is not a singleton) with a new bit indicating that all its literals are false. Include the local defining equivalence, then existentially eliminate these single-use original variables and the purely local variables. Retain the other raw boundary bits. A witness computes each flag directly. Every locally admitted tuple of remaining bits and flags has an original local extension, and all crossing coordinates depend only on the retained tuple. Combining extensions on disjoint sides proves soundness. The flags are computed before PE evaluation, so this changes table lengths without increasing the predicate dimension or encrypted circuit depth.
+
+| 67/61 split | Keys | Ciphertexts | Predicate dimension |
+|---|---:|---:|---:|
+| All locally admissible assignments | 5,569,680,682,508,448 | 114,163,505,439,814 | 117 |
+| Remove private inputs | 1,799,247,130,578,720 | 66,019,523,484,510 | 117 |
+| Remove private and single-use inputs | **570,808,747,385,608** | **41,923,871,289,682** | **117** |
+
+The last row introduces five flags on the left and three on the right. Its local elimination widths are 23 and 25. The key and ciphertext exponents are respectively 49.02 and 45.25. The squared-advantage single-challenge floor becomes 219 bits before reduction costs. These are counts of extendible labels, not estimates of LWE strength. The reference checks the projected label sets against explicit images on small inputs.
+
 **General NANDs and a separation control.** From a raw NAND list, normalize forward reads to true. Determine which gates depend solely on left, right or constant wires. Treat each side-local gate as an opaque, locally evaluated Boolean atom, which does not increase witness length. Distribute the remaining gates to CNF over those atoms only while an explicit size cap permits. If the output polarity overflows, retain truth values of mixed gates in its dependency cone as extra witness bits; enforce each named NAND by its two binary implications and one ternary implication and require the output. Local atoms are always evaluated on actual inputs, never guessed. A satisfying original input extends by recording its mixed gate values; conversely the clauses force the unique correct values in gate order. The augmented bits may be partitioned between the two sides before the same cover compiler. This fallback can add as many bits as there are mixed gates; revert to the original #64 split when the added cost is excessive. The local model counter above applies directly to clauses on input variables; local restrictions involving opaque functions require enumeration or another counting algorithm.
 
 A second 128-input/4,096-gate family tests the opaque route. Each side emits 16 parities of disjoint four-bit groups; 48 crossing NAND guards forbid adjacent parity pairs in a three-regular bipartite graph. Compilation produced 16 star coordinates and zero additional witnesses. This function has no width-three CNF on the original inputs: every partial assignment on at most three input bits can extend to all-even right parities, yet some full assignments violate a guard. A nontrivial width-three clause implied by the function would contradict the first fact. The inputs contain deliberately redundant padding and the parity system is easy; public enumeration of the two 16-bit profile domains already provides an assumption-free alternative. More generally at small p, a subset-zeta table on the p-bit masks can test for a compatible pair in O(p·2^p) Boolean operations after enumerating profiles. Cryptographic gains require comparison with such public solvers.
@@ -415,4 +427,80 @@ for mask in range(1<<p):
     assert np.array_equal((full*bits[:,:,None]).sum(axis=(0,1))%q,(short*v[:,None]).sum(axis=0)%q)
     assert np.array_equal((A*bits[:,:,None,None]).sum(axis=(0,1))%q,(A[:,0]*v[:,None,None]).sum(axis=0)%q)
 print('full/projected matrix and ciphertext sums: 128 predicates')
+
+def forget(clauses,private,cap=10000):
+    cs=set(clauses)
+    for i in sorted(private):
+        pos=[row for row in cs if i in row]
+        neg=[row for row in cs if -i in row]
+        if len(pos)*len(neg)>cap:raise OverflowError
+        cs={row for row in cs if i not in row and -i not in row}
+        for a in pos:
+            for b in neg:
+                row=(set(a)|set(b))-{i,-i}
+                if not any(-v in row for v in row):cs.add(tuple(sorted(row)))
+        if len(cs)>cap:raise OverflowError
+    return tuple(sorted(cs))
+
+for _ in range(100):
+    vs=set(range(1,8))
+    cs=[tuple(sorted(v if r.getrandbits(1) else -v for v in r.sample(sorted(vs),3))) for j in range(10)]
+    private=set(r.sample(sorted(vs),3))
+    projected=forget(cs,private)
+    mask=sum(1<<(v-1) for v in vs-private)
+    original={x&mask for x in range(128) if not any(fails(c,x) for c in cs)}
+    assert original=={x&mask for x in range(128) if not any(fails(c,x) for c in projected)}
+
+def projected_tally(L):
+    loc,edges,cover=compile_cnf(128,F,L)
+    counts=[]
+    for side,vs in enumerate((L,set(range(1,129))-L)):
+        exposed={abs(v) for term in cover for row in term[side] for v in row}
+        cs=forget(loc[side],vs-exposed)
+        index=LocalIndex(exposed,cs)
+        counts.append(index.total)
+        x=w&sum(1<<(v-1) for v in exposed)
+        assert index.convert(index.convert(x,False),True)==x
+    return counts
+L=improve(F)
+for v in (12,76,36):L.add(v)
+pc=projected_tally(L)
+print('projected 67/61',pc,[round(log2(v),3) for v in pc])
+
+def leaf_basis(vs,local,ends,x):
+    incidence={v:[t for t in ends if any(abs(i)==v for i in t)] for v in vs}
+    hidden={v for v,ts in incidence.items() if not ts or len(ts)==1 and len(ts[0])>1}
+    flags={t:i+129 for i,t in enumerate(sorted(t for t in ends if any(abs(v) in hidden for v in t)))}
+    cs=list(local)
+    for t,h in flags.items():
+        cs.extend(tuple(sorted((-h,-v))) for v in t)
+        cs.append(tuple(sorted((h,)+t)))
+    exposed=(vs-hidden)|set(flags.values())
+    z=(x&sum(1<<(i-1) for i in vs-hidden))|sum(int(fails(t,x))<<(h-1) for t,h in flags.items())
+    return exposed,forget(cs,hidden),z,flags
+
+loc,edges,cover=compile_cnf(128,F,L)
+for side,vs in enumerate((L,set(range(1,129))-L)):
+    ends={e[side] for e in edges}
+    exposed,cs,z,flags=leaf_basis(vs,loc[side],ends,w)
+    idx=LocalIndex(exposed,cs)
+    assert idx.convert(idx.convert(z,False),True)==z
+    for pair in cover:
+        actual=any(fails(t,w) for t in pair[side])
+        revised=any((z>>(flags[t]-1)&1) if t in flags else fails(t,z) for t in pair[side])
+        assert bool(revised)==actual
+    print('leaf projection',side,len(flags),idx.width,idx.total,round(log2(idx.total),3))
+for _ in range(60):
+    vs=set(range(1,8))
+    def clause(k):
+        return tuple(sorted(i if r.getrandbits(1) else -i for i in r.sample(sorted(vs),k)))
+    local=[clause(3) for _ in range(5)]
+    ends={clause(r.choice((1,2))) for _ in range(6)}
+    exposed,cs,_,flags=leaf_basis(vs,local,ends,0)
+    ix=LocalIndex(exposed,cs)
+    keep=exposed-set(flags.values())
+    def pack(x):
+        return (x&sum(1<<(i-1) for i in keep))|sum(int(fails(t,x))<<(h-1) for t,h in flags.items())
+    image={pack(x) for x in range(128) if not any(fails(t,x) for t in local)}
+    assert image=={ix.convert(j,True) for j in range(ix.total)}
 ~~~
