@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWEGGH15.cancel_prefix_closed", "proof_type": "prove", "explanation": "The first j factors of the prefix product and W_{j, z_j} depend only on z_0..z_j (List.ext_getElem on the take of List.ofFn), so the expression for z equals the one for z', which is zero."}

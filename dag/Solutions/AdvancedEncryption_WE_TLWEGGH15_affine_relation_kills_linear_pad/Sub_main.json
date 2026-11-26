@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWEGGH15.affine_relation_kills_linear_pad", "proof_type": "prove", "explanation": "The L-part is L(sum alpha_z c_z) = 0 by linearity; the m-part is (sum alpha_z) m = m."}
