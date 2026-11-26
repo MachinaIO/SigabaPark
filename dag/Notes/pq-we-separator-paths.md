@@ -393,3 +393,46 @@ for truth in product(range(2),repeat=4):
         assert reached=={v for a,v in direct if a==u}
 print("16 joint mask laws; 48 directed source/assignment comparisons")
 ~~~
+
+## Compiling linear consistency between nonlinear local checks
+
+Give each bag its own witness w_i, a local check P_i(w_i), and a computable vector z_i(w_i) of interface bits. Suppose the remaining global constraint is exactly XOR_i H_i z_i = d over F_2, with public matrices. This admits nonlinear local checks. Copying a wire into multiple bags fits by adding consecutive-copy equality rows and supplying copies as interface bits. An accepting original trace must efficiently yield these local witnesses, and any consistent list must glue to an accepting trace. These conditions hold for gate bags with all shared wires linked by copy equalities.
+
+Let U_i be the span of all matrix columns up through bag i and V_i the span of all later columns. Abort to a constant NO ciphertext if d is outside the total span. At cut i use only the states S_i = U_i intersect (d + V_i). These form an affine space of dimension h_i = rank(U_i) + rank(V_i) - rank(U_i+V_i). Compute an origin and basis by binary elimination before enumerating any states. The endpoints are 0 and d, layer-indexed even when equal. Use the state-space principle from [Forney, Minimal trellises and the state space theorem](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/1b67ae9f5c124c3bd56c8649afa5af47_chap10.pdf).
+
+For each adjacent pair a,b enumerate an edge only if delta = a XOR b lies in the column span of H_i. Label it by the local NP statement "there exists w_i with P_i(w_i) and H_i z_i(w_i) = delta." Bind the bag description and delta to the label. Many distinct pairs can now share that exact statement. Every accepting trace visits its partial sums. Conversely, summing the local statements along a path cancels the internal states and gives d, so the chosen witnesses glue. The compiler and its NO security reduction need no certificate for the truth of a label during encryption. Use the directed scheme above with one leaf key per distinct label. Its nonuniform security proof still requires hiding for false local labels.
+
+For m bags and h = max_i h_i the pair scan has at most m*2^(2h) iterations. A bag has at most min(2^rank(H_i), |S_(i-1)|*|S_i|) distinct leaf labels. There are at most m decryptions of k-bit leaf keys on a path. All three costs are polynomial for logarithmic h and a polynomial leaf backend. With publicly decidable local labels this case can instead be decided directly by reachability. The counting gain is relevant when the leaf checks themselves carry hard private witnesses.
+
+The width estimate is exact for an ordered, explicitly routed interface required to preserve every consistent prefix/suffix combination when local vectors are unrestricted. Choose for each s in S_i a prefix of contribution s and suffix of contribution d XOR s. Each matched pair is valid. Splicing a prefix and suffix belonging to distinct states violates the equation. Even a nondeterministic router must therefore have a distinct cut vertex for each of these matched paths, provided the two halves interact only via that vertex. Restrictions imposed by local predicates, reordering, or cryptographic checks spanning the cut can escape this lower bound. In particular r independent paired copy constraints have peak h=r in the order of all first copies followed by all second copies, and peak h=1 if the pairs can be interleaved. A short random linear fingerprint substituted for exact equality admits a nonzero kernel for every choice of fewer than r rows. Its resulting extra paths invalidate this exact routing argument; any computational substitute needs a separate NO-instance security proof.
+
+~~~python
+from itertools import product
+
+def span(columns):
+    vals = {0}
+    for c in columns:
+        vals |= {v ^ c for v in vals}
+    return vals
+
+def cuts(columns, d):
+    return [span(columns[:i]) & {d ^ x for x in span(columns[i:])}
+            for i in range(len(columns) + 1)]
+
+checked = 0
+for columns in product(range(4), repeat=3):
+    for d in range(4):
+        states = cuts(columns, d)
+        for bits in product(range(2), repeat=3):
+            s = 0
+            accepted = s in states[0]
+            for i, (c, bit) in enumerate(zip(columns, bits)):
+                s ^= c * bit
+                accepted &= s in states[i + 1]
+            assert accepted == (s == d)
+            checked += 1
+cols = [1 << i for i in range(8)]
+assert max(map(len, cuts(cols * 2, 0))) == 256
+assert max(map(len, cuts([c for c in cols for _ in range(2)], 0))) == 2
+print(checked, "trace checks; paired-copy peaks 256 and 2")
+~~~
