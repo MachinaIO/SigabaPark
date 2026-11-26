@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NonLattice.kilian_mixed_telescope", "proof_type": "prove", "explanation": "Induction on L with List.ofFn_succ' (snoc form) and List.prod_concat; the induction hypothesis is applied to the restrictions along Fin.castSucc, Fin.succ_castSucc aligns the indices, and the middle p_L p_L^-1 cancels by mul_inv_cancel_left."}
