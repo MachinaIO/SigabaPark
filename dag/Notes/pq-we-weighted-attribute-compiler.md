@@ -46,6 +46,31 @@ Ciphertexts alone shrink by 37.01% and 25.73%. These are static wire counts excl
 
 The two formal statements cover algebraic score preservation and the coefficient norm. Full quantum security, preprocessing clocks and the WE Submission remain open. A bounded compiler can fall back to the original representation whenever symbolic work or the wire-size estimate exceeds budget.
 
+### Packing filtered domains with a public rank directory
+
+The previous comparison fixes table counts to isolate the attribute optimization. A second compiler changes the counts. For each side retain only addresses satisfying a public set of necessary conditions for a *global* witness. This can use more local clauses than the crypto predicate: removing an entire address when emitting the table incurs no extra attribute coordinate. Keep every side-local clause of both the initial and simplified formulas, as well as earlier checked strengthened clauses that are side-local. Derive further necessary clauses as follows.
+
+* Treat a mixed clause z or D with one opposite-side literal as a guarded demand for z when D fails. Follow the unguarded opposite-side binary implication graph. A pair of incompatible demands implies the union of their guards. A clause with up to three opposite literals also yields a side-only resolvent when demands force every opposite literal false. The listing caps the guard size at four and uses at most twelve requests per literal in the latter search.
+* Use bounded directional resolution in three opposite-variable orders. Generate nontautological resolvents of length up to four, considering at most 48 parents per sign per variable. Discarding skipped parents/resolvents weakens the filter safely. Replay each generated resolution from its two parents and check retained guarded consequences by unit propagation. Remove subsumed side clauses. The bounded-inference approach is related to [Dechter and Rish](https://ijcai.org/proceedings/1997/187). The earlier strengthening step uses [clause vivification](https://doi.org/10.1016/j.artint.2019.103197).
+
+Enc enumerates each public base domain in its original order. It writes a bit marking every retained address and emits dense crypto slots only at ones. Store a prefix count for every 512-bit block plus a final count. An original address i maps to the stored count for its block plus the number of earlier ones in the block. For a base domain of A addresses the bit budget used here is A+(ceil(A/512)+1)·ceil(log2(A+1)). A zero mark terminates that lookup. Every genuine witness has both marks set because every new clause is entailed by the original residual. The directory is a public deterministic function of the statement, independent of message and encryption coins. Invalid rows expose no key or encryption. Consequently the two guard coordinates can be dropped for this packed variant. The compiler also uses the stronger local equations when factoring the remaining valid features.
+
+For counting, use component-cached exact #SAT on the side filters, including the factor of two for each free variable lost during restriction. The PR 93 rankers cover all locally valid assignments so the resulting counts are exact for those domains. For the more selective coupled ranker of PR 97, intersect the filter with its actual domain: at each surviving leaf condition on fixed side bits, conjoin its incidence forest, count the free solutions, and sum disjoint leaves. An encoder can always build the directory by streaming its actual base domain instead of completing the counting search. The clock must charge the chosen procedure. The measured counts use neither sampling nor an independence estimate.
+
+| Control | Base domain | New p | Left C | Right K | Total PiB per WE bit including directory |
+|---|---|---:|---:|---:|---:|
+| 851 | PR 93 comparison row | 670 | 458752 | 155362546 | 7.662 |
+| 854 | PR 93 depth 17 | 606 | 17789381 | 514308410 | 108.775 |
+| 854 | PR 97 depth 9 | 606 | 10427839 | 280736999 | 63.088 |
+| 854 | PR 97 depth 17 | 606 | 716405 | 8828271 | 3.994 |
+| 1202 | PR 97 depth 17 | 493 | 56735 | 12722771 | 0.652 |
+| 1204 | PR 97 depth 17 | 654 | 1092860 | 20818329 | 6.778 |
+
+For the four controls in seed order the squared key norm bounds V are 32192, 75406, 79557 and 156996 at the all-ones anchor. Use the existing budget listing with the new p,V,K,C and add both directory bounds. Example: the seed-854 depth-17 coupled base has 8749398 and 123070763 addresses. Its two directories take 138720419 bits. Including the dense slots gives 35979026961487163 bits. Before filtering, the PR 97 two-width parameter sweep for that same base gave 586937534550603934 bits, or 65.163 PiB. The comparison is within the same public input and the same base ranker. Framing and computation are excluded as above.
+
+**Public decision comparison.** A 65536-node public DPLL budget on the original formulas settles all four: seeds 851 and 854 are YES (58 and 4818 nodes) and 1202 and 1204 are NO (3753 and 10001 nodes). The independent PR 93 refutation checker also replayed the 10001-node proof for 1204. In particular an actual dispatcher using that inexpensive successful public path would emit none of the large tables in the table above. The results measure conditional encryption/compiler costs and do not demonstrate superiority over public decision or a reduced worst-case bound. In the 854 coupled depth-nine trees no witness appeared during construction; at depth seventeen both trees already find witnesses. Matching the depth-nine DPLL node cap alone would not account for the additional work of this compiler.
+
+
 ### Reproduction
 
 Extract the Python listings from [PR 93 at its tested revision](https://github.com/MachinaIO/SigabaPark/blob/121e230357e9154fd838a3bbd5fc74dc9a06dd3b/dag/Notes/pq-we-latent-unit-profiles.md) and [PR 91 at its tested revision](https://github.com/MachinaIO/SigabaPark/blob/29b7f29db2ea0554e5ea76db6e3bdb4def2b50de/dag/Notes/pq-we-block-dominance.md) as latent.py and profiles.py. Run the first listing with those two paths, in that order. It checks 48,960 scores against the original CNFs over all assignments of 192 small formulas before compiling the four 128-input controls. The second listing runs the complete integer budget enumeration. The last listing runs with Sage/SymPy and takes the kernel/coset sampler from [PR 96](https://github.com/MachinaIO/SigabaPark/blob/9cc63482575bafbec9d17315f1f570f79ebc9b10/dag/Notes/pq-we-dyadic-afv.md) as its sole argument; it checks signed real keys, nonbinary attributes and a rejecting score of two.
@@ -431,5 +456,243 @@ def weighted_check(path):
     assert all(int(x)%q==0 for x in A.row_join(-sim[0]-sim[1])*sk-u)
     print('negative key coefficients, signed attributes, both bits and simulated score two passed')
 if __name__=='__main__':weighted_check(sys.argv[1])
+
+~~~
+
+For packed domains, save the first listing as compact.py and the following as filter.py. Run it with the three paths latent.py, profiles.py and compact.py. It checks the domain filter, exact counts and directory lookup on 140 small formulas (3981 retained pairs), then replays the large filter proofs.
+
+~~~python
+from functools import lru_cache
+from collections import Counter
+import runpy,sys
+from math import log2,prod
+def trim(cs,side):
+    calls=0
+    def canonical(cs):return tuple(sorted(set(tuple(sorted(c)) for c in cs)))
+    def scope(cs):return {abs(a) for c in cs for a in c}
+    def restrict(cs,a):return canonical(tuple(v for v in c if v!=-a) for c in cs if a not in c)
+    @lru_cache(None)
+    def count(cs):
+        nonlocal calls
+        calls+=1
+        if () in cs:return 0
+        if not cs:return 1
+        V=scope(cs)
+        def sub(a):
+            reduced=restrict(cs,a);lost=V-{abs(a)}-scope(reduced)
+            return (1<<len(lost))*count(reduced)
+        unit=next((c[0] for c in cs if len(c)==1),None)
+        if unit is not None:return sub(unit)
+        par={v:v for v in V}
+        def root(v):
+            while par[v]!=v:par[v]=par[par[v]];v=par[v]
+            return v
+        for c in cs:
+            p=root(abs(c[0]))
+            for l in c[1:]:par[root(abs(l))]=p
+        groups={}
+        for c in cs:groups.setdefault(root(abs(c[0])),[]).append(c)
+        if len(groups)>1:return prod(count(tuple(g)) for g in groups.values())
+        freq=Counter(abs(a) for c in cs for a in c)
+        v=max(V,key=lambda v:(freq[v],-v))
+        return sub(v)+sub(-v)
+    cs=canonical(cs);result=(1<<len(set(side)-scope(cs)))*count(cs)
+    count.cache_clear()
+    return result,calls
+from itertools import combinations
+def bucket_filter(rows,side,width=4,proof=None):
+    known=set(map(frozenset,rows))
+    # Three public elimination orders. Long mixed clauses may be dropped; every
+    # emitted clause is still an implicate of the original CNF.
+    loc={frozenset(c) for c in rows if all(abs(a) in side for a in c)}
+    hidden={abs(a) for c in rows for a in c if abs(a) not in side}
+    for mode in range(3):
+        bag={frozenset(c) for c in rows if len(c)<=width}
+        live=set(hidden)
+        while live:
+            freq=Counter(a for c in bag for a in c)
+            if mode==0:v=min(live,key=lambda x:(freq[x]*freq[-x],x))
+            elif mode==1:v=min(live)
+            else:v=max(live)
+            live.remove(v)
+            pos=[c for c in bag if v in c];neg=[c for c in bag if -v in c]
+            bag.difference_update(pos,neg)
+            def shortlist(cs):
+                return sorted(cs,key=lambda c:(len(c),sum(abs(a) in live for a in c),tuple(sorted(c))))[:48]
+            made=set()
+            for a in shortlist(pos):
+                for b in shortlist(neg):
+                    u=(a|b)-{v,-v}
+                    if len(u)<=width and not any(-i in u for i in u):
+                        made.add(u)
+                        if proof is not None and u not in known:
+                            proof.append((a,b,v,u));known.add(u)
+            bag.update(made)
+        loc.update(bag)
+    return loc
+
+def projected_filter(rows,side,maxlen=4,cc=None):
+    side=set(side); local=set(); graph={}; requests={}
+    for c in rows:
+        a=frozenset(z for z in c if abs(z) in side);b=[z for z in c if abs(z) not in side]
+        if not b:local.add(a)
+        elif len(b)==1 and len(a)<=maxlen:requests.setdefault(b[0],set()).add(a)
+        elif len(b)==2 and not a:
+            x,y=b;graph.setdefault(-x,set()).add(y);graph.setdefault(-y,set()).add(x)
+    entailed=set();causes={}
+    for l,A in requests.items():
+        seen={l};stack=[l]
+        while stack:
+            for b in graph.get(stack.pop(),set())-seen:seen.add(b);stack.append(b)
+        for h in seen:
+            causes.setdefault(h,set()).update(A)
+            for a in A:
+                for b in requests.get(-h,()):
+                    merged=a|b
+                    if len(merged)<=maxlen and not any(-i in merged for i in merged):
+                        entailed.add(merged)
+    # A mixed clause with at most three opposite literals closes a contradiction
+    # if each of them is forced false by an active guarded request.
+    for c in rows:
+        a=frozenset(z for z in c if abs(z) in side)
+        opp=[z for z in c if abs(z) not in side]
+        if not 2<=len(opp)<=3 or len(a)>maxlen:continue
+        guards=[sorted(causes.get(-b,()),key=lambda D:(len(D),tuple(sorted(D))))[:12] for b in opp]
+        partial={a}
+        for choices in guards:
+            partial={d|g for d in partial for g in choices if len(d|g)<=maxlen and
+                     not any(-j in d for j in g)}
+        entailed.update(partial)
+    proof=[];bucket=bucket_filter(rows,side,maxlen,proof);keep=set()
+    for c in sorted(entailed|local|bucket,key=lambda c:(len(c),tuple(sorted(c)))):
+        if not any(frozenset(z) in keep for k in range(min(len(c),maxlen)+1) for z in combinations(c,k)):
+            keep.add(c)
+    if cc is not None:
+        valid=set(map(frozenset,rows))
+        for a,b,v,u in proof:
+            assert a in valid and b in valid and v in a and -v in b and (a|b)-{v,-v}==u
+            valid.add(u)
+        check=cc['Implications']([tuple(sorted(c)) for c in valid])
+        active=(1<<len(check.rows))-1
+        for c in keep-valid:
+            assert check.reason(active,0,tuple(sorted(c)),include=True) is not None
+    return [tuple(sorted(c)) for c in keep]
+
+def filter_tests(m,cc):
+    from random import Random
+    g=Random(621);pairs=0
+    for _ in range(140):
+        n=g.randint(2,9);V=set(range(1,n+1));left={i for i in V if g.randrange(2)}
+        F=[tuple(v*g.choice((-1,1)) for v in g.sample(sorted(V),g.randint(0,min(4,n)))) for _ in range(g.randint(0,16))]
+        red,trace=cc['tighten'](F)
+        assert cc['replay'](F,trace)==set(red)
+        learned={tuple(sorted(c)) for c in F}|set(red)
+        for changed,_ in trace:learned.update(c for _,c in changed)
+        filters=[projected_filter(learned,side,cc=cc) for side in (left,V-left)]
+        kept=[];index=[]
+        for side,clauses in zip((left,V-left),filters):
+            ordered=[z for z in range(1<<n) if not (z&~sum(1<<(v-1) for v in side))]
+            mask=[int(m['satisfies'](clauses,z)) for z in ordered]
+            kept.append([z for z,b in zip(ordered,mask) if b])
+            assert len(kept[-1])==trim(clauses,side)[0]
+            idx={};prefix=[0]
+            for j,b in enumerate(mask):
+                if j and j%4==0:prefix.append(prefix[-1]+sum(mask[j-4:j]))
+                if b:idx[ordered[j]]=prefix[j//4]+sum(mask[(j//4)*4:j])
+            index.append(idx)
+        loc,_,cover=m['compile_cnf'](n,red,left)
+        cert=cc['pack'](cover,filters,0,n,'sum')
+        lm=sum(1<<(v-1) for v in left)
+        for x in range(1<<n):
+            l=x&lm;r=x&~lm;yes=m['satisfies'](F,x)
+            if l not in index[0] or r not in index[1]:assert not yes;continue
+            assert kept[0][index[0][l]]==l and kept[1][index[1][r]]==r
+            w=cc['apply_map'](cert,cover,filters,m,l,0,'sum')[:-2]
+            v=cc['apply_map'](cert,cover,filters,m,r,1,'sum')[:-2]
+            assert yes==(sum(a*b for a,b in zip(w,v))%cc['Q']==0)
+            pairs+=1
+    print('filtered pair checks',pairs,flush=True)
+
+def bench(a,b,compiler):
+    cc=runpy.run_path(compiler)
+    sys.argv=[a,b];ns=runpy.run_path(a);m=ns['m'];filter_tests(m,cc)
+    for seed,num in [(851,300),(854,540),(1202,560),(1204,560)]:
+        F=(m['planted'](128,num,seed)[1] if seed<1000 else ns['generate'](128,num,seed))
+        r,*_=m['project'](F,128,8,0);rr=r
+        for rr,_ in ns['massage'](r,rounds=6 if num==300 else 4):pass
+        rows,_,vs=m['shrink'](rr,set(),128)
+        left=(set(range(1,1+max(0,round((len(vs)-log2(max(1,len(rr)/2)))/2)))) if num==300 else ns['fit'](rows,40 if num==540 else len(vs)//2-3))
+        red,trace=cc['tighten'](rows)
+        assert cc['replay'](rows,trace)==set(red)
+        learned={tuple(sorted(c)) for c in rows}|set(red)
+        for changed,deleted in trace:learned.update(c for _,c in changed)
+        loc,_,cover=m['compile_cnf'](len(vs),red,left)
+        domains=[]
+        vals=[]
+        for side in (left,set(range(1,len(vs)+1))-left):
+            filters=projected_filter(learned,side,cc=cc)
+            domains.append(filters)
+            vals.append((len(filters),*trim(filters,side)))
+        cert=cc['pack'](cover,domains,(1<<len(vs))-1,len(vs),'sum')
+        print(seed,vals,'dimension',len(cert[2]),'norm',cert[-1]-1,flush=True)
+if __name__=='__main__':bench(*sys.argv[1:])
+
+~~~
+
+The final listing additionally takes filter.py and the coupled tree listing from [PR 97](https://github.com/MachinaIO/SigabaPark/blob/7220172e0d6dd4ff34f718aed28e63b03688a9f8/dag/Notes/pq-we-coupled-domains-and-pivot-quotient.md), as the fourth and fifth paths. It checks 160 small intersections by direct rank enumeration.
+
+~~~python
+import runpy,sys
+from math import log2
+def intersection(tree,side,filters,trim):
+    cache={};work=0;leaves=0
+    def walk(tree):
+        nonlocal work,leaves
+        count,node=tree
+        if not count:return 0
+        if len(node)==3:return walk(node[1])+walk(node[2])
+        fixed,vs,forest,_=node;leaves+=1
+        residual=set(tuple(sorted(c)) for c in forest)
+        for c in filters:
+            if any(abs(a) not in vs and bool(fixed>>(abs(a)-1)&1)==(a>0) for a in c):continue
+            u=tuple(a for a in c if abs(a) in vs)
+            if not u:return 0
+            residual.add(u)
+        sig=(frozenset(vs),frozenset(residual))
+        if sig not in cache:
+            k,steps=trim(residual,vs);work+=steps;cache[sig]=k
+        return cache[sig]
+    return walk(tree),leaves,work
+def check_intersections(ds,df,P,cc):
+    from random import Random
+    g=Random(615);m=ds['m']
+    for _ in range(160):
+        n=g.randint(2,9);side={v for v in range(1,n+1) if g.randrange(2)}
+        F=[tuple(v*g.choice((-1,1)) for v in g.sample(range(1,n+1),g.randint(1,min(4,n))))
+           for _ in range(g.randint(1,3*n))]
+        filters=df['projected_filter'](F,side,cc=cc)
+        T=P(F,side,g.randint(0,4),ds)
+        expected=sum(m['satisfies'](filters,T.address(j,True)) for j in range(T.root[0]))
+        assert intersection(T.root,side,filters,df['trim'])[0]==expected
+
+def bench(a,b,c,f,h):
+    sys.argv=[a,b];ds=runpy.run_path(a);m=ds['m'];cc=runpy.run_path(c);df=runpy.run_path(f);P=runpy.run_path(h)['Projection']
+    check_intersections(ds,df,P,cc)
+    for seed,num in [(854,540),(1202,560),(1204,560)]:
+        F=(m['planted'](128,num,seed)[1] if seed==854 else ds['generate'](128,num,seed));r,*_=m['project'](F,128,8,0)
+        for rr,_ in ds['massage'](r,rounds=4):pass
+        rows,_,vs=m['shrink'](rr,set(),128);left=ds['fit'](rows,40 if seed==854 else len(vs)//2-3)
+        red,trace=cc['tighten'](rows);learned={tuple(sorted(c)) for c in rows}|set(red)
+        for changed,_ in trace:learned.update(c for _,c in changed)
+        tables=[]
+        for side in (left,set(range(1,len(vs)+1))-left):
+            filters=df['projected_filter'](learned,side)
+            res=[]
+            for depth in (9,17):
+                T=P(rows,side,depth,ds)
+                res.append((T.root[0],*intersection(T.root,side,filters,df['trim']),T.models))
+            tables.append(res)
+        print(seed,tables,flush=True)
+if __name__=='__main__':bench(*sys.argv[1:])
 
 ~~~
