@@ -46,7 +46,7 @@ def threshold(v, p):
         a = a*a//unit
     return a >> (guard-p)
 
-def sample_squared(center, width2, b, bits):
+def sample_squared(center, width2, b, bits, accept=None):
     # Exact rational input, width >= 1, b >= 1. bits(k) supplies k uniform bits.
     assert width2 >= 1 and b >= 1
     t = isqrt((b+12)//4)+1
@@ -66,7 +66,8 @@ def sample_squared(center, width2, b, bits):
         k = shell*L+idx
         j = mid-k if bits(1)==0 else mid+1+k
         v = F(j-center)**2/width2
-        if bits(p) < min(1<<p,threshold(v,p+shell)):
+        coin = bits(p)
+        if (coin < threshold(v,p+shell) if accept is None else accept(v,p+shell,coin)):
             return j
     return mid
 # Execute after the scalar threshold and sample_squared definitions.
