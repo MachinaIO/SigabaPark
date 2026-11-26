@@ -436,3 +436,33 @@ assert max(map(len, cuts(cols * 2, 0))) == 256
 assert max(map(len, cuts([c for c in cols for _ in range(2)], 0))) == 2
 print(checked, "trace checks; paired-copy peaks 256 and 2")
 ~~~
+
+## Randomized compression controlled by distinct attainable residuals
+
+A short public linear fingerprint can work on a wider class than exact, trace-preserving routing if the original NO instance has few *distinct* attainable errors. For a fixed statement let D consist of all d XOR (XOR_i H_i z_i(w_i)) over independently locally accepting witnesses. Its cardinality N counts vectors, not witness tuples. A YES instance contains zero. For NO, choose a public random binary k-by-r matrix M, where r is the original syndrome length. Build the preceding trellis with matrices M H_i and target M d. Its terminal is reachable precisely when D intersects ker(M). In particular, a true witness gives a path for every M. When a projected target is outside its total column span, emit a fixed dummy ciphertext in that branch and define decryption there arbitrarily; a valid witness never needs this case.
+
+Suppose a public bound B >= 1 holds on N for every NO in the intended family. Use k = ceil(log2 B) + 1 rows and T independent matrices. Split the payload bit into T uniform XOR shares constrained to sum to that bit, and apply the directed compiler separately with independent keys to every projected instance. For fixed nonzero v, Pr[Mv=0]=2^-k. A union bound gives projected satisfiability probability at most B/2^k. All T projections admit paths with probability at most (B/2^k)^T. A receiver with a true witness decrypts every share using that same witness; its error is bounded by the sum of the branch errors. Different witnesses could open different projections, which is why a single stacked matrix and its joint rank do not give the NO security bound here.
+
+Condition on the public matrices. If any projection is NO, select the first such branch. Sample all other shares uniformly and run their public encryptions. Distinguishing the two payloads then distinguishes an encryption of complementary bits in the selected NO branch; orient the challenge according to the parity of the sampled shares. Thus the absolute difference of acceptance probabilities is at most the worst projected-NO distinguishing bound plus (B/2^k)^T. Hardwiring a worst matrix tuple and its index uses the same nonuniform, pointwise security convention as the preceding compiler. This proof neither tests branch membership at encryption time nor requires a new hash hardness assumption. With T equal to the security parameter the additive term is at most 2^-T. Width is at most 2^k per layer, pair enumeration costs O(T m 4^k) iterations, the matrix headers cost Tkr bits, and there are at most T m 2^k distinct local labels counted separately across branches. For polynomial B all three resources are polynomial assuming polynomial local WE algorithms, polynomial field bookkeeping and polynomial-size local statements. Cryptographic security still depends on the actual false projected leaf statements. A public B can follow, for example, from enumerated sets bounding local contributions with polynomial product of their cardinalities, even when witnesses per contribution are numerous.
+
+There is also a limitation for this exact distribution of random tests. On a NO with N>0 let X count nonzero attainable residuals mapped to zero. Different nonzero vectors over F_2 are linearly independent in pairs, so their indicators are pairwise independent. Then E[X]=N/2^k and Var[X]=N*2^-k*(1-2^-k). Chebyshev gives Pr[X=0] <= (2^k-1)/N. Even T tests have probability at most T*(2^k-1)/N of producing *any* projected NO. Thus for exponentially many residuals, logarithmic row count and polynomial repetitions generally fail to deliver the false branch required by this proof. This is a bound on the compiler's false-branch argument, not a general WE impossibility. An explicit example has two bags with H_1=H_2=identity, target zero, left local vectors all nonzero and right local vector only zero. Every k<r projection has a false match. At the opposite extreme if each side is locally restricted to a single different r-bit value, the same matrices have exact middle width 2^r yet one random row rejects with probability 1/2. These examples illustrate the interface; their simple local predicates allow independent simplifications.
+
+~~~python
+from itertools import combinations, product
+from fractions import Fraction
+for k in (1, 2):
+    matrices = list(product(range(8), repeat=k))
+    for n in range(1, 8):
+        for D in combinations(range(1, 8), n):
+            counts = [sum(all((v & row).bit_count() % 2 == 0 for row in rows)
+                          for v in D) for rows in matrices]
+            mean = Fraction(sum(counts), len(counts))
+            var = sum((x - mean)**2 for x in counts) / len(counts)
+            no = Fraction(counts.count(0), len(counts))
+            assert mean == Fraction(n, 2**k)
+            assert var == mean * (1 - Fraction(1, 2**k))
+            assert 1-no <= mean and no <= Fraction(2**k-1, n)
+            if n == 7:
+                assert no == 0
+print("254 residual-set/row-count cases: both bounds and exact moments")
+~~~
