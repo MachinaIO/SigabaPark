@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Exotic.rank_equiv_combination", "proof_type": "prove", "explanation": "Pull A and B out of the sum (Matrix.mul_sum, Matrix.sum_mul, smul commutes with multiplication), then use rank_mul_eq_left_of_isUnit_det and rank_mul_eq_right_of_isUnit_det."}
