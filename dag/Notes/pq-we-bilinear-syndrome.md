@@ -47,3 +47,34 @@ circuits=[([(1,1,2)],2), ([(1,1,2),(1,2,3),(3,3,4)],4)]
 print([check(g,o) for g,o in circuits])
 assert [check(g,o) for g,o in circuits] == [Fraction(1,2),Fraction(17,64)]
 ~~~
+
+### Canceling entire rank classes with signed noise
+
+The tag can carry a noise bit correlated with the choice of matrix noise. This permits subtraction in the Fourier coefficients with a genuine nonnegative sampling law. Fix a public list of distinct odd ranks R from 3 through d. For each r in R independently take c=2^-r. With probability 1-c add a fresh uniform-factor outer product to the matrix noise; with probability c(1-c) flip the tag only; with the remaining probability c^2 add a fresh fair bit to the tag only. Two successive all-zero tests on r fair bits implement these three branches exactly in bounded time. Sum the chosen matrix and tag increments and use a single fresh row mask. All branch choices remain private. Raw length is still d^2+1 and raw work is O((1+|R|)d^2+g).
+
+For a message-sensitive Fourier character indexed by a feasible Y and the tag, let x=2^(-rank Y). Its signed expectation for one factor is (1-c)(x-c); independent convolution multiplies these factors. Infeasible characters vanish by the row mask. The Fourier differences of the two message laws therefore vanish *everywhere* on a false circuit if all feasible ranks belong to R. This proves exact equality of the full ciphertext distributions, including for nonlinear observations. No rank enumeration by the sender is needed when R is fixed from a public dimension bound. A true witness of rank one has correlation delta = product_{r in R} (1-2^-r)(1/2-2^-r). For k=|R|, delta >= (1/2) 2^-k: after extracting 2^-k, the remaining product is bounded below by 1-3 sum_{odd r>=3} 2^-r = 1/2. Independent majority on ceil(8 lambda 4^k) raw copies thus has failure at most exp(-lambda) and preserves perfect hiding under the rank promise.
+
+For the previous identically false three-gate example d=5. Taking R={3,5} removes both possible false ranks, changing the previously measured TV of 17/64 to exactly zero. The rank-one correlation is 9765/65536 (the product above); this correction requires extra independent repetitions for reliable recovery. Taking every odd rank through d covers arbitrary NAND circuits but has an exponential repetition bound in d. With a known list of O(log lambda) possible false ranks all three resource bounds are polynomial. The list must cover *all* feasible ranks on each promised false circuit; a lower bound on its minimum rank is insufficient.
+
+**Limit of this particular cancellation method.** More generally choose a private bounded number j of independent uniform-factor outer products and a tag flip that can depend on j but is independent of their factors. The resulting character is P(x)=sum_j a_j x^j with sum_j |a_j| <= 1, hence |P(z)|<=1 on the complex unit disk. For each prescribed zero c divide P by (z-c)/(1-cz); the quotient has a removable singularity at c and the same bound on the unit circle, hence at x=1/2 by the maximum modulus principle. Iterating gives |P(1/2)| <= product_c (1/2-c)/(1-c/2) <= 2^-k. The constructed factor-of-two lower bound is therefore within a constant factor of the maximum possible single-parity correlation in this sampler class. For k growing faster than log lambda, polynomially many independent witness-parity samples cannot restore constant correctness: each sample is a binary symmetric channel of bias at most 2^-k and product TV is at most the number of samples times that bias. The restriction here is to this sampler class and this decoder; it makes no assertion about general WE.
+
+For a direct finite-distribution test, use the `check` listing above through construction of `counts` and `delta`, where `delta` in that listing is the quotient-space tag vector. Replace its return calculation by the following lines (inside the function). Each step convolves nonnegative integer masses on the quotient. The true one-gate and false three-gate outputs for the two-factor test are shown below.
+~~~python
+    base = counts.copy()
+    for rank in (3,5):
+        q=1<<rank
+        noise=Counter({x:2*q*(q-1)*m for x,m in base.items()})
+        unit=sum(base.values())
+        noise[delta] += (2*(q-1)+1)*unit
+        noise[0] += unit
+        if rank==3: counts=Counter({0:1})
+        new=Counter()
+        for x,m in counts.items():
+            for y,v in noise.items():
+                new[x^y] += m*v
+        counts=new
+    keys=set(counts) | {x^delta for x in counts}
+    return Fraction(sum(abs(counts[x]-counts[x^delta]) for x in keys),
+                    2*sum(counts.values()))
+~~~
+The exact message distances returned are 9765/65536 and 0, respectively.
