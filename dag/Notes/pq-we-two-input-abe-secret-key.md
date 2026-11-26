@@ -1165,3 +1165,45 @@ for mask in range(1,256):
         exceptional+=bool(missing)
 print(passed,"certified offset tests;",exceptional,"language/code pairs with a missing coset")
 ~~~
+
+## Isolating the few possibly empty fibers before splitting WE
+
+Continue with A, H, C and the shared offset o(y) above, for one designated incoming state. Write m=2^r for the size of a nonempty H intersection and e=|H|-|A|. When e>=m but B=floor(e/m) is polynomially bounded, the density test alone leaves exceptions. There is a randomized compiler that handles them with separate WE calls on the core and on a fixed fiber. It requires no uniform sampler for accepting witnesses and has correctness even on YES fibers with a unique accepting word.
+
+Sample Q independent holes from H minus A, recording distinct C-coset labels in a public set T (use a parity-check matrix for labels). Sample by lexicographic unranking: for a prefix p, the number of holes below it is |H_p|-|A_p|. The former is zero or a power of two by linear elimination; the latter is a suffix-path count of the deterministic verifier. Their difference is exact because A is contained in H. For bounded-time coins and failure parameter lambda, map a uniform integer with ceil(log2 e)+lambda+ceil(log2 Q)+2 bits modulo e to the rank. The total variation error over all Q ranks is at most 2^-lambda. Every completely empty fiber meeting H comprises m holes in one coset; there are at most B such cosets. With Q=ceil(e/m)*(lambda+ceil(log2(max(1,B)))+1), the probability of missing *any* completely empty fiber is at most B exp(-Qm/e)+2^-lambda <= 2^(1-lambda). This controls even a shared offset chosen from exponentially many possibilities after the list is seen. Partial fibers may also appear in T.
+
+Encrypt the same payload independently for the following OR of branches. The first WE instance checks only the core witness y, the public hull test o(y)+h in C+V, and that its coset label is absent from T. For each label t in T take a representative hole h_t from the sample. Make two WE instances: the first checks the core and the equality of its offset label to t; the second checks f(h_t+D u)=1, where the columns of D span C intersect V and u has exactly r bits. Encrypt independent XOR shares of the payload across this pair (fresh mask for each pair). On a satisfying witness whose label was sampled, its actual accepted stream a gives u by solving D u=a+h_t. Both a and h_t belong to H and the same coset. Conversely a passing pair gives an accepted stream and its difference from o(y) lies in C, hence lifts to an original private witness. Use a canonical label order and transmit sufficient data to identify the two instances. A decryptor only opens its own branch. The construction handles e<m by the earlier deterministic rule and empty A directly.
+
+On a false original instance, except on the stated sampling failure, the first branch is false and every pair has at least one false instance. For each pair a true or unknown other share can be freshly encrypted with public coins, and changing the payload complements the share under the false instance. A hybrid over the first branch and all pairs bounds total distinguishing advantage by the sampling failure plus (1+|T|) times the worst applicable pointwise backend advantage, with polynomial simulation overhead and independent encryption randomness. Selecting a false member of each pair may use the nonuniform convention. Correctness for original YES witnesses does not rely on sampling success; at most two backend decryptions are used. The compiler adds no instance-dependent hardness assumption. If the sampler's cost or branch count is excessive, use the original backend instead.
+
+For a core with s witness bits, splitting each resulting WE relation into two halves using the existing ABE backend now takes O((1+Q)(2^ceil(s/2)+2^ceil(r/2))) cryptographic entries, before policy sizes and security-loss calibration. A single direct split of s+d private/core bits would scale as 2^ceil((s+d)/2), where d=dim C counts private stream coordinates. The improvement separates witness exponents on the stated density regime. Neither this entry count nor polynomial B ensures polynomial total complexity when s or r is large. Outside this regime the construction has no general security or complexity improvement over the existing fallback.
+
+~~~python
+from itertools import product, combinations
+def span(vs):
+    out={0}
+    for v in vs: out|={x^v for x in out}
+    return frozenset(out)
+codes={span(p) for k in range(4) for p in combinations(range(1,8),k)}
+checks=0
+for mask in range(1,256):
+    A={x for x in range(8) if mask>>x&1}
+    h=min(A)
+    H={h^v for v in span(x^h for x in A)}
+    holes=H-A
+    for C in codes:
+        label=lambda x:min(x^c for c in C)
+        empty={label(x) for x in H}-{label(x) for x in A}
+        # Every possible list of distinct labels produced by two sampled holes.
+        for T in {frozenset(label(x) for x in pair) for pair in product(holes,repeat=2)}:
+            for o in range(8):
+                t=label(o)
+                exact=any(label(x)==t for x in A)
+                main=t not in T and any(label(x)==t for x in H)
+                pair=t in T and any(label(x)==t for x in A)
+                assert not exact or main or pair
+                if empty<=T: assert (main or pair)==exact
+                if (main or pair)!=exact: assert t in empty-T
+                checks+=1
+print(checks,"offset/list cases; errors only at unsampled completely empty fibers")
+~~~
