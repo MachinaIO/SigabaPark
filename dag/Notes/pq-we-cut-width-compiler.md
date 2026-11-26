@@ -846,3 +846,99 @@ def audit(fold,front,prefix,lattice,wire):
         assert wire['exercise'](f,prefix,lattice,4,2)==0
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
+
+### Certifying unit terminal rows at small-prime-power moduli
+
+The scalar count variant needs a prime larger than the maximum positive counter value. With q=p^k and a smaller prime, partition the failures across terminal counters. Two signed clauses with opposite literals on some variable cannot both be false. Greedily partition the distinct clauses into families with this property pairwise. Each family contributes at most one failure on every path. Pack at most p-1 families into each counter. With F families this uses ceil(F/(p-1)) counters, each in [0,p-1]. On a NO statement every path has a positive counter, which is a unit modulo q. On valid paths all counters vanish; keep the bit in a separate isolated message coordinate. In particular p=2 works with several coordinates. This removes the *unit-row* obstacle at powers of two. The cryptographic assumptions, sampler, noise bounds, concrete parameters and quantum reduction must still hold at the chosen modulus. Where the cheaper folded scalar construction is admissible, keep it as a candidate.
+
+The reference compiler shares prefix indicators across all buckets. It shares an unread-suffix count only among clauses with the same bucket destination. Persistent sink edges, clause openings, closings and the last projection remain binary. The previous slot induction now gives each bucket count separately, including a possible empty clause. On an arbitrary subinterval entries are bounded by the same polynomial in the total number of clauses. The proof of a unit at each proper prefix of a NO path follows by extension to its unit terminal row. Number of levels and worst-case matrix width remain polynomial, independently of whether grouping finds useful incompatibilities. Grouping does not query satisfiability.
+
+**A sharp limit on linear terminal compression.** Suppose for each of c separately indexed failures the compiler adds a fixed vector v_i in F_p^d to a terminal checksum. Require a nonzero checksum for *every nonempty subset* of failures, with zero at the empty subset. This requires c<=d(p-1), even allowing arbitrary coefficients. In the group algebra F_p[(F_p)^d], write y_j=X^{e_j}-1. Then y_j^p=0. Each factor 1-X^{v_i} has zero constant term in the y variables. If c>d(p-1) their product vanishes, since every monomial of that degree contains a p-th power. Yet in the group basis its coefficient at X^0 would be one if there were no nonempty zero-sum subset, by expanding the product and retaining just the empty selection. This contradiction gives the bound. Repeating each basis vector p-1 times attains it. This is the elementary abelian case of the classical Davenport constant, applied here to linear unit-row checks. See [On the Davenport Constant and Group Algebras](https://math.smertnig.at/paper/davenport_const.pdf). The bound concerns a universal checksum on independent flags. It does not lower-bound general WE, nor force the same bound for the attainable failure patterns of a specific NAND relation. The incompatibility test exploits exactly this distinction.
+
+For the 4096-NAND stream at table arity four, 212 clauses gave 128 certified families. At p=2,3,5,7,17,257 the terminal counter counts were respectively 128,64,32,22,8,1 and the full compiled widths were 135,70,37,27,13,5 at 170 levels. Thus choosing a smaller underlying prime can cost substantial width even after sharing. With the 64 complete clauses on six variables exactly one clause fails per assignment; the greedy partition needs one counter even at p=2 (full program width 35). This degenerate NO control checks the grouping argument independently of the stream. These are frontend dimensions, not comparisons at equal cryptographic security.
+
+Save the next listing as buckets.py and run python buckets.py frontend.py cut.py mixed.py lut.py. It verifies all terminal entries and counter ranges on 9144 path/message/modulus combinations, then runs the two structural controls.
+
+~~~python
+"""Certified terminal coordinates for small-prime-power matrix WE."""
+from itertools import product
+from random import Random
+import runpy,sys
+
+def partition(cs,p):
+    families=[]
+    for i in sorted(range(len(cs)),key=lambda i:(len(cs[i]),cs[i])):
+        neg={-v for v in cs[i]}
+        for family in families:
+            if all(neg.intersection(cs[j]) for j in family):
+                family.append(i);break
+        else:families.append([i])
+    slots={i:k//(p-1) for k,family in enumerate(families) for i in family}
+    return slots,len(families)
+
+def compile_buckets(cs,order,bit,p,mixed):
+    assert p>=2
+    # Precondition: p is prime; primality is a public parameter check.
+    slots,nfam=partition(cs,p)
+    B=(nfam+p-2)//(p-1);base=2+B
+    u=[1,bit]+[0]*B
+    if () in cs:u[2+slots[cs.index(())]]=1
+    pos={v:i for i,v in enumerate(order)}
+    paths=mixed['cuts'](cs,order)
+    modes=mixed['choose'](paths,len(order))
+    def build(modes):
+        tables=[{} for _ in order]
+        layers=[[{(a,a) for a in range(base)} for b in (0,1)] for v in order]
+        if not layers:layers=[[{(a,a) for a in range(base)} for b in (0,1)]]
+        w=base
+        for j,(c,path,mode) in enumerate(zip(cs,paths,modes)):
+            if not c:continue
+            old=0
+            for i,P,S in path:
+                key=P if mode==0 else (S,slots[j])
+                d=tables[i];new=d.setdefault(key,base+len(d))
+                w=max(w,new+1)
+                for b in (0,1):
+                    if (order[i] if b else -order[i]) not in c:layers[i][b].add((old,new))
+                old=new
+            i=max(pos[abs(v)] for v in c)
+            for b in (0,1):
+                if (order[i] if b else -order[i]) not in c:layers[i][b].add((old,2+slots[j]))
+        layers[-1]=[{(a,b) for a,b in E if 1<=b<base} for E in layers[-1]]
+        return u+[0]*(w-base),layers
+    return min((build(m) for m in (modes,[0]*len(cs),[1]*len(cs))),key=lambda pr:len(pr[0])),slots,nfam
+
+def audit(front,cut,mixed,lut):
+    rng=Random(39024);checks=0
+    for h in range(7):
+        for _ in range(12):
+            cs=cut['canonical']([tuple(v*rng.choice((-1,1)) for v in rng.sample(range(1,h+1),rng.randint(0,min(3,h)))) for _ in range(12)])
+            order=list(range(1,h+1));rng.shuffle(order)
+            for p,b in product((2,3,5),(0,1)):
+                pr,slots,nfam=compile_buckets(cs,order,b,p,mixed)
+                B=(nfam+p-2)//(p-1)
+                for word in product((0,1),repeat=h):
+                    vals=dict(zip(order,word))
+                    counts=[0]*B
+                    for j,c in enumerate(cs):
+                        if not any(vals[abs(x)]==(x>0) for x in c):counts[slots[j]]+=1
+                    row=front['eval_program'](pr,word)
+                    assert row[0]==0 and row[1]==b and row[2:2+B]==counts and sum(row)==b+sum(counts)
+                    assert max(counts,default=0)<p
+                    checks+=1
+    print('full vector and capacity checks',checks)
+    n=128;gates=[];prev=0
+    for i in range(1,n+1):
+        for j in range(32):
+            gates.append((prev,i if j%3==0 else prev));prev=n+len(gates)
+    cs,order=lut['frontend'](n,gates,4);cs=cut['canonical'](cs)
+    for p in (2,3,5,7,17,257):
+        pr,slots,families=compile_buckets(cs,order,0,p,mixed)
+        print('p/clauses/exclusive families/buckets/width',p,len(cs),families,len(set(slots.values())),len(pr[0]))
+    # Every complete assignment falsifies exactly one of the 64 full clauses.
+    cs=cut['canonical']([tuple(i+1 if not x else -i-1 for i,x in enumerate(w)) for w in product((0,1),repeat=6)])
+    pr,slots,families=compile_buckets(cs,list(range(1,7)),0,2,mixed)
+    assert families==1 and all(front['eval_program'](pr,w)[2]==1 for w in product((0,1),repeat=6))
+    print('full-clause family: counters',len(set(slots.values())),'matrix width',len(pr[0]))
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
