@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Reroute.kilian_partition_iff", "proof_type": "prove", "explanation": "Forward: equal kA values give equal images, so the indicator rows of kB x and kB y coincide. Backward: vecMul by the invertible T is injective, so equal kB values force equal indicator rows of kA x and kA y; evaluate at kA x."}
