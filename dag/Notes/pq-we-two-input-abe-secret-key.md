@@ -1252,3 +1252,55 @@ for f in product(range(4),repeat=4):
     assert all(2*f[t]>m for t in kept) and len(kept)<=2*e//m
 print("all four-label mass profiles through weight three; coverage and list bound verified")
 ~~~
+
+## Exact exceptional-label tests from affine rejection events
+
+For a suffix rejecting exactly when at least one affine system E_j holds on (shared ports y, private bits z), compile the *number* of accepting completions as a symbolic integer expression. In particular a violated CNF clause is a conjunction of affine equalities when its literals read affine Boolean queries. Knowledge of the rejection representation must follow from the verifier; an approximate cover does not suffice. Unlike the preceding heavy-label argument, no bound on the ratio of holes to fiber size is needed here.
+
+Start a signed dictionary at +1 on the whole space. For each E_j multiply the current indicator by (1-indicator(E_j)): retain each old term (F,c) and add (F intersect E_j,-c). Drop empty flats and aggregate identical canonical augmented row-reduced systems using integer addition; delete zeros. This is pointwise integer inclusion-exclusion for acceptance. For every remaining term F, fix y. Binary elimination of its private columns yields a shared affine test P_F(y) for consistency, and its private solution count is exactly 2^(n_z-rank_z(F)) if that test passes. Sum the coefficients times these conditional counts and test positivity. Identical *projected* tests can again be combined, even when the flats before projection differ. The residual verifier needs no private witness or branch WE. A valid full witness restricts to a valid core witness; the positive integer count proves existence in the other direction. One can recover an actual completion by self-reducing on private bits with the same flats and additional pins. Integer arithmetic matters: reducing the count modulo a prime could turn a positive count into zero.
+
+Split the computation first if the private row spans of groups of events form a direct sum. Compute coordinates on a basis for each private span; despite arbitrary overlap of shared ports, every tuple of *private* coordinate evaluations across the groups is simultaneously realizable. Thus feasibility is the AND of the separate positivity tests. Events with no private rows can be checked on y directly. Any proposed partition can be certified by testing that the total rank equals the sum of the separate ranks. This prevents an exponential global intersection dictionary on parallel independent components. The cost is polynomial in the sum of the *intermediate* dictionary sizes, the public dimensions, and the number of events (pre-aggregation coefficient magnitudes are at most exponential in the event count, thus polynomial bit length). Impose a public dictionary budget and fall back to the original verifier on overflow. This is a projection of counts over private bits, distinct from the clause-mask shift application of inclusion-exclusion in the clause restriction note.
+
+For example impose z_i=1 and z_i=y_i for every i through two affine violation events per block. Blocks have independent one-bit private spans. Projecting each gives y_i=1, so the entire private witness disappears using linear many constant-size blocks. There are exponentially many shared inputs with no completion. This demonstrates the difference between counting feasible private completions symbolically and listing exceptional labels. It certifies a restricted family; public descriptions with overlapping high-rank constraints can still exceed the budget.
+
+~~~python
+from itertools import product
+from random import Random
+rng=Random(992)
+# A row stores four variable coefficients and an RHS in bit four.
+def canon(rows):
+    piv={}
+    for row in rows:
+        for i in sorted(piv):
+            if row>>i&1: row^=piv[i]
+        mask=row&15
+        if not mask:
+            if row: return None
+            continue
+        i=(mask&-mask).bit_length()-1
+        for k in piv:
+            if piv[k]>>i&1: piv[k]^=row
+        piv[i]=row
+    return tuple(piv[i] for i in sorted(piv))
+def holds(rows,w):
+    return all(((r & (16|w)).bit_count()%2)==0 for r in rows)
+for trial in range(200):
+    events=[[rng.randrange(32) for j in range(rng.randrange(1,4))]
+            for i in range(rng.randrange(9))]
+    terms={():1}
+    for event in events:
+        nxt=terms.copy()
+        for flat,c in terms.items():
+            inter=canon(flat+tuple(event))
+            if inter is not None: nxt[inter]=nxt.get(inter,0)-c
+        terms={f:c for f,c in nxt.items() if c}
+    for y in range(4):
+        count=0
+        for flat,c in terms.items():
+            private_rank=sum(bool(row&3) for row in flat)
+            if holds([row for row in flat if not row&3],4*y):
+                count+=c*(1<<(2-private_rank))
+        brute=sum(not any(holds(event,4*y+z) for event in events) for z in range(4))
+        assert count==brute
+print("800 shared inputs: projected signed counts match private witness multiplicities")
+~~~
