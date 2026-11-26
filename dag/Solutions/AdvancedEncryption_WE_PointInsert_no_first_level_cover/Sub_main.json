@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PointInsert.no_first_level_cover", "proof_type": "prove", "explanation": "Such a cover is alive on every prefix starting with b; for a pad this contradicts the invariant, for a clause the prefix fully falsifies it and would be allowed."}
