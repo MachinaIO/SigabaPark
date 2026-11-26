@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.EvalOnly.query_lower_bound",
+ "title": "Evaluation-only WE needs about 2^n oracle queries or an expensive decryptor (averaging lemma)",
+ "statement": "Abstract core of the query lower bound for witness encryption whose algorithms use the statement only by evaluating it. W is the witness space; E0 beta is the challenge law on the false statement (the all-zero predicate), Ew w beta the law on the statement planted at w (true only at w); A w is the decryptor Dec(., w, .) with w hard-wired and its oracle simulated. Hypotheses: for each beta the planted-point probabilities p w beta (that Enc on the false statement queries w) sum to at most q; A w's acceptance differs between E0 beta and Ew w beta by at most p w beta; A w decrypts correctly with margin 1 - eps; and every A w meets the k-bit false-statement security bound. Conclusion: if eps + 2q/|W| <= 1, some A w costs at least 2^k (1 - eps - 2q/|W|)^2."
+}

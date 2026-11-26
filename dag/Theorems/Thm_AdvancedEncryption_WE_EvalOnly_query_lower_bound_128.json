@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.EvalOnly.query_lower_bound_128",
+ "title": "Evaluation-only WE at n = 128, lambda = 128: fewer than 2^125 queries force a 2^127-cost decryptor",
+ "statement": "Concrete instance of the evaluation-only lower bound: with |W| = 2^128, eps <= 2^-127, k = 128 and total query mass q <= 2^125 per message bit, some decryptor-based adversary A w has cost at least 2^127. Hence a witness encryption scheme for 128-bit predicates that uses the predicate only through evaluations (oracle queries) either makes about 2^125 queries in Enc or has a decryptor (plus oracle simulation) of cost about 2^127."
+}
