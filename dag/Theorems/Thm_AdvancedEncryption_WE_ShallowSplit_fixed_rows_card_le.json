@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ShallowSplit.fixed_rows_card_le", "title": "A walk with prefix-local flips needs row dimension at least the number of prefixes at a fixed cut", "statement": "Same hypotheses as fixed_rows_linearIndependent with Fintype iota; then card V <= card iota."}

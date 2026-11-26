@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ShallowSplit.class_flip_bound", "proof_type": "prove", "explanation": "Take the first step t+1 at which a member's label at u is true (Nat.find); at step t every member changes, so c is inside F t u."}

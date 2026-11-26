@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ShallowSplit.fixed_rows_card_le", "proof_type": "prove", "explanation": "Prove linear independence as in fixed_rows_linearIndependent, then LinearIndependent.fintype_card_le_finrank and finrank (iota -> K) = card iota."}
