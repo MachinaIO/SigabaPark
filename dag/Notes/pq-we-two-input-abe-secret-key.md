@@ -586,3 +586,46 @@ for length in range(4):
         assert any(preimage(x)!=(x[2]^(x[0]&x[1])) for x in cases)
 print("16 boundary updates; all 6175 shorter signed-control words excluded")
 ~~~
+
+## Binding repeated reads in the binary matrix-chain interface
+
+The public evaluator of the matrix-chain benchmark in [PR 99](https://github.com/MachinaIO/SigabaPark/pull/99) permits one independent branch choice per encrypted level. Using the five-instruction NAND word verbatim there would allow inconsistent reads. The following compiler enforces consistency *inside the product* for every level string and avoids expanding the ternary permutations. As in the benchmark, use a source coordinate initialized to one, a failure counter initialized to zero, and the backend's message coordinate. All transitions have entries zero or one and row vectors act from the left.
+
+For each NAND check read its proposed inputs a,b and output c in three binary levels. Use two scratch coordinates. After a put the source into slot a (index zero or one). On b=0 route both slots to slot zero; on b=1 keep both. Thus exactly slot ab is live. On c send slot c to the failure counter and clear both slots, since c=ab is exactly a NAND violation. An additional read pins the circuit output by adding the source to the counter if it reads zero. Keep the counter and message by identity. A known constant port hardwires its two matrices to the same effective choice, with no consistency slot; for the empty-gate convention use the direct true case.
+
+Concurrently, for each trace wire with at least two occurrences, save its *first* bit in two one-hot slots. On every later read of bit v add its saved slot 1-v to the counter. Discard the slots immediately after the last comparison. Store by routing the source, with other source entries allowed; on intermediate levels carry both slots by identity. Allocate pairs by interval coloring of the closed first-to-last occurrence intervals; F is their maximum overlap. The additional source, counter, message and two scratch coordinates give width at most 2F+5 and length 3g+1. Multiple additions to the counter come from distinct old coordinates (scratch, saved slot, or pin source). Hence no matrix entry of value two is required. Project the terminal row to failure and message as in PR 99. Under the designated initial row the counter is exactly the number of locally false gate/pin checks plus the number of disagreements with first occurrences, at most (g+1)+(3g+1). A modulus above 4g+2 suffices for this no-wrap argument; the backend's other modulus/noise conditions remain necessary. A zero counter defines a consistent trace and every gate equation holds. Conversely a valid witness extends by honest gate values and yields zero. This proves the mixed-string invariant, not just correctness on honest paths.
+
+This is an actual polynomial-size binary plaintext matrix frontend; both level choices are safe to expose *through a backend whose security applies to that frontend*. For 4096 gates it needs 12289 levels and at most 16386 failure counts as an upper bound on the counter value. The width is schedule-dependent and may outweigh the shorter ternary instruction sequence. Compare H, width, prefix-product growth, preimage dimension and noise with the live-clause frontend before selecting parameters. This supplies neither a new fixed-assumption hiding theorem nor a claim that PR 99's modified frontend is automatically covered by every published theorem.
+
+~~~python
+from itertools import product
+# Leaves a,b and internal z=NAND(a,b), o=NAND(z,a), then output o.
+ports=(0,1,2,2,0,3,3)
+S,C,B,H0,H1=range(5)
+saved={w:(5+2*j,6+2*j) for j,w in enumerate((0,2,3))}
+width=11
+def matrix(i,v):
+    M=[[0]*width for _ in range(width)]
+    for k in (S,C,B): M[k][k]=1
+    for w,(lo,hi) in saved.items():
+        occ=[k for k,u in enumerate(ports) if u==w]
+        if i==occ[0]: M[S][lo+v]=1
+        if occ[0]<i<=occ[-1]:
+            if i in occ: M[lo+1-v][C]=1
+            if i<occ[-1]: M[lo][lo]=M[hi][hi]=1
+    if i==6: M[S][C]=1-v
+    elif i%3==0: M[S][H0+v]=1
+    elif i%3==1: M[H0][H0]=M[H1][H0+v]=1
+    else: M[H0+v][C]=1
+    return M
+tables=[[matrix(i,v) for v in (0,1)] for i in range(7)]
+for bits in product(range(2),repeat=7):
+    bad=sum(bits[i+2]==bits[i]*bits[i+1] for i in (0,3))+(bits[-1]==0)
+    bad+=sum(bits[i]!=bits[ports.index(w)] for i,w in enumerate(ports))
+    for msg in (0,1):
+        r=[1,0,msg]+[0]*(width-3)
+        for i,v in enumerate(bits):
+            r=[sum(a*b for a,b in zip(r,col)) for col in zip(*tables[i][v])]
+        assert (r[C],r[B])==(bad,msg)
+print("256 binary matrix chains: exact disagreement count and message coordinate")
+~~~
