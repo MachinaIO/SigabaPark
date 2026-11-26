@@ -1,0 +1,1 @@
+{"name":"WE_SuccinctInstanceDecoder","title":"Executable readout of the registered succinct-LWE challenge word","description":"Unframes the four fields, reads little-endian magnitudes and signs, and indexes the public matrices by rows and the optional trapdoor by columns. Defined on every word.","tags":["witness-encryption","reduction","encoding"]}
