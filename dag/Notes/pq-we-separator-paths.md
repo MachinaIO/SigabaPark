@@ -555,3 +555,39 @@ for t in range(1,5):
                 assert len(hist[0]) == 5**(5-t)
 print("64 threshold/subset cases: full correction histograms or witness reconstruction")
 ~~~
+
+## Deriving the gate key removes one more correction and extends to span programs
+
+When the gate key can be chosen by the construction, use t anchor pads, interpolate the degree-less-than-t polynomial through them, and use its value at zero as the gate key. Only n-t non-anchor corrections remain. More generally, let rows m_i describe a monotone span program over the seed field, with nonzero target tau in their full span. The gate opens exactly when the rows on available wires span tau. Use coordinates in a fixed public row basis so the n-by-r matrix has rank r. Pick r independent anchor rows B. With one domain-separated child pad p_i per row occurrence, solve M_B y = p_B. Set K = tau y. Publish c_i = m_i y - p_i only on the n-r nonanchors. Authorized children supply p_i and hence m_i y (with c_i added for a nonanchor); use any public reconstruction coefficients for tau. This is ordinary row-span reconstruction; background on span programs and linear sharing appears in [Babai, Gal and Wigderson](https://doi.org/10.1007/s004930050058). The field subtraction also covers odd characteristic; for the seed implementation use a binary extension field.
+
+**Joint hiding of a derived key.** In topological order, replace the outgoing expansions of inactive children with independent per-occurrence pads, starting with the secured false leaves. Fix the active input pads and all randomness external to the fresh inactive wire slots at the gate. For an inactive gate with active rows A there exists a vector h with M_A h=0 and tau h=1. For every field element d, shift all local pads by p_i -> p_i + d m_i h. This fixes active pads and permutes the uniformly random inactive pads. It sends y to y+d h, fixes every correction, and translates K by d. Thus K is exactly uniform jointly independently of the gate corrections conditional on the fixed data. This is independence from the *public corrections*, not independence from the full internal pad vector. No later computation takes these private pads as inputs except via this gate's key and corrections; exclusive wire slots are essential even for a repeated child. A reduction samples local pads to generate the corrections, discards the derived key, and uses its PRG challenge for the outgoing expansion (or reserved root slot). The independence just proved makes the real side of that hybrid exact. Gates whose policy is true are evaluated as prescribed. This yields the same polynomial, nonuniform fixed-PRG/leaf reduction as above. It does not require a PRG secure under related seeds.
+
+**Two specializations.** Vandermonde rows with target evaluation at zero give exactly n-t corrections, so a 48-of-64 gate with 128-bit pads now uses 16 words or 2048 bits. An all-input AND gate has zero correction words, and the DAG still pays for child-to-wire pad derivations, leaf material, topology and the final payload mask. For undirected s-to-t connectivity, use vertex incidence rows e_u+e_v in characteristic two and target e_s+e_t for distinct terminals. If the full graph disconnects the terminals the gate is always false and can be handled directly. Otherwise a path sums to the target; if disconnected in the available subgraph, its component indicator annihilates all available rows and separates the target. Choose a public spanning forest as anchors. Its rank is |V|-c for c full-graph components, including isolated vertices. Only |E|-|V|+c words, one per nonforest edge, are published. Implementation needs only XOR: assign root potential zero in each tree, propagate potentials along anchor edges using their pads, and publish the endpoint potential difference minus the pad for each remaining edge. Set the gate key to the terminal potential difference. For a connected graph with 100 vertices and 110 edges this costs 11 correction words, or 1408 bits at k=128. The graph arithmetic is linear time given a forest; a receiver can find an available path and XOR its corrected values. Directed connectivity in general is outside this incidence representation. Both specializations still require a sound embedding of the original witness relation and secure local keys.
+
+~~~python
+from collections import Counter, defaultdict
+from itertools import product
+
+# Five occurrences, rank three, anchors first; two non-anchors.
+rows = (1,2,4,3,6)
+target = 5
+dot = lambda a,b: (a & b).bit_count() % 2
+for mask in range(1 << len(rows)):
+    active = [i for i in range(len(rows)) if mask >> i & 1]
+    coeff = next((s for s in range(1 << len(rows))
+                  if not (s & ~mask) and
+                  all(dot(s,sum(dot(m,1<<j)<<i for i,m in enumerate(rows)))
+                      == dot(target,1<<j) for j in range(3))), None)
+    views = defaultdict(Counter)
+    for pads in product((0,1), repeat=len(rows)):
+        y = sum(pads[i]<<i for i in range(3))
+        corr = tuple(dot(m,y)^p for m,p in zip(rows[3:],pads[3:]))
+        key = dot(target,y)
+        views[tuple(pads[i] for i in active),corr][key] += 1
+        if coeff is not None:
+            assert sum((pads[i] ^ (corr[i-3] if i>=3 else 0))
+                       for i in active if coeff>>i & 1)%2 == key
+    if coeff is None:
+        assert all(h[0]==h[1] for h in views.values())
+print("1024 active-set/pad combinations: authorized reconstruction or joint key hiding")
+~~~
