@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.dyadic_bkw_none", "proof_type": "prove", "explanation": "The BKW search begins at block width two, so the table exceeds the existing cutoff at a modulus of at least 2^512 under the stated normalization hypotheses."}

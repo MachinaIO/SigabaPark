@@ -1,6 +1,6 @@
 ---
 title: A rectangular AFV variant over powers of two for bounded binary predicates
-refs: [definition:WE_CircuitSAT, theorem:AdvancedEncryption.WE.IPE.ordinary_registry_flatten, theorem:AdvancedEncryption.WE.IPE.ordinary_cbd16_strength_640]
+refs: [definition:WE_CircuitSAT, theorem:AdvancedEncryption.WE.IPE.ordinary_registry_flatten, theorem:AdvancedEncryption.WE.IPE.ordinary_cbd16_strength_640, theorem:AdvancedEncryption.WE.IPE.dyadic_512_strength_640]
 tags: [witness-encryption, predicate-encryption, lwe, trapdoor]
 ---
 
@@ -75,6 +75,17 @@ The following are integer counts for the same two cut profiles. We enumerated ta
 |---:|---:|---:|---:|---:|---:|---:|
 | 1076 | 512 | 204 | 770 | 794 | 586688080532105216 | 9.24% |
 | 831 | 512 | 177 | 742 | 765 | 43665650132294512303 | 15.81% |
+
+### Halving the modulus exponent and dimension
+
+In the core BKW cutoff proof the search starts at block width b=2, whereas the table bound uses only b>=1. Keeping the exact lower endpoint gives q^b >= 2^(2e) for q>=2^e. Thus e>=512 reaches the same 2^1024 table cutoff. The new generic estimator proof changes this BKW argument and keeps the remaining attack bounds from the core theorem. The second numeric certificate uses n=2^17, M=2^21, q=2^512 and both CBD(16) laws. Its margin parameters (W, ZA, K0, R) are (90, 180, 40, 64). The same target of 640 applies.
+
+| p | r | t | m | d | Upper log2 original error | Key bits per coordinate | Transmitted bits per ciphertext coordinate | Table bits per WE bit |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1076 | 171 | 94 | 1107155 | 393216 | 459 | 319 | 343 | 166786968291757568 |
+| 831 | 256 | 77 | 1133706 | 262144 | 507 | 386 | 409 | 11945295824085201989 |
+
+Both have m+1 <= 2^21. In the loop below set e=512 in the gadget length, blinding range, budget, error threshold e-4 and ciphertext-width cap, set n=2^17, and use sample cap 2^21. The budget checks and rounding argument are otherwise identical. Relative to the 1024-exponent rounded rows, these two tables are 3.52 and 3.66 times smaller.
 
 ### Reduction budget and comparison to Praxis
 

@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.dyadic_estimator_ge", "title": "CBD estimator lower bounds for modulus exponents from 512", "statement": "Extends the standard-library CBD estimator theorem to exponents at least 512 using the sharper BKW cutoff. All other attack proofs follow the core CbdQ proof."}
