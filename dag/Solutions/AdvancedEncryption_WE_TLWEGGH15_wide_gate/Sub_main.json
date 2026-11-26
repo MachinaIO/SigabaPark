@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWEGGH15.wide_gate", "proof_type": "prove", "explanation": "Reassociate, apply Matrix.mul_kronecker_mul and mul_one."}
