@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.dead_level_invisible", "proof_type": "prove", "explanation": "Induction on i: at i = j + 1 the step matrices vanish; above it the predecessors vanish by the induction hypothesis."}

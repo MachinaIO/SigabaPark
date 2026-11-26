@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ExposedRoot.phase_one_kernel_break", "title": "Phase-1 LWE with short public matrices needs width: an integer left-kernel vector z of the short public S gives z (S a + E) = z E", "statement": "For matrices over a ring, if z * S = 0 then z * (S * a + E) = z * E."}

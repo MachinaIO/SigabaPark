@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ExposedRoot.cover_pad_card", "title": "Cover pad: over a finite ring, for invertible M and any x, t exactly one u has x + M u = t, so x + M u with uniform u is uniform whatever x is", "statement": "Over a finite ring, if M * Minv = 1 and Minv * M = 1, then for all matrices x, t the number of matrices u with x + M * u = t is exactly 1."}
