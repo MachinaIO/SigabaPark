@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.FlipShift.eq_zero_of_spanning_annihilated", "proof_type": "prove", "explanation": "By Submodule.span_induction every vector of the span satisfies v M = 0; apply this to the standard basis vectors Pi.single i 1 (Matrix.single_one_vecMul) to get each row of M."}

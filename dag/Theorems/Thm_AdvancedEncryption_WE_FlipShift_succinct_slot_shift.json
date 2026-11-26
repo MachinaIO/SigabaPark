@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.FlipShift.succinct_slot_shift", "title": "A succinct-LWE hint gives preimages under B only up to the W-shift", "statement": "If B Tk + Wk TW = G (one diagonal block of [I tensor B | W] T = I tensor G), then for every Z, row s and noise e: (s B + e)(Tk Z) = s (G Z) - (s Wk)(TW Z) + e (Tk Z)."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.FlipShift.stacked_hint_decodes", "proof_type": "prove", "explanation": "Each slot contributes (s k' B) T k' k + (s k' W k') TW k = s k' (B T k' k + W k' TW k), which is s k G for k' = k and 0 otherwise; sum with Finset.sum_ite_eq and collect the noise terms by Finset.sum_add_distrib and abel."}

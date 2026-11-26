@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.FlipShift.succinct_slot_shift", "proof_type": "prove", "explanation": "Substitute G = B Tk + Wk TW, distribute vecMul over sums and products (Matrix.add_vecMul, Matrix.vecMul_add, Matrix.vecMul_vecMul, Matrix.mul_assoc) and cancel with abel."}
