@@ -351,3 +351,110 @@ int main(int argc,char** argv){
     }
 }
 ~~~
+
+## What happens if the sign matrices share factors as in Praxis?
+
+[Praxis, Section 2.5 and Figure 5](https://eprint.iacr.org/2026/2971) stores factors on the vertices of a bipartite grid and pairs them to recover virtual cells. For 6,912 copies its example takes 528 group elements per unknown in place of 41,472. Its security argument accommodates the shared hidden scalars and tie masks. Consider using the same layout for AFV's independent signs. The following conditional calculation quantifies exactly where the analogy fails.
+
+Represent the desired output columns by edges of a finite simple bipartite graph with v incident vertices, e edges and k connected components. For each base coordinate j, independently sample one fair sign at every vertex and give edge uv the product of its endpoint signs. For a forest, fixing one root sign per component gives a bijection from the remaining vertex signs to the edge signs. The construction is exact, and still needs e independent bits per j. For a graph with cycles, the edge signs form a binary subspace of codimension b=e-v+k after identifying minus with one: signs multiply to one around every cycle, and every assignment on a spanning forest extends uniquely.
+
+These dependencies can survive summing the coordinates. Fix integer x with at least one odd entry and q>2 sum_j |x_j|, so the centered lift of each projected scalar Y_e is exact. Put S=sum_j x_j. The bit (S-Y_e)/2 modulo two is the parity of the negative signs on the odd coordinates. In the original encryption these e bits are independent and fair. In the shared version their vector belongs to the same subspace, since it is a sum of vectors from that subspace. Thus conditional TV distance of the projected noise vectors is at least 1-2^(-b). Even one 2-by-2 rectangle gives 1/2. The event can be evaluated on conditional noise; it gives no attack on the public ciphertext and makes no claim about the frequency of eligible x under a concrete AFV parameter set. It rules out justifying this reuse by a pointwise distribution-preserving argument. The sampler below shares public tables and keeps fresh independent draws for each edge.
+
+## A smaller reservoir using binomial generating trees
+
+For a chunk of size c, write each integer weight binom(c,i) in binary. Put one leaf labelled i at depth j for each set bit at position c-j. The dyadic masses sum to one. At each depth double the surviving index, add the next fair bit, and assign the first indices to that depth's leaves. Subtract their count if the draw continues. Kraft equality ensures all paths terminate by c, and each label receives exactly its binomial mass. This is the discrete distribution generating tree of Knuth and Yao; see also [Saad et al.](https://arxiv.org/abs/2003.03830).
+
+Let z=65/64. With n_j leaves at depth j, the length L has moment M_c=E[z^L]=sum_j n_j (65/128)^j. The code below uses outward rounding after each Horner step and computes integers h(c) satisfying M_c^32 <= z^h(c). To charge partial chunks separately, choose integers d and a >= 0 satisfying h(W)<=d and W h(c)<=dc+a for 1<=c<W. At most T magnitudes have a partial chunk. Thus per output the sum of h(c) over all chunks is at most (dm+Ta)/W. Conditional independence and Markov's inequality give a reservoir of ceil(D(dm+Ta)/(32W))+t bits with overflow probability at most z^(-t). For tau=179, t=8003 gives z^(-t)<=2^-179.
+
+At W=1024 the certified pair is (d,a)=(230,164572). With the same illustrative public caps the reservoir is **552,917,117,891 fair bits per AFV entry**, a factor **58.17** below explicit signs. At W=256 it is 1,060,130,920,259 bits. The table-wide statistical budget is unchanged. These are uniform analytical bounds. Native timings above cover the CDF sampler only. The listing computes the certificate and exhaustively verifies the label distribution for c up to 13.
+
+~~~python
+from math import comb
+from collections import Counter
+from functools import lru_cache
+
+def coeffs(c):
+    v=1
+    for k in range(c+1):
+        yield v
+        v=v*(c-k)//(k+1)
+
+def populations(c):
+    # Count the ones in each column of binomial coefficients simultaneously.
+    planes=[]
+    for carry in coeffs(c):
+        for i,plane in enumerate(planes):
+            planes[i]=plane^carry
+            carry&=plane
+            if not carry:break
+        if carry:planes.append(carry)
+    return [sum(((x>>b)&1)<<i for i,x in enumerate(planes)) for b in range(c)]
+
+@lru_cache(None)
+def labels(c):
+    weights=list(coeffs(c))
+    return [[i for i,v in enumerate(weights) if (v>>(c-d))&1] for d in range(1,c+1)]
+
+def sample(c,bit):
+    j=0
+    for row in labels(c):
+        j=2*j+bit()
+        if j<len(row):return row[j]
+        j-=len(row)
+    raise AssertionError
+
+def moment_cap(c):
+    scale=1<<80;bound=0
+    for count in populations(c):
+        bound=(65*(bound+count*scale)+127)//128
+    return bound
+
+def units(bound):
+    # Smallest h giving (bound/2^80)^32 <= (65/64)^h.
+    a=bound**32
+    den=(1<<80)**32
+    lo=-1;hi=40000
+    while hi-lo>1:
+        j=(lo+hi)//2
+        if a*(64**j)<=den*(65**j):hi=j
+        else:lo=j
+    return hi
+
+for c in range(1,14):
+    h=Counter()
+    for tape in range(1<<c):
+        bits=iter((tape>>j)&1 for j in range(c))
+        h[sample(c,lambda:next(bits))]+=1
+    assert [h[j] for j in range(c+1)]==list(coeffs(c))
+    assert populations(c)==[len(row) for row in reversed(labels(c))]
+
+def excess(tau):
+    z=0;a=1;b=1<<tau
+    while a<b:a*=65;b*=64;z+=1
+    return z
+
+C=41923871289682;m=1<<19;p=117;D=p*m;T=1062;W=1024
+maxv,maxc=max((moment_cap(c),c) for c in range(1,W+1))
+h=units(maxv);tau=133+(C-1).bit_length()
+N=D*(m//W+T)
+B=(N*h+31)//32+excess(tau)
+print('max moment, c, h/32, extra and capped bits:',maxv,maxc,h,excess(tau),B)
+print('baseline ratio',round(D*m/B,2))
+
+from bisect import bisect_left
+# Precompute the largest permitted integer moment bound for each h.
+# Taking a 32nd root is unnecessary: compare the 32nd powers.
+cutoff=[((1<<80)**32*65**j)//64**j for j in range(h+1)]
+cost=[0]+[bisect_left(cutoff,moment_cap(c)**32) for c in range(1,W+1)]
+assert max(cost) <= h and cutoff[-1] >= maxv**32
+for width in (64,128,256,512,1024):
+    best=None
+    for d in range(cost[width],cost[width]+513):
+        overhead=max([0]+[width*cost[c]-d*c for c in range(1,width)])
+        value=d*m+T*overhead
+        cand=value,d,overhead
+        if best is None or cand<best:best=cand
+    value,d,overhead=best
+    cap=(D*value+32*width-1)//(32*width)+excess(tau)
+    print('W,d,overhead,cap,ratio:',width,d,overhead,cap,round(D*m/cap,2))
+~~~
