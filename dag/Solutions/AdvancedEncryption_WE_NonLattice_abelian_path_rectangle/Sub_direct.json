@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NonLattice.abelian_path_rectangle", "proof_type": "prove", "explanation": "Merge both sides into one sum and compare termwise: if var j is k or i, each side contributes f_j(false) + f_j(true) (using update_self and update_of_ne with i != k, then abel); otherwise all four updates read w(var j)."}

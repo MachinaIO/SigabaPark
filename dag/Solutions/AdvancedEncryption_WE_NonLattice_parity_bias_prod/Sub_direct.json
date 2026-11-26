@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NonLattice.parity_bias_prod", "proof_type": "prove", "explanation": "Write the character of the sum as a product of characters (additivity of (-1)^val on ZMod 2 by case analysis, then Finset induction), push the weight product inside, exchange product and sum with Fintype.prod_sum, and evaluate each one-coordinate sum by cases on c_i."}
