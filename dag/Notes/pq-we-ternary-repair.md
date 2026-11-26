@@ -30,6 +30,8 @@ The span in the third row below is the set of truth tables of affine functions o
 
 The same compiler admits a conservative bound uniform over keys for a fixed CNF. For m≥1 nonempty clauses (each of width at most three), put h=ceil(log2 m), L=2^h. One round adds at most 6m+2L+8n+5 binary AND nodes with free complements: 2m for the violated-clause flags, L-1 for the tree and L-1 for prefix enables, m leaf selects, at most 3m for the per-position group reductions, 8n for masks and XOR updates, and at most five for digit decoding/validity. The AIG depth increment is at most 3h+8: two levels for a clause, at most 2h+1 to select the first violation, h for the group OR, then five for masking, OR and XOR. The validity chain also fits this bound. The final satisfaction test adds at most 3m+1 AND nodes and h+3 levels. An AIG of G gates and depth D on 2c inputs lowers here to at most 2G+2c+1 NANDs and depth at most 2D+1 (one physical NAND per AND and at most one inverter per needed polarity). At n=128, m=300 and c=27, these bounds give 209,919 NANDs and depth 1,915 or less for every fixed key of the example; they still exclude lattice costs. Empty clauses can be handled immediately as false.
 
+A second implementation uses a divide-and-conquer parallel-prefix OR for all preceding violation flags. At each doubling, every position in the right half of a block combines its prefix with the final prefix of the left half. This computes all prefixes in h AIG levels with more gates. On the same key it used **110,204 NANDs at depth 835**, reducing depth by 204 and adding 20,782 NANDs. The preceding uniform gate bound is for the first implementation. For the parallel-prefix version a conservative AIG depth increment is 2h+8 per round (clause flags, prefix OR and one select, variable-group OR and final update), giving a uniform NAND depth bound of 1,429 for these parameters. The two circuits implement the same 27-trit policy.
+
 **An alternate center-access tradeoff.** For 31 repairs take 120 independent affine maps from 29 bits to 128 bits, sampled as binary matrices plus offsets. Each map gives 2^29 pairwise independent uniform anchors, with repetitions allowed. For a fixed target let p=Vol(128,31)/2^128. For X the number of hits, E[X]=2^29 p, Var(X)=2^29 p(1-p); the second-moment bound gives Pr[X=0]≤(1-p)/(1-p+2^29 p). Raising this bound to power 120 gives at most 2^-129 by integer comparison. The maps need 460,800 public bits. There are 120·2^29·3^31 certificate labels, about 2^85.04; testing all 64,424,509,440 anchors in the worst case is much more costly for the witness holder. This illustrates why center lookup and seed size must accompany the certificate length.
 
 **Evidence.** Standalone scripts follow. The full-size SAT control is a planted 300-clause CNF compiled to exactly 4,096 NAND gates. The UNSAT variant replaces eight clauses by clauses excluding all assignments on three variables. The compiler recognizes both without auxiliary variables. A fixed test stream with the 9,842-shift code found a close center on shift index 48, generated an accepting certificate and rejected that certificate on the UNSAT control. Tests include all 625 two-input two-gate lists, 400 seeded small circuits, every starting point for each satisfying target of a small repair formula, and arbitrary three-digit paths on a contradiction. The reference encryptor has a finite fallback on unrecognized NANDs. The full-size random-walk trial budget and full ABE tables were not executed; neither a registered machine clock nor a quantum-secure ABE parameter instantiation has been verified here.
@@ -359,6 +361,18 @@ class AIG:
             enable[2*i]=enable[i]
             enable[2*i+1]=self.both(enable[i],-tree[2*i])
         return [self.both(enable[m+i],f) for i,f in enumerate(bad)]
+    def first_shallow(self,bad):
+        pref=bad.copy()
+        step=1
+        while step<len(pref):
+            for start in range(0,len(pref),2*step):
+                middle=start+step
+                if middle<len(pref):
+                    left=pref[middle-1]
+                    for i in range(middle,min(middle+step,len(pref))):
+                        pref[i]=self.either(left,pref[i])
+            step*=2
+        return [bad[0]]+[self.both(bad[i],-pref[i-1]) for i in range(1,len(bad))]
     def lower(self,out):
         live={abs(out)}
         for g,(a,b) in reversed(self.ops.items()):
@@ -377,7 +391,7 @@ class AIG:
         output=use(out)
         return gates,output,depth[output]
 
-def policy(F,initial,r,n):
+def policy(F,initial,r,n,shallow=False):
     A=AIG(2*r)
     xs=[1 if initial>>i&1 else -1 for i in range(n)]
     valid=1
@@ -385,7 +399,7 @@ def policy(F,initial,r,n):
         lo,hi=2+2*j,3+2*j
         digit=[A.both(-lo,-hi),A.both(lo,-hi),A.both(-lo,hi)]
         valid=A.both(valid,-A.both(lo,hi))
-        select=A.first(A.failed(F,xs))
+        select=(A.first_shallow if shallow else A.first)(A.failed(F,xs))
         groups=[[[] for _ in range(3)] for _ in xs]
         for row,h in zip(F,select):
             for k in range(3):groups[abs(row[k%len(row)])-1][k].append(h)
@@ -424,6 +438,11 @@ def policy_test():
     assert run_gate(g,out,sum(v<<(2*i) for i,v in enumerate(ds)),54)
     assert not run_gate(g,out,3,54)
     print('27-trit policy',len(g),'NANDs, depth',depth)
+    g,out,depth=policy(F,x,27,128,shallow=True)
+    for digs in [ds]+[[rr.randrange(3) for _ in range(27)] for _ in range(20)]:
+        z=sum(v<<(2*i) for i,v in enumerate(digs))
+        assert run_gate(g,out,z,54)==walk(F,x,digs)
+    print('parallel-prefix policy',len(g),'NANDs, depth',depth)
     # Fair comparator: compile the same exact CNF with half the source inputs hardwired.
     A=AIG(64)
     xs=[1 if w>>i&1 else -1 for i in range(64)]+list(range(2,66))
