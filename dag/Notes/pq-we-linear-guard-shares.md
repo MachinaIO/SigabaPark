@@ -560,7 +560,7 @@ from math import ceil,exp,pi
 from random import Random
 import numpy as np
 
-def exercise(front,wrapper,n,roots):
+def exercise(front,wrapper,n,roots,target_product=None):
     rng=Random(60414);extra=Random(50718);share_rng=Random(7103)
     q=7**28;rad=256;k=ceil(q.bit_length()/8);t=2
     public_B=q//4096;bytes_per=(q.bit_length()+7)//8
@@ -628,7 +628,12 @@ def exercise(front,wrapper,n,roots):
                     noise=arr(1,A.shape[1],lambda:gauss(0,2))
                     if roots>1:noise=np.vstack((noise,arr(roots-1,A.shape[1],lambda:gauss(0,2,extra))))
                 else:noise=arr(F.shape[0],A.shape[1],lambda:gauss(0,2))
-                target=(F@A+noise)%q
+                if target_product is None:
+                    ideal=F@A
+                else:
+                    root=(u,roots) if j==0 else None
+                    ideal=target_product(w,edges,S,A,q,root)
+                target=(ideal+noise)%q
                 C=target if j==0 else pre(target)
                 if j:samples+=t
                 Fpair.append(F);Cpair.append(C)
@@ -903,4 +908,124 @@ if __name__=='__main__':
     assert exercise(front,prefix,lattice,4,1)==12
     assert exercise(front,prefix,lattice,4,2)==0
     assert exercise(front,prefix,lattice,8,1)==0
+~~~
+
+
+### Computing encryption targets without expanding the Kronecker product
+
+Each interior branch of the general circuit compiler needs T=(M tensor S)A modulo q before noise addition and preimage sampling. Partition A into w blocks A_j of shape n by k (k=m inside the chain and k=t at its endpoint). For source i let P_i be its public set of outgoing logical coordinates. Then T_i=S(sum over j in P_i of A_j). Two exact evaluation orders are available. Compute the block product once for each distinct nonempty P_i and copy the result for duplicate sets. Alternatively compute S A_j once per referenced destination j and then add the referenced products for each source. Pick by the smaller product count. This uses at most w block products, including when the logical matrix is dense, compared with w² in the naive dense Kronecker evaluation. With e edges, gathering and scattering cost O((e+w)nk) additions or entry copies beyond the products. Intermediate sums may be reduced modulo q. This is the distributive law over the original ring and introduces no noise or cryptographic assumption.
+
+At the root accumulate weights v=uM by the incidence lists, combine the A_j with weights v_j and apply just the l selected rows of S. This costs l n k scalar multiplications for the final product plus at most w n k for weighting and adding the input blocks. The reference uses fixed logical loops for the root to avoid a message-dependent selection of blocks. The routine assumes exact integer or correctly reduced modular arithmetic. In the diagnostic the old Kronecker matrix is also built for independent residual checks; the new target routine and a production encoder do not need it. Preimage generation and all coins are identical. No change is needed to the wire format or Dec.
+
+On the 4096-NAND ordered control of PR 99 (4224 levels, width 28), summing over both branches at every interior level yields 6620096 dense, 128087 nonzero-edge and 108913 factored units of n²m scalar multiplications. This saves 98.35% against the dense product and 14.97% against multiplying independently on every nonzero logical edge. These counts apply just to the target product; preimage sampling, additions, setup and memory traffic are separate. The example's satisfiability also admits the earlier capped decision shortcut; the counts measure the general encoder along its matrix path. For arbitrary circuits the target formation now takes O(w n²k + (e+w)nk) ring work per nonroot branch and retains polynomial bounds on the three honest costs.
+
+Run python targets.py frontend.py pair.py lattice.py. The seventh listing checks 720 root/interior targets against explicit Kronecker products on odd and even moduli, then replays the three complete toy lattice configurations and compares every emitted leaf byte for both messages at identical sampler coins.
+
+~~~python
+"""Exact target products from the incidence lists of the logical program."""
+from collections import Counter
+from random import Random
+import runpy
+import sys
+import numpy as np
+
+def patterns(width,edges):
+    rows=[[] for _ in range(width)]
+    for i,j in sorted(edges):
+        rows[i].append(j)
+    return tuple(tuple(row) for row in rows)
+
+def target(rows,S,A,q,root=None):
+    n=S.shape[0]
+    k=A.shape[1]
+    blocks=A.reshape(len(rows),n,k)
+    if root is not None:
+        u,ell=root
+        # Fixed logical loops even when the message coordinate is zero.
+        weights=[0]*len(rows)
+        for i,row in enumerate(rows):
+            for j in row:
+                weights[j]+=u[i]
+        acc=np.zeros((n,k),dtype=object)
+        for weight,block in zip(weights,blocks):
+            acc+=weight*block
+        return S[:ell]@(acc%q)%q
+    active={j for row in rows for j in row}
+    unique={row for row in rows if row}
+    out=np.zeros((len(rows),n,k),dtype=object)
+    if len(unique)<=len(active):
+        cache={}
+        for row in unique:
+            acc=blocks[row[0]].copy()
+            for j in row[1:]:
+                acc+=blocks[j]
+            cache[row]=S@(acc%q)%q
+        for i,row in enumerate(rows):
+            if row:out[i]=cache[row]
+    else:
+        cache={j:S@blocks[j]%q for j in active}
+        for i,row in enumerate(rows):
+            for j in row:out[i]+=cache[j]
+            out[i]%=q
+    return out.reshape(len(rows)*n,k)
+
+def check(front):
+    rng=Random(1117)
+    total=0
+    for w in (1,3,8):
+        for n in (1,3):
+            for k in (1,5):
+                for q in (8,49,7**28):
+                    for _ in range(10):
+                        edges={(i,j) for i in range(w) for j in range(w) if rng.randrange(4)==0}
+                        M=np.array([[int((i,j) in edges) for j in range(w)] for i in range(w)],dtype=object)
+                        S=np.array(rng.choices(range(-5,6),k=n*n),dtype=object).reshape(n,n)
+                        A=np.array([rng.randrange(q) for _ in range(w*n*k)],dtype=object).reshape(w*n,k)
+                        rows=patterns(w,edges)
+                        assert np.array_equal(target(rows,S,A,q),np.kron(M,S)@A%q)
+                        u=np.array(rng.choices(range(4),k=w),dtype=object)
+                        ell=rng.randint(1,n)
+                        assert np.array_equal(target(rows,S,A,q,(u,ell)),np.kron(u@M,S)[:ell]@A%q)
+                        total+=2
+    print('exact target comparisons:',total)
+    n=128
+    order=[];gates=[];prev=0
+    for i in range(1,n+1):
+        order.append(i)
+        for step in range(32):
+            gates.append((prev,i if step%3==0 else prev))
+            prev=n+len(gates)
+            order.append(prev)
+    rank={v:i for i,v in enumerate(order,1)}
+    cs=front['nand_cnf'](n,gates)
+    clauses=[tuple((1 if v>0 else -1)*rank[abs(v)] for v in c) for c in cs]
+    u,layers=front['compile_program'](clauses,len(order),0)
+    w=len(u);records=Counter()
+    for level in layers[1:-1]:
+        for edges in level:
+            rows=patterns(w,edges)
+            records['dense']+=w*w
+            records['edge']+=len(edges)
+            records['factored']+=min(len(set(rows)-{()}),len({j for _,j in edges}))
+    print('width, layers, interior dense/edge/factored n^2*m multiplication units:',w,len(layers),dict(records))
+if __name__=='__main__':check(runpy.run_path(sys.argv[1]))
+
+def replay(front,wrapper,lattice):
+    # Compare the complete emitted leaf byte strings with identical sampler coins.
+    for n,ell in [(4,1),(4,2),(8,1)]:
+        records=[]
+        for opt in (None,lambda w,e,S,A,q,root:target(patterns(w,e),S,A,q,root)):
+            captured=[]
+            def encrypt(code,bit,coin,leaf):
+                def take(i,b):
+                    blob=leaf(i,b)
+                    captured.append(blob)
+                    return blob
+                return wrapper['encrypt'](code,bit,coin,take)
+            fail=lattice['exercise'](front,{**wrapper,'encrypt':encrypt},n,ell,opt)
+            records.append((fail,captured))
+        assert records[0]==records[1] and len(records[0][1])==10
+        print('identical leaf ciphertexts:',n,ell,len(records[0][1]))
+if __name__=='__main__' and len(sys.argv)>2:
+    replay(*map(runpy.run_path,sys.argv[1:]))
 ~~~
