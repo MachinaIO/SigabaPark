@@ -942,3 +942,155 @@ def audit(front,cut,mixed,lut):
     print('full-clause family: counters',len(set(slots.values())),'matrix width',len(pr[0]))
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
+
+### Bounded nonlinear aggregation of violations at small primes
+
+The additive lower bound assumes a fixed linear contribution per failed clause. Instead, first compute one Boolean flag indicating *any* violation in a group. For a fixed global variable order and group of clauses, build a deterministic read-once layered program: retain the mask of clauses not yet satisfied. After each variable discard the newly satisfied clauses. Enter an absorbing failure state if any remaining clause just lost its last chance to be satisfied. Future clauses initially belong to the mask. At each cut enumerate only reachable masks, aborting the group trial if their number exceeds a public cap. A backward pass merges states with identical pairs of successor classes; a state with constant residual output can terminate immediately. This second pass preserves the group's exact Boolean function. At most two successors per state are inspected before testing the cap on a layer. A group with a constant failure predicate equal to one certifies NO for the full statement.
+
+Sort clauses by their last variable, try a whole group, and bisect failed trials recursively. A single clause fits cap two. Hence there are at most 2c-1 nonempty trials for c clauses, each polynomial in H, c and the cap, counting mask and dictionary operations. Fix or polynomially bound the cap. All blocks use the **same witness bits in the same order**, even when their clauses overlap. Put at most p-1 group flags in each terminal counter. This bound holds irrespective of how many clauses fail inside a group. A block emits one contribution at the first transition whose residual function is identically failure, and stops; success transitions disappear. For p=2 every block has a distinct bucket. For general p give the first, second and subsequent block of each bucket separate source coordinates initialized to one, reusing these source coordinates across buckets. This prevents two simultaneous immediate failures from becoming a single source-to-bucket edge on one branch. At most min(p-1,number of groups) source coordinates are required on nonempty inputs. Preserve the message in its own coordinate and reuse per-cut scratch slots. Each active state has at most one successor per branch, and each group opens only once. Polynomial subproduct bounds, a terminal unit on NO paths and the valid-witness bit test follow.
+
+On the preceding 4096-gate stream at p=2 and 170 levels, the linear-bucket compiler gave width 135. Caps 4, 8 and 16 gave widths 128, 83 and 56. At cap 32 the whole stream fits one block and gives width 4. When the entire predicate fits one public deterministic block its satisfiability is already decidable by graph reachability, so the earlier bounded decision shortcut is cheaper in that case. Partial compilation remains useful when the whole block exceeds the cap. For a second frontend control append equality of two separated 16-bit words and sixteen local two-literal constraints to the stream CNF. Reading all bits of the first word before the second requires at least 65536 distinguishable states for a complete exact deterministic equality test at that cut (fix the other constraints to accepting values and distinguish two prefixes by completing with the first). The capped construction still represents the conjunction exactly. With 234 levels the older width is 194; cap 16 gives 54 blocks and width 118, reducing the equal-scale interior square terms by about 63%. Caps 32 and 64 yield fewer, larger blocks and width 124. Choose by full width rather than by group count. This control compares matrix encodings in the indicated order; it makes no hardness claim for these statements. Compare with other preprocessors and include the cost of public compilation in the honest clock.
+
+Run python blocks.py frontend.py cut.py lut.py mixed.py buckets.py. The listing exhaustively checks 24384 small branch/message/cap cases, including odd primes and early termination. It also verifies 300 equality-control assignments and 120 accepting/rejecting paths on the combined control.
+
+~~~python
+"""Bounded, read-once block violation programs sharing one global witness path."""
+from itertools import product
+from random import Random
+import runpy,sys
+
+def block(cs,pos,cap):
+    # A mask marks clauses that have not yet been satisfied. -1 is already failed.
+    levels={}
+    for j,c in enumerate(cs):
+        end=max(pos[abs(x)] for x in c)
+        for lit in c:
+            i=pos[abs(lit)]
+            step=levels.setdefault(i,[0,0,0])
+            step[int(lit>0)]|=1<<j
+        levels[end][2]|=1<<j
+    order=sorted(levels);states={(1<<len(cs))-1};history=[]
+    for i in order:
+        sat0,sat1,close=levels[i];edges={}
+        for mask in states:
+            dest=[]
+            for sat in (sat0,sat1):
+                left=mask&~sat
+                dest.append(-1 if mask==-1 or left&close else left)
+            edges[mask]=tuple(dest)
+        states={d for pair in edges.values() for d in pair}
+        if len(states)>cap:return None
+        history.append(edges)
+    # Minimize backwards. 0 denotes no possible violation; -1 denotes certain failure.
+    classes={s:(-1 if s==-1 else 0) for s in states}
+    reduced=[]
+    for edges in reversed(history):
+        ids={};prev={};trans={}
+        for s,dest in edges.items():
+            sig=tuple(classes[t] for t in dest)
+            if sig in ((0,0),(-1,-1)):prev[s]=sig[0];continue
+            if sig not in ids:ids[sig]=len(ids)+1
+            prev[s]=ids[sig];trans[ids[sig]]=sig
+        reduced.append(trans);classes=prev
+    return order,list(reversed(reduced)),classes[(1<<len(cs))-1]
+
+def compile_blocks(cs,order,bit,p,cap):
+    pos={v:i for i,v in enumerate(order)}
+    cs=sorted(cs,key=lambda c:(max((pos[abs(v)] for v in c),default=-1),len(c),c))
+    H=max(1,len(order))
+    if () in cs:return ([1],[[{(0,0)},{(0,0)}] for _ in range(H)]),[],True
+    def split(group):
+        if not group:return []
+        pr=block(group,pos,cap)
+        if pr is not None:return [(group,pr)]
+        assert len(group)>1
+        mid=len(group)//2
+        return split(group[:mid])+split(group[mid:])
+    groups=split(cs)
+    buckets=(len(groups)+p-2)//(p-1)
+    lanes=max(1,min(len(groups),p-1));base=2+buckets+lanes-1
+    layers=[[{(a,a) for a in range(base)} for _ in (0,1)] for _ in range(H)]
+    width=[base]*H
+    for j,(group,(indices,tables,initial)) in enumerate(groups):
+        bucket=2+j//(p-1)
+        if initial==0:continue
+        if initial==-1:return ([1],[[{(0,0)},{(0,0)}] for _ in range(H)]),[],True
+        lane=j%(p-1)
+        prev={initial:0 if lane==0 else 1+buckets+lane}
+        for k,(i,trans) in enumerate(zip(indices,tables)):
+            dests={v for node in prev for v in trans[node] if v>0}
+            # Spaces at different cuts may use different coordinate numbers.
+            nxt={v:width[i]+s for s,v in enumerate(sorted(dests))}
+            width[i]+=len(nxt)
+            for node,a in prev.items():
+                for b,v in enumerate(trans[node]):
+                    if v:layers[i][b].add((a,bucket if v==-1 else nxt[v]))
+            prev=nxt
+            if k+1<len(indices):
+                for h in range(i+1,indices[k+1]):
+                    nxt={v:width[h]+s for s,v in enumerate(prev)}
+                    width[h]+=len(nxt)
+                    for E in layers[h]:
+                        E.update((a,nxt[v]) for v,a in prev.items())
+                    prev=nxt
+    layers[-1]=[{(a,b) for a,b in E if 1<=b<2+buckets} for E in layers[-1]]
+    init=[1,bit]+[0]*buckets+[1]*(lanes-1)+[0]*(max(width)-base)
+    return (init,layers),[g for g,_ in groups],False
+
+def audit(front,cut,lut,mixed,buckets):
+    rng=Random(375304);cases=0
+    for h in range(1,8):
+        order=list(range(1,h+1))
+        for _ in range(12):
+            cs=cut['canonical']([tuple(v*rng.choice((-1,1)) for v in rng.sample(order,rng.randint(1,min(h,4)))) for _ in range(rng.randrange(13))])
+            rng.shuffle(order)
+            for p,cap in [(2,2),(2,8),(3,4),(5,3)]:
+                for bit in (0,1):
+                    pr,groups,impossible=compile_blocks(cs,order,bit,p,cap)
+                    for w in product((0,1),repeat=h):
+                        vals=dict(zip(order,w))
+                        def bad(g):return any(not any(vals[abs(x)]==(x>0) for x in c) for c in g)
+                        row=front['eval_program'](pr,w)
+                        if impossible:assert bad(cs) and row==[1]
+                        else:
+                            cnt=[sum(bad(g) for g in groups[i:i+p-1]) for i in range(0,len(groups),p-1)]
+                            assert row[:2+len(cnt)]==[0,bit,*cnt] and sum(row)==bit+sum(cnt)
+                            assert bool(sum(cnt))==bad(cs) and max(cnt,default=0)<p
+                        cases+=1
+    print('checked paths',cases)
+    n=128;gates=[];prev=0
+    for i in range(1,n+1):
+        for j in range(32):
+            gates.append((prev,i if j%3==0 else prev));prev=n+len(gates)
+    cs,o=lut['frontend'](n,gates,4)
+    for cap in (2,4,8,16,32,64,256):
+        pr,groups,impossible=compile_blocks(cut['canonical'](cs),o,0,2,cap)
+        print('stream cap/groups/levels/width/constant NO',cap,len(groups),len(pr[1]),len(pr[0]),impossible)
+    stream_cs,stream_order=cs,o
+    # Equality of two separated 16-bit words, with sixteen local disjunctions.
+    n=16;o=list(range(1,4*n+1))
+    cs=[c for i in range(1,n+1) for c in [(i,-i-n),(-i,i+n),(2*n+2*i-1,2*n+2*i)]]
+    pr,groups,impossible=compile_blocks(cs,o,0,2,8)
+    assert not impossible and len(groups)>1
+    for _ in range(300):
+        w=[rng.randrange(2) for v in o]
+        if _%2==0:w[n:2*n]=w[:n];w[2*n::2]=[1]*n
+        assert (sum(front['eval_program'](pr,w))==0)==(w[:n]==w[n:2*n] and all(w[i] or w[i+1] for i in range(2*n,4*n,2)))
+    print('separated equality: groups/width',len(groups),len(pr[0]))
+    shift=max(stream_order)
+    combined=stream_cs+[tuple((1 if x>0 else -1)*(abs(x)+shift) for x in c) for c in cs]
+    order=stream_order+[shift+v for v in o]
+    combined=cut['canonical'](combined)
+    old,_,_=buckets['compile_buckets'](combined,order,0,2,mixed)
+    for cap in (16,32,64):
+        pr,groups,impossible=compile_blocks(combined,order,0,2,cap)
+        assert len(groups)>1 and not impossible
+        print('combined cap/groups/levels/old width/new width',cap,len(groups),len(pr[1]),len(old[0]),len(pr[0]))
+        for j in range(40):
+            tr=lut['trace'](128,gates,[1]*128);assert tr[-1]
+            w=[rng.randrange(2) for _ in o];w[n:2*n]=w[:n];w[2*n::2]=[1]*n
+            if j%2:w[n]^=1
+            word=[tr[v] for v in stream_order]+w
+            assert (sum(front['eval_program'](pr,word))==0)==(j%2==0)
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
