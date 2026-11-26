@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.TwoInput.dp_reach",
+ "proof_type": "prove",
+ "explanation": "Induction on n; the successor case splits a list into prefix and last block (List.eq_nil_or_concat) and uses foldl over an append. The cost bound is card_product with card_le_univ."
+}
