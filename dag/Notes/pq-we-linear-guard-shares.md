@@ -539,3 +539,140 @@ def compare(n,g,guards,base,labels,shapes,front,alpha,tau):
                     return v
                 assert dec(node,ct,live,check_witness)==bit
 ~~~
+
+### Serialized lattice composition and the number of root rows
+
+The fourth listing plugs a small actual lattice-chain Enc/Dec into the prefix compiler. Its three guards are distinct two-literal clauses on disjoint pairs of private bits. A two-of-three policy has five encrypted local bits. Every leaf uses two encoded layers, two terminal columns, modulus 7^28 and an integer-centered threshold floor(q/4096) fixed before encryption. Residues are serialized in ten bytes each. Dec receives only the selected serialized leaf records, their public layout and the local witnesses. The diagnostic separately checks all preimage congruences and the noise residual on every path. The trapdoor construction, floating QR and Gaussian decisions are adapted from the [PR 99 correctness diagnostic](https://github.com/MachinaIO/SigabaPark/pull/99); this uses reduced dimensions, seeded test streams and unbounded toy proposal loops. It does not instantiate concrete quantum security or a worst-case sampler clock.
+
+| Lattice dimension | Retained root rows | Bytes per outer bit | Valid opens passed / failed |
+| ---: | ---: | ---: | ---: |
+| 4 | 1 | 49200 | 96 / 12 |
+| 4 | 2 | 65600 | 108 / 0 |
+| 8 | 1 | 97200 | 108 / 0 |
+
+Each row comprises both outer messages and all qualifying six-bit witnesses. It performs 216 leaf decryptions and checks 40 exact residuals across ten leaf encryptions. The failures at dimension four all stem from one valid local path with bit-one payload and identically zero ideal integer signal. The two-row replay preserves the first row, the chosen tensor matrices, the trapdoors and the final columns using the same primary stream, generating only the extra root noise from a separate stream. The second row fixes this failure on the tested instance. Relative to doubling the dimension, the two-row replay uses 31600 fewer bytes here. This comparison concerns correctness on these coins, not equivalent hardness.
+
+Retaining l root rows is again public postprocessing of the full ciphertext. For the two-layer backend there is also a simple correctness estimate. Let p be the underlying prime and let rho bound the maximum single-entry atom modulo p of the independent tensor matrices. For the bit-one guard path the logical row contains a unit. Given a terminal tensor factor S2 of rank r modulo p, each independent selected root row of S1 annihilates S2 with probability at most rho^r, by conditioning on all but r pivot coordinates. All l rows annihilate it with probability at most rho^(r l). For any 1<=k<=n, the probability rank(S2)<k is at most binom(n,k-1) rho^((n-k+1)^2): choose k-1 columns spanning the others (extend a spanning selection if needed), then each remaining independent column must satisfy at least n-k+1 independent constraints. Thus the total signal-loss probability is at most that term plus rho^(k l), capped at one. A surviving row and t nearly uniform final columns give the terminal small-interval bound of PR 99; add its statistical and evaluation-error terms. For longer chains the conditional rank argument still applies to the suffix product, whose rank distribution requires a separate bound. The extra rows increase the actual transmitted root size and selected arithmetic. Run OPENBLAS_NUM_THREADS=1 python lattice.py frontend.py pair.py with NumPy to reproduce the toy checks.
+
+~~~python
+from itertools import product
+from math import ceil,exp,pi
+from random import Random
+import numpy as np
+
+def exercise(front,wrapper,n,roots):
+    rng=Random(60414);extra=Random(50718);share_rng=Random(7103)
+    q=7**28;rad=256;k=ceil(q.bit_length()/8);t=2
+    public_B=q//4096;bytes_per=(q.bit_length()+7)//8
+    clauses=[(1,2),(1,-2),(-1,2)]
+    def arr(r,c,f):return np.array([[f() for _ in range(c)] for _ in range(r)],dtype=object)
+    def digits(z):
+        z=z.copy()%q;rows=[]
+        for _ in range(k):rows.append(z%rad);z=z//rad
+        assert not z.any()
+        return np.stack(rows,axis=1).reshape((-1,z.shape[1]))
+    def gauss(center,width,stream=None):
+        stream=rng if stream is None else stream
+        lo=int(np.floor(center-12*width));hi=int(np.ceil(center+12*width))
+        while True:
+            j=stream.randint(lo,hi)
+            if stream.random()<exp(-pi*((j-center)/width)**2):return j
+    u0,_=front['compile_program']([clauses[0]],2,0)
+    w=len(u0);d=n*w;a=4;m=a+d*k;I=np.eye(a,dtype=object)
+    G=np.kron(np.eye(d,dtype=object),np.array([[rad**j for j in range(k)]],dtype=object))
+    def trap():
+        A0=arr(d,a,lambda:rng.randrange(q));S=arr(a,d*k,lambda:rng.randrange(-1,2))
+        A=np.hstack((A0,(G-A0@S)%q))
+        one=np.zeros((k,k),dtype=object)
+        for j in range(k-1):one[j,j]=rad;one[j+1,j]=-1
+        rem=q
+        for j in range(k):rem,digit=divmod(rem,rad);one[j,-1]=digit
+        assert rem==0
+        block=np.kron(np.eye(d,dtype=object),one)
+        lift=digits(-A0)
+        basis=np.block([[S@block,I+S@lift],[block,lift]])
+        assert not ((A@basis)%q).any()
+        # Each gadget kernel has determinant q. The remaining columns project to
+        # the identity on top coordinates after undoing the unit shear.
+        ortho,tri=np.linalg.qr(np.asarray(basis,float))
+        sigma=16*abs(np.diag(tri)).max()
+        def preimages(target):
+            y0=digits(target);y=np.vstack((S@y0,y0))
+            centers=ortho.T@np.asarray(y,float)
+            for j in reversed(range(m)):
+                width=sigma/abs(tri[j,j])
+                z=[gauss(-c/tri[j,j],width) for c in centers[j]]
+                centers[:j]+=np.outer(tri[:j,j],z)
+                y+=np.outer(basis[:,j],np.array(z,dtype=object))
+            assert not ((A@y-target)%q).any()
+            return y
+        return A,preimages
+
+    code=wrapper['codes']([[0],[1],[2]],[1,1,1])
+    badleaf=[];samples=0;residuals=0;dec_calls=0;passed=0;failed=0
+    def enc_leaf(i,msg):
+        nonlocal samples,residuals
+        u,layers=front['compile_program']([clauses[i]],2,msg)
+        assert len(u)==w and len(layers)==2
+        A0,pre=trap();Af=arr(d,t,lambda:rng.randrange(q))
+        buf=[];plain=[];enc=[]
+        for j,branches in enumerate(layers):
+            Fpair=[];Cpair=[]
+            for edges in branches:
+                M=np.zeros((w,w),dtype=object)
+                for src,dst in edges:M[src,dst]=1
+                S=arr(n,n,lambda:gauss(0,2.5))
+                F=np.kron(np.array([u],dtype=object)@M,S)[:roots] if j==0 else np.kron(M,S)
+                A=A0 if j==0 else Af
+                if j==0:
+                    noise=arr(1,A.shape[1],lambda:gauss(0,2))
+                    if roots>1:noise=np.vstack((noise,arr(roots-1,A.shape[1],lambda:gauss(0,2,extra))))
+                else:noise=arr(F.shape[0],A.shape[1],lambda:gauss(0,2))
+                target=(F@A+noise)%q
+                C=target if j==0 else pre(target)
+                if j:samples+=t
+                Fpair.append(F);Cpair.append(C)
+                buf.append(b''.join((int(x)%q).to_bytes(bytes_per,'little') for x in C.flat))
+            plain.append(Fpair);enc.append(Cpair)
+        for a,b in product((0,1),repeat=2):
+            err=(enc[0][a]@enc[1][b]-plain[0][a]@plain[1][b]@Af+q//2)%q-q//2
+            assert max(map(abs,err.flat))<=public_B;residuals+=1
+            if any((a,b)[abs(v)-1]==(v>0) for v in clauses[i]):
+                obs=(enc[0][a]@enc[1][b]+q//2)%q-q//2
+                if int(max(map(abs,obs.flat))>public_B)!=msg:
+                    badleaf.append((i,msg,a,b,not (plain[0][a]@plain[1][b]).any()))
+        return b''.join(buf)
+    def dec_leaf(i,blob,word):
+        nonlocal dec_calls
+        dec_calls+=1
+        a,b=word&1,word>>1&1
+        def fetch(start,count):
+            return np.array([int.from_bytes(blob[j:j+bytes_per],'little') for j in
+                range(start*bytes_per,(start+count)*bytes_per,bytes_per)],dtype=object)
+        root=fetch(a*roots*m,roots*m).reshape(roots,m);last=fetch(2*roots*m+b*m*t,m*t).reshape((m,t))
+        observed=(root@last+q//2)%q-q//2
+        return int(max(map(abs,observed.flat))>public_B)
+    for bit in (0,1):
+        ct=wrapper['encrypt'](code,bit,lambda:share_rng.randrange(2),enc_leaf)
+        size=sum(len(x) for row in ct.values() for x in row)
+        for word in range(64):
+            cert={}
+            for i,clause in enumerate(clauses):
+                v=word>>(2*i)&3
+                if any(((v>>(abs(x)-1))&1)==(x>0) for x in clause):cert[i]=v
+            if len(cert)<2:continue
+            before=dec_calls;out=wrapper['decrypt'](code,ct,cert,dec_leaf);assert dec_calls-before==2
+            if out==bit:passed+=1
+            else:failed+=1
+        print('end-to-end bit / serialized payload bytes / matrix columns',bit,size,m)
+    print('valid opens passed / failed, leaf decryptions, exact residuals, sampled columns:',
+          passed,failed,dec_calls,residuals,samples)
+    print('dimension / root rows and erroneous valid leaf paths (id,msg,a,b,zero integer signal):',n,roots,badleaf)
+    return failed
+if __name__=='__main__':
+    import sys,runpy
+    front,wrapper=[runpy.run_path(p) for p in sys.argv[1:]]
+    exercise(front,wrapper,4,1)
+    assert exercise(front,wrapper,4,2)==0
+    assert exercise(front,wrapper,8,1)==0
+~~~
