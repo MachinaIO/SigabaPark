@@ -1,1 +1,0 @@
-{"theorem": "AdvancedEncryption.WE.LeafView.uniformRow_masks_shift", "proof_type": "prove", "explanation": "Use multi-column leftover hashing in both worlds, translation invariance of the uniform spare row, and exact factorization of the conditional key law through the ordinary row hashes. A fiber representative is used only to identify statistical laws."}
