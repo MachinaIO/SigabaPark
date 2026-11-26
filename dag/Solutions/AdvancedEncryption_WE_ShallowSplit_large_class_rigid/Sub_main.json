@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ShallowSplit.large_class_rigid", "proof_type": "prove", "explanation": "The large kappa-class c is monochromatic under kappa', so c is inside the kappa'-class c'; c' is then large, hence kappa-monochromatic, hence inside c."}

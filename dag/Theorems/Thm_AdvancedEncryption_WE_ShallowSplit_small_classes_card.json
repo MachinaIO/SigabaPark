@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ShallowSplit.small_classes_card", "title": "If every class has at most b elements then there are at least |V|/b classes", "statement": "For kappa : V -> S with every fiber of size <= b, card V <= b * card S."}

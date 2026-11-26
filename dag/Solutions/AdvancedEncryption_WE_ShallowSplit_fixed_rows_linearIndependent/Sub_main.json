@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ShallowSplit.fixed_rows_linearIndependent", "proof_type": "prove", "explanation": "Apply L t and L (t+1) to a vanishing combination sum g y X y = 0, subtract and evaluate at u: only the x term survives, so g x times a nonzero difference is 0."}
