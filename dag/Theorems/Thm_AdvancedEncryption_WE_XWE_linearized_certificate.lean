@@ -1,4 +1,6 @@
-import SigabaNeoStd
+import Mathlib.LinearAlgebra.Pi
+import Mathlib.LinearAlgebra.Prod
+import Mathlib.Tactic.LinearCombination
 
 open LinearMap
 
