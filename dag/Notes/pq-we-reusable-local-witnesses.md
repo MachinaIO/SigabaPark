@@ -1,6 +1,6 @@
 ---
 title: Reusing local certificates and eliminating repeated encryptions in separator WE
-refs: [definition:WE_CircuitSAT, theorem:AdvancedEncryption.WE.Separator.support_insert]
+refs: [definition:WE_CircuitSAT, theorem:AdvancedEncryption.WE.Separator.support_insert, theorem:AdvancedEncryption.WE.Separator.template901_counts]
 tags: [witness-encryption, circuit-sat, compilation, complexity]
 ---
 
@@ -41,6 +41,8 @@ Bound the number of states and explicit edges before allocation, the total canon
 * An eight-bag, 4096-gate conjunction with strictly increasing local guard prefixes gives 15 nonconstant types. Equality-only compilation encrypts eight leaves. Twenty-eight proper conjunct projections reduce this to one, the strongest guard, and 896 sampled source-to-target witness implications were checked. No PRG is used.
 * A separate family uses four fresh sets of 31 private inputs with the same 120-clause CNF template and a carried conjunction. The compiler produces one opaque 31-input predicate without tabulating its 2^31 witnesses. The same signed-AND simplifier and first-use variable ordering are applied to the full circuit and the leaf. Feed both into the live-clause matrix compiler of [PR 99](https://github.com/MachinaIO/SigabaPark/pull/99). At a fixed scale m=alpha*w the interior residue count is 2(h-2)w² alpha². On the three planted seeds 81–83 the full-to-leaf interior ratio is 4.057–4.058. On unplanted seed 901 the shapes are (1551,456) and (387,454), and the coefficients are 644185728 and 158709320, ratio 4.059. The success or failure of the unplanted CNF is not needed or asserted. This control directly exploits repetition of independently witnessed subproblems. It measures compiled matrix dimensions, not a lattice security level, total bytes or measured encryption time.
 * Distinct incomparable types may give no compression. The unconditional algebraic transformations preserve whichever leaf assumptions the backend needed. The conditional polynomial benchmark of PR 99 still uses additional assumptions beyond ordinary registered LWE.
+
+The shortened matrix backend also permits an end-to-end count for the encrypted part. Including both endpoints, h>=2 levels and m columns give C=2m(1+t)+2(h-2)m² transmitted residues, P=2((h-2)m+t) sampled preimage columns, and D=(h-2)m²+mt selected modular multiply-adds in Dec. For each of the four measured templates the listing verifies coefficient inequalities implying C_full>4 C_leaf, P_full>4 P_leaf and D_full>4 D_leaf for *every* common integral alpha>=1 and 1<=t<=alpha*w_leaf. The full scheme also has over four times as many levels. For unplanted seed 901 these three strict inequalities are the second Lean theorem, with the measured shapes supplied as inputs. This comparison uses fresh matrices and the same modulus and scale on both sides, with framing omitted; the single-leaf tree requires no public masks. It covers the complete matrix payload and these two operation counts, without claiming measured runtime, a security parameter selection, or a fourfold reduction in total machine steps including compilation and witness conversion.
 
 To reproduce, take nand.py from the second listing in [PR 102 at d49bd9e](https://github.com/MachinaIO/SigabaPark/blob/d49bd9eeb7d5a4cacdfd6b4d774348e55ad6a0f9/dag/Notes/pq-we-separator-paths.md) and frontend.py from the first listing in [PR 99 at 58036ab](https://github.com/MachinaIO/SigabaPark/blob/58036abbee86216e6e0bf18a4a8234c6d55d82cb/dag/Notes/pq-we-live-clause-matrix-product.md). Run the four listings as python labels.py nand.py, python implications.py labels.py nand.py, python shapes.py labels.py nand.py frontend.py, and python pads.py.
 
@@ -473,6 +475,16 @@ def run(lib,base,front):
         if trace[-1]:assert used
         m,l=[matrix_shape(key,front['compile_program']) for key in (k0,k)]
         coeff=lambda h:2*(h[0]-2)*h[1]**2
+        # For every common alpha>=1 and 1<=t<=alpha*local_width:
+        # lower-bound full-minus-four-local costs by using t<=alpha*local_width.
+        H,W=m;h,w=l
+        inner=(H-2)*W**2-4*(h-2)*w**2
+        border=4*w-W
+        assert border>=0 and inner>border*(w+1) # two endpoints incl. root
+        assert (H-2)*W-4*(h-2)*w>3*w # preimage columns incl. final t
+        assert H>4*h
+        print('coefficients certifying >4x for payload, MACs, sampled columns:',
+              inner,border,(H-2)*W-4*(h-2)*w)
         print('seed / full and leaf (levels,width) / interior coefficients / quotient:',
               seed,m,l,coeff(m),coeff(l),round(coeff(m)/coeff(l),3))
 if __name__=='__main__':run(*(runpy.run_path(x) for x in sys.argv[1:]))
