@@ -221,3 +221,106 @@ def check():
     print(chains,'matrix paths;',cases,'prime-power row distributions')
 if __name__=='__main__':check()
 ~~~
+
+The third listing runs both shortened encryption and decryption for a two-input NAND using NumPy. Extract the first listing as frontend.py and this listing as toy.py, then run OPENBLAS_NUM_THREADS=1 python toy.py frontend.py. It constructs gadget trapdoors, samples short preimages by randomized nearest-plane sampling, checks every preimage congruence, sends one root row and two terminal columns, and evaluates every path with modular integer arithmetic. Its small setup, floating Gaussian decisions, deterministic test RNG, uniform final matrix, and observed error threshold are for a correctness diagnostic only. In particular the diagnostic computes a bound from private sampled norms to check the estimates; a WE decoder must instead use a public parameter bound as above.
+
+With the same seed at lattice dimensions 2 and 4, all 32 path residuals satisfied their bounds. At dimension 2 five of six valid decryptions passed. The missed bit-one path lost its tensor row modulo 7. At dimension 4 all six passed; each ciphertext used 303416 residues and Enc sampled 780 preimage columns. At that same m=388 the full three-level dense layout has 605280 residues (2*4*388+4*388²) and 1552 preimage columns. This directly exercises the survival term in the correctness estimate and shows why one successful small instance would not suffice to set security parameters.
+
+~~~python
+"""Toy lattice chain. Integer congruences checked exactly, floating Gaussian sampler."""
+from itertools import product
+import numpy as np
+from math import ceil,exp,pi,log
+from random import Random
+
+def toy(front,n):
+    rng=Random(6091);q=7**45;rad=256;k=ceil(q.bit_length()/8)
+    cs=front['nand_cnf'](2,[(1,2)])
+    def arr(r,c,f):return np.array([[f() for _ in range(c)] for _ in range(r)],dtype=object)
+    def digits(z):
+        z=z.copy()%q;rows=[]
+        for _ in range(k):rows.append(z%rad);z=z//rad
+        assert not z.any()
+        return np.stack(rows,axis=1).reshape((-1,z.shape[1]))
+    def gauss(center,width):
+        lo=int(np.floor(center-12*width));hi=int(np.ceil(center+12*width))
+        while True:
+            j=rng.randint(lo,hi)
+            if rng.random()<exp(-pi*((j-center)/width)**2):return j
+    u0,l0=front['compile_program'](cs,3,0)
+    w=len(u0);d=n*w;a=4;m=a+d*k;I=np.eye(a,dtype=object)
+    G=np.kron(np.eye(d,dtype=object),np.array([[rad**j for j in range(k)]],dtype=object))
+    def trap():
+        A0=arr(d,a,lambda:rng.randrange(q));S=arr(a,d*k,lambda:rng.randrange(-1,2))
+        A=np.hstack((A0,(G-A0@S)%q))
+        one=np.zeros((k,k),dtype=object)
+        for j in range(k-1):one[j,j]=rad;one[j+1,j]=-1
+        rem=q
+        for j in range(k):rem,digit=divmod(rem,rad);one[j,-1]=digit
+        assert rem==0
+        block=np.kron(np.eye(d,dtype=object),one)
+        lift=digits(-A0)
+        basis=np.block([[S@block,I+S@lift],[block,lift]])
+        assert not ((A@basis)%q).any()
+        # Each gadget kernel has determinant q. The remaining columns project to
+        # the identity on top coordinates after undoing the unit shear.
+        ortho,tri=np.linalg.qr(np.asarray(basis,float))
+        sigma=16*abs(np.diag(tri)).max()
+        def preimages(target):
+            y0=digits(target);y=np.vstack((S@y0,y0))
+            centers=ortho.T@np.asarray(y,float)
+            for j in reversed(range(m)):
+                width=sigma/abs(tri[j,j])
+                z=[gauss(-c/tri[j,j],width) for c in centers[j]]
+                centers[:j+1]+=np.outer(tri[:j+1,j],z)
+                y+=np.outer(basis[:,j],np.array(z,dtype=object))
+            assert not ((A@y-target)%q).any()
+            return y
+        return A,preimages
+    valid=0;checks=0;fail=[]
+    for bit in (0,1):
+        u,layers=front['compile_program'](cs,3,bit)
+        ct=[];logical=[];maxerr=0;maxS=0;maxD=0;samplers=0;t=2
+        for i,choices in enumerate(layers):
+            final=i==len(layers)-1
+            if final:
+                # Uniform final matrix in the statistically switched experiment.
+                A=arr(d,t,lambda:rng.randrange(q));next_pre=None
+            else:A,next_pre=trap()
+            pair=[];plain=[]
+            for edges in choices:
+                M=np.zeros((w,w),dtype=object)
+                for s,j in edges:M[s,j]=1
+                S=arr(n,n,lambda:gauss(0,2.5));maxS=max(maxS,max(map(abs,S.flat)))
+                F=np.kron(np.array([u],dtype=object)@M,S)[:1] if not i else np.kron(M,S)
+                E=arr(F.shape[0],A.shape[1],lambda:gauss(0,2))
+                maxerr=max(maxerr,max(map(abs,E.flat)))
+                Z=(F@A+E)%q
+                if i:
+                    D=pre(Z);samplers+=Z.shape[1]
+                    maxD=max(maxD,max(map(abs,D.flat)));pair.append(D)
+                else:pair.append(Z)
+                plain.append(F)
+            ct.append(pair);logical.append(plain);pre=next_pre
+        B=maxerr
+        for _ in layers[1:]:
+            B=m*maxD*B+d*(len(cs)+1)*(n*max(1,maxS))**len(layers)*maxerr
+        assert 16*(B+1)<q
+        for path in product(range(2),repeat=3):
+            y=ct[0][path[0]];F=logical[0][path[0]]
+            for i,b in enumerate(path[1:],1):y=(y@ct[i][b])%q;F=F@logical[i][b]
+            center=lambda a:(a+q//2)%q-q//2
+            assert max(map(abs,center(y-F@A).flat))<=B;checks+=1
+            if path[2]==1 and not(path[0] and path[1]):
+                decoded=int(max(map(abs,center(y).flat))>B)
+                if decoded!=bit:fail.append((path,not (F%7).any()))
+                valid+=1
+        print('message, levels, width, m, residues, preimage columns, B bits:',
+              bit,len(layers),w,m,sum(c.size for pair in ct for c in pair),samplers,int(B).bit_length())
+    print('dimension',n,'exact residuals',checks,'correct valid decryptions',valid-len(fail),'of',valid,'failures (path, vanished mod 7)',fail)
+    return fail
+if __name__=='__main__':
+    import sys,runpy
+    front=runpy.run_path(sys.argv[1]);toy(front,2)
+    assert not toy(front,4)
+~~~
