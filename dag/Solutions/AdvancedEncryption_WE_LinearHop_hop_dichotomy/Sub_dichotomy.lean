@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Common
+import Mathlib.Data.Set.Card
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Dimension.Finite
 
 theorem solution {K U V : Type*} [Field K] [Fintype K] [AddCommGroup U] [Module K U]
     [Fintype U] [AddCommGroup V] [Module K V] (L : U →ₗ[K] V) (c : V)

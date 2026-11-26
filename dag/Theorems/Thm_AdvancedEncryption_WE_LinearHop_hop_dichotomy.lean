@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Common
+import Mathlib.Data.Set.Card
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Dimension.Finite
 
 /-- Linear embedding hop dichotomy (note `pq-we-linear-hop-barrier`): if `h ∘ L = 0`, the value
 `h (L b + c)` does not depend on the embedded `b`; otherwise, for uniform `u`, `h (L u + c)` is

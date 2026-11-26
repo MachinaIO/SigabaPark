@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Common
+import Mathlib.Data.Set.Card
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Dimension.Finite
 
 /-- A monotone chain of subspaces `R 0 ≤ R 1 ≤ …` of a finite-dimensional space has at most
 `finrank K V` strict steps below any `n`. Counting core of the linear-hop barrier (note

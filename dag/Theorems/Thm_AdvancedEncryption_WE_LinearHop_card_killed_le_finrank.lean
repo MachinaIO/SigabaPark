@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Common
+import Mathlib.Data.Set.Card
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Dimension.Finite
 
 /-- Per-hop kill count (note `pq-we-linear-hop-barrier`): at most `finrank K V` indices `r` have a
 hop embedding `L r` that is invisible to every later functional `h t` (`t > r`) but visible to
