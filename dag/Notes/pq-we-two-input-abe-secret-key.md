@@ -1123,3 +1123,45 @@ for _ in range(150):
     assert periods(tabs)=={d for d in range(1<<L) if all(a==f[x^d] for x,a in enumerate(f))}
 print("150 width-three schedules: full computed period spaces equal truth-table stabilizers")
 ~~~
+
+## Projecting existential acceptance by counting holes in an affine hull
+
+A verifier can have trivial translation stabilizer but accept enough words that private consistency need not be routed explicitly. For a fixed incoming state let A be the accepting language over unrestricted binary level choices of length L. The actual streams for a shared input y are o(y)+C with the public offset o(y) and binary private code C as above. First handle empty A by rejecting. Compute its affine hull H=h+V, its size |A|, the number of holes e=2^dim(V)-|A|, and r=dim(V intersect C). Whenever e<2^r the exact residual predicate is
+
+    there exists a private accepting completion  iff  o(y)+h belongs to C+V.
+
+Indeed the right side is exactly nonempty intersection of the two affine spaces. Every nonempty intersection has 2^r points, and the e missing words cannot cover it. In particular a parity-check matrix for C+V supplies ordinary Boolean parity tests on the offset bits. The residual predicate needs no new private bits. Every accepting original witness restricts to a valid residual witness. For false-instance WE the reverse implication requires only existence: the count proves it without handing the decryptor a private completion. If a reverse witness is required for another application, sampling uniform points of a nonempty intersection succeeds with probability at least 1-e/2^r; a tiny gap in absolute counts alone does not guarantee efficient sampling. More generally at most floor(e/2^r) of the C-cosets meeting H can be completely empty of A, because their intersections are disjoint. Guessing how the holes are distributed when the strict test fails is unsound. Equality can already fail for A equal to a full affine space of dimension at least two minus one word and C=0.
+
+These inputs to the test are available without enumerating A. On the public deterministic layered verifier propagate, per state, the count of distinct reaching prefixes and a basis for the span of their augmented vectors (1,prefix). Appending an answer bit acts linearly on augmented vectors. Sum counts over incoming labeled edges, including both answers when they reach the same state; determinism gives each word one path. Merge bases by Gaussian elimination. Combine accepting terminal states; taking the first-coordinate-one slice of their augmented span gives H. Counts require at most L+1 bits. This yields polynomial preprocessing in L, the explicit verifier size and the private code dimensions. The same calculation can be restricted to paths visiting a given state at an internal cut, testing its language separately. The OR of the resulting projected systems is exact if all nonempty components pass their tests; uncertified components need exact residual verification or a fallback. Costs and correctness of the retained core WE are unchanged except for the new residual predicates and preprocessing.
+
+For example take L>=3 and let A consist of words with first bit zero except the all-zero word. Its affine hull is the whole first-bit-zero hyperplane and its global period space is zero. If C is any nonzero subcode of that hyperplane, e=1<|C|. For every shared offset, the residual check is precisely that its first bit is zero, even if C contains long-range repeated-bit dependencies. This is a predicate-sensitive simplification outside the global-period method. No comparable density guarantee holds for arbitrary CircuitSAT.
+
+~~~python
+from itertools import combinations
+def span(vs):
+    out={0}
+    for v in vs: out|={x^v for x in out}
+    return frozenset(out)
+codes={span(chosen) for i in range(4) for chosen in combinations(range(1,8),i)}
+passed=exceptional=0
+for mask in range(1,256):
+    A={x for x in range(8) if mask>>x&1}
+    h=min(A)
+    V=span(a^h for a in A)
+    H={h^v for v in V}
+    holes=len(H)-len(A)
+    for C in codes:
+        size=len(V&C)
+        missing=set()
+        for o in range(8):
+            coset=frozenset(o^c for c in C)
+            actual=bool(A&coset)
+            projected=bool(H&coset)
+            if projected and not actual: missing.add(coset)
+            if holes<size:
+                assert actual==projected
+                passed+=1
+        assert len(missing)<=holes//size
+        exceptional+=bool(missing)
+print(passed,"certified offset tests;",exceptional,"language/code pairs with a missing coset")
+~~~
