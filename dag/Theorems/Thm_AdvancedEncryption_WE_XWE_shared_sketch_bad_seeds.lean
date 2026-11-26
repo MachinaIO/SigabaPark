@@ -1,4 +1,4 @@
-import Mathlib
+import SigabaNeoStd
 
 theorem AdvancedEncryption.WE.XWE.shared_sketch_bad_seeds {T V S : Type*} [DecidableEq V] [DecidableEq S]
     (cert : Finset T) (res : T → Finset V) (bad : V → Finset S) (B D : ℕ)
