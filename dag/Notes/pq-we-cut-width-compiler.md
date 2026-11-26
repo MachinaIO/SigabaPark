@@ -994,7 +994,7 @@ def block(cs,pos,cap):
         reduced.append(trans);classes=prev
     return order,list(reversed(reduced)),classes[(1<<len(cs))-1]
 
-def compile_blocks(cs,order,bit,p,cap):
+def compile_blocks(cs,order,bit,p,cap,groups=None):
     pos={v:i for i,v in enumerate(order)}
     cs=sorted(cs,key=lambda c:(max((pos[abs(v)] for v in c),default=-1),len(c),c))
     H=max(1,len(order))
@@ -1006,7 +1006,7 @@ def compile_blocks(cs,order,bit,p,cap):
         assert len(group)>1
         mid=len(group)//2
         return split(group[:mid])+split(group[mid:])
-    groups=split(cs)
+    if groups is None:groups=split(cs)
     buckets=(len(groups)+p-2)//(p-1)
     lanes=max(1,min(len(groups),p-1));base=2+buckets+lanes-1
     layers=[[{(a,a) for a in range(base)} for _ in (0,1)] for _ in range(H)]
@@ -1092,5 +1092,129 @@ def audit(front,cut,lut,mixed,buckets):
             if j%2:w[n]^=1
             word=[tr[v] for v in stream_order]+w
             assert (sum(front['eval_program'](pr,word))==0)==(j%2==0)
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
+
+
+### Minimizing peak width across bounded violation blocks
+
+For p=2, the width of the preceding encoder can be optimized directly. Keep its clause order, state cap, two permanent coordinates and one output coordinate per block. For an interval I of the ordered clauses that passes the state cap, let l_I(h) be one plus the number of live nonterminal states of its minimized block after level h, including the states carried through gaps between relevant variables. For a partition P into such intervals, the actual encoder allocates width
+
+    2 + max_h sum_{I in P} l_I(h).
+
+The one in each interval's load charges its output coordinate, including the initial and final boundaries where no scratch is used. The listing prices every contiguous interval in the two main controls. The capped constructor can cost polynomial time even when an uncapped block is infeasible: try O(c²) intervals, each with bounded states and polynomial-size masks. A smaller optional library retains bisections and aligned power-of-two intervals, giving an upper bound on unrestricted interval cost; its lower bound applies only to that library. The previous construction remains available when order search or matrix compilation time dominates. The listed encoder accepts the planner's internal partition without rebuilding its blocks.
+
+For any public nonnegative integer prices pi_h with positive sum T, a shortest path over clause boundaries minimizes the sum of interval prices, where the price of I is the dot product of pi with its load. Let D be that shortest-path value. Every integral partition has peak width at least 2+ceil(D/T), since its weighted average load cannot exceed its peak load. Evaluate the actual peak for each returned partition, keep the smallest, raise prices at bottleneck levels, and repeat a bounded number of rounds. Each round gives a valid lower bound independently of the update rule. An equality between a lower bound and an emitted width certifies optimality in this fixed construction family. A gap after the last round still gives a usable interval of proven costs. A locally constant NO block is handled by the established constant program separately.
+
+On the separated 16-bit equality control with additional disjunctions, cap eight and 64 levels, bisection used width 51. A partition into eight blocks gives width 42. D=65071 and T=1664 yield the matching lower bound 42. On the combined 260-clause control, cap sixteen and 234 levels, bisection used width 118. A partition into 49 blocks emits width 83. D=637841 and T=7956 give 2+ceil(D/T)=83. In both cases the library contains **every interval** that the stated forward state-cap test admits, including single clauses. At equal scale the change from 118 to 83 reduces interior square-block payload, selected dense interior Dec operations and one-dimensional sampling counts by about 50.5%. This is optimal width for that clause order, cap, interval family and emitter. Noncontiguous groups, different variable orders, shared states, other caps, and alternative encryption constructions can yield different widths. The search and its certificate do not discharge the backend security assumptions.
+
+Run python prices.py blocks.py lut.py cut.py frontend.py with NumPy. The listing compares planned loads with emitted dimensions, checks all block flags for both message bits on 400 selected paths across the two controls, and cross-checks bounds by enumerating partitions of small full libraries. The margin check keeps the reference integer dot products within int64; arbitrary precision dot products give the same algorithm beyond that range.
+
+~~~python
+"""Primal layouts and integer lower bounds on a public interval-block library, p=2."""
+from random import Random
+from itertools import product
+import sys,runpy
+import numpy as np
+
+def profile(pr,H):
+    levels,tables,initial=pr
+    out=np.zeros(H,dtype=np.int64)
+    nodes={initial} if initial>0 else set()
+    for j,(i,tab) in enumerate(zip(levels,tables)):
+        nodes={w for v in nodes for w in tab[v] if w>0}
+        if j+1<len(levels):out[i:levels[j+1]]=len(nodes)
+    return out
+
+def plan(cs,order,cap,block,rounds=64,all_intervals=False):
+    pos={v:i for i,v in enumerate(order)}
+    cs=sorted(cs,key=lambda c:(max(pos[abs(v)] for v in c),len(c),c))
+    C=len(cs);H=max(1,len(order));ends=[[] for _ in range(C+1)]
+    candidates=set()
+    def split(i,j):
+        candidates.add((i,j))
+        if j-i>1:
+            mid=(i+j)//2;split(i,mid);split(mid,j)
+    if C:split(0,C)
+    size=1
+    while size<=C:
+        for i in range(0,C-size+1,max(1,size//4)):candidates.add((i,i+size))
+        size*=2
+    if all_intervals:candidates.update((i,j) for j in range(1,C+1) for i in range(j))
+    loads=[];arcs=[]
+    for i,j in sorted(candidates):
+        pr=block(cs[i:j],pos,cap)
+        if pr is None:continue
+        if pr[2]==-1:return [(cs[i:j],pr)],1,1
+        idx=len(loads);loads.append(1+profile(pr,H));arcs.append((i,j,pr));ends[j].append((i,idx))
+    if not C:return [],2,2
+    A=np.array(loads)
+    prices=np.ones(H,dtype=np.int64)
+    best=None;lower=2
+    # Integer arithmetic; for larger inputs use arbitrary precision if this check fails.
+    assert H*(rounds+1)*(rounds+1)*(int(A.max())+1)*C*8<2**62
+    for step in range(rounds):
+        cost=A@prices
+        dist=[0]*(C+1);back=[None]*(C+1)
+        for j in range(1,C+1):
+            dist[j],i,idx=min((dist[i]+int(cost[idx]),i,idx) for i,idx in ends[j])
+            back[j]=(i,idx)
+        total=int(prices.sum());lower=max(lower,2+(dist[C]+total-1)//total)
+        j=C;path=[]
+        while j:
+            j,idx=back[j];path.append(idx)
+        load=A[path].sum(axis=0);bound=2+int(load.max())
+        if best is None or bound<best[0]:best=(bound,path[::-1])
+        if lower==best[0]:
+            if C>=40:print('certificate: clauses, weighted minimum, price sum, certified width',C,dist[C],total,2+(dist[C]+total-1)//total)
+            break
+        hot=np.flatnonzero(load==load.max())
+        # Add mass to just one current bottleneck to avoid reinforcing long plateaus.
+        prices[hot[step%len(hot)]]+=H*(1+(rounds-step)//8)
+    groups=[(cs[arcs[k][0]:arcs[k][1]],arcs[k][2]) for k in best[1]]
+    return groups,lower,best[0]
+
+def audit(blocks,lut,cut,front):
+    rng=Random(42951)
+    n=16
+    eq=[c for i in range(1,n+1) for c in [(i,-i-n),(-i,i+n),(2*n+2*i-1,2*n+2*i)]]
+    N=128;gates=[];prev=0
+    for i in range(1,N+1):
+        for j in range(32):
+            gates.append((prev,i if j%3==0 else prev));prev=N+len(gates)
+    s,o=lut['frontend'](N,gates,4);shift=max(o)
+    combined=s+[tuple((1 if x>0 else -1)*(abs(x)+shift) for x in c) for c in eq]
+    for cs,order,cap in [(eq,list(range(1,65)),8),(combined,o+[shift+i for i in range(1,65)],16)]:
+        cs=cut['canonical'](cs)
+        old=blocks['compile_blocks'](cs,order,0,2,cap)[0]
+        groups,lb,ub=plan(cs,order,cap,blocks['block'],all_intervals=True)
+        programs=[blocks['compile_blocks'](cs,order,b,2,cap,groups)[0] for b in (0,1)]
+        assert all(len(pr[0])==ub for pr in programs) and lb<=ub
+        print('levels/cap/groups/old width/lower/actual width',len(order),cap,len(groups),len(old[0]),lb,ub)
+        tr=lut['trace'](N,gates,[1]*N)
+        for trial in range(100):
+            w=[rng.randrange(2) for i in range(64)]
+            if trial%2==0:w[16:32]=w[:16];w[32::2]=[1]*16
+            word=([tr[v] for v in o] if len(order)>64 else [])+w
+            vals=dict(zip(order,word))
+            fails=[any(not any(vals[abs(x)]==(x>0) for x in c) for c in group) for group,_ in groups]
+            for b,pr in enumerate(programs):
+                row=front['eval_program'](pr,word)
+                assert row[1]==b and row[2:2+len(groups)]==fails
+    # Cross-check the dual bound against every partition on short full libraries.
+    for _ in range(40):
+        o=list(range(1,6))
+        cs=cut['canonical']([tuple(v*rng.choice((-1,1)) for v in rng.sample(o,2)) for i in range(8)])
+        cs.sort(key=lambda c:(max(o.index(abs(x)) for x in c),len(c),c))
+        groups,lb,ub=plan(cs,o,3,blocks['block'],all_intervals=True)
+        if lb==1:continue
+        opt=None
+        for cuts in product((0,1),repeat=len(cs)-1):
+            ix=[0]+[i for i,b in enumerate(cuts,1) if b]+[len(cs)]
+            parts=[blocks['block'](cs[i:j],{v:k for k,v in enumerate(o)},3) for i,j in zip(ix,ix[1:])]
+            if any(p is None for p in parts):continue
+            value=2+len(parts)+int(np.sum([profile(p,len(o)) for p in parts],axis=0).max())
+            opt=value if opt is None else min(opt,value)
+        assert lb<=opt<=ub
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
