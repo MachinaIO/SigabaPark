@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.affine_port_image",
+  "proof_type": "prove",
+  "explanation": "Represent equation and port values by a single linear image. Evaluation at the candidate point vanishes on the span of the supplied checks. Double-annihilator separation then gives an actual preimage."
+}

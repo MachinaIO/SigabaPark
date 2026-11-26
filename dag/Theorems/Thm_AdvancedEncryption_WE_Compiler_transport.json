@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.transport",
+  "title": "Witness-encryption relation compilation with explicit framing cost",
+  "statement": "A public statement and witness compiler reflecting satisfiability preserves WE correctness and false-statement security when the algorithm laws match and the framed adversary simulation costs at most a power-of-two factor covered by the target security bits."
+}

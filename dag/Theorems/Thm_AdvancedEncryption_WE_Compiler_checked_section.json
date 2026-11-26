@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.checked_section",
+  "title": "Two matrix identities certify a parity test and a witness section",
+  "statement": "If H annihilates L and LD+EH is the identity, the zero tests of H precisely characterize the image of L, and D explicitly lifts every passing output."
+}

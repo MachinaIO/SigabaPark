@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.checked_section",
+  "proof_type": "prove",
+  "explanation": "Evaluate the decomposition on a passing output and the annihilator identity on any source input."
+}

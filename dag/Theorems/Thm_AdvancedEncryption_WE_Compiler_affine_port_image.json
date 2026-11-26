@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.affine_port_image",
+  "title": "Exact projected witness image from a complete family of linear checks",
+  "statement": "A port value has a full preimage satisfying the affine equations and its nonlinear guard exactly when the guard holds and all generators of the joint-image annihilator vanish on the right-hand side and port value."
+}
