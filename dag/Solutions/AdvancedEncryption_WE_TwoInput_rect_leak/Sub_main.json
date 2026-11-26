@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.TwoInput.rect_leak",
+ "proof_type": "prove",
+ "explanation": "Expand vecMul over the sums and differences (add_vecMul, sub_vecMul, vecMul_sub, vecMul_smul), then ring pointwise."
+}

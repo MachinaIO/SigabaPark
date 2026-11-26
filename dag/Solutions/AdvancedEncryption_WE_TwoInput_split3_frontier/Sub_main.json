@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.TwoInput.split3_frontier",
+ "proof_type": "prove",
+ "explanation": "Forward by omega. Backward: a = min(E-K1, m), b = min(E-K2, m-a), c = the rest; omega checks all four conditions."
+}
