@@ -66,7 +66,7 @@ theorem solution {n s : ℕ} (φ : Circuit n s) :
     let p := analyze n φ.gates
     (∀ x : Fin n → Bool, Satisfies φ x →
       Satisfies φ (liftBits p (fun i ↦ x i.val))) ∧
-    (∀ β : Bool, encBit (n := n) φ.gates β = true ↔ β = true ∧ ∃ x, Satisfies φ x) := by
+    (∀ β : Bool, AdvancedEncryption.WE.CircuitSAT.WirePolarity.encBit (n := n) φ.gates β = true ↔ β = true ∧ ∃ x, Satisfies φ x) := by
   dsimp only
   let p := analyze n φ.gates
   have dom (x : Fin n → Bool) : Satisfies φ x →
