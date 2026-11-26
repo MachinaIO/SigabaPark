@@ -547,3 +547,42 @@ for u in range(1,4):
                     checked+=1
 print(checked,"signed/repeated-input boundary checks; clause lengths 3, 5 and 9")
 ~~~
+
+## A direct five-instruction NAND check with a matching local lower bound
+
+Let p be the product of controlled permutations before the fixed merger M=(0,2,2), in execution order. It suffices to realize p^{-1}(0)=f, where f is the Boolean violation indicator. Indeed on a good trace only starting state 0 reaches 0; on a bad trace only starting state 1 could reach 0, and state 1 is never a boundary state. M maps both other outcomes to failure. Conversely these two required boundary behaviors force exactly this preimage in either case. This relaxes the previous requirement to implement an entire translation by -f.
+
+Let a,b be the NAND inputs, c the proposed output, and t=1-c. The violation indicator is f=t XOR (ab), with f(0,0,0)=0 in local coordinates (a,b,t). Write R_j(s)=j-s mod 3. Use the following four instructions, each applying its reflection if its named local bit is one and identity otherwise, in the displayed execution order:
+
+    (t, R_1), (a, R_2), (b, R_0), (a, R_2), M.
+
+For verification, the prefix character supports of the control sequence form the open walk empty, t, ta, tab, tb (concatenation means set union here). In the inverse product applied to zero, a controlled reflection R_j with prefix supports U before and V after contributes (j/2)(chi_U-chi_V), since it is involutive. Summing the four contributions gives the F_3 character coefficients (2,2,2,1,2) in that walk order. These are the coefficients of f: expand (1-chi_t*(1-2ab))/2 using a=(1-chi_a)/2 and likewise for b. The listed support has size five. In any word of l such controlled reflections, including controls with reversed polarity, the inverse image of zero has character support at most l+1: each term lies on its two adjacent prefix supports, with signs allowed. Hence three instructions cannot implement this boundary behavior before M on three independent local bits. This proves optimality among single-bit-controlled identity/transposition words with one final fixed M and the stated boundary encoding. It does not bound other gate encodings or joint optimization across gates.
+
+A unit pin uses one conditional R_1 on its violation bit, followed by M. Conjoining g native NAND checks and the output pin gives at most 5g+2 instructions, with g+1 fixed mergers. Constants and complemented controls can be resolved publicly; tied inputs remain correct by specialization. The certificate is the original witness extended by honest gate values. In the reverse direction all accepted checks force exactly those values. For g=4096 this gives 20482 instructions versus the preceding clause-by-clause upper bound 77827, under the same reread model. Each native gate contributes four witness-controlled reads rather than reading arbitrary independent occurrence labels. This reduction sharpens the concrete fixed-assumption WE target; it is not a public-key encoding of the transitions that enforces witness consistency.
+
+~~~python
+from itertools import product
+def step(s,x,word):
+    for i,j in word:
+        if x[i]:
+            s=(j-s)%3
+    return s
+word=((2,1),(0,2),(1,0),(0,2))
+cases=list(product(range(2),repeat=3))
+for x in cases:
+    bad=x[2]^(x[0]&x[1])
+    assert step(0,x,reversed(word))==bad
+    for s in (0,2):
+        assert (0,2,2)[step(s,x,word)]==(2 if bad else s)
+# Exhaust shorter words allowing both polarities at every query.
+ops=list(product(range(3),range(3),range(2)))
+for length in range(4):
+    for short in product(ops,repeat=length):
+        def preimage(x):
+            s=0
+            for i,j,pol in reversed(short):
+                if x[i]^pol: s=(j-s)%3
+            return s
+        assert any(preimage(x)!=(x[2]^(x[0]&x[1])) for x in cases)
+print("16 boundary updates; all 6175 shorter signed-control words excluded")
+~~~
