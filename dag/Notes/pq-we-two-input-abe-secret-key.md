@@ -1058,3 +1058,68 @@ for trial in range(150):
         assert lower==optimum
 print("600 interval families/caps: every exact multicut optimum equals enumeration")
 ~~~
+
+## Relaxing consistency by all global XOR periods of a narrow verifier
+
+Let f on L binary level choices be acceptance of the public deterministic layered verifier from a designated start, *before* enforcing private stream consistency. Compute its translation periods K={d: for all x, f(x+d)=f(x)}, a binary linear space. If the honest level choices are o(y)+C, replace C by C+K in the projection compiler. A relaxed accepting word has form o(y)+c+d; the word o(y)+c is accepted by the period identity. Conversely any honest accepting word remains available. Gaussian elimination splits a relaxed codeword into c and d and lifts c to the private witness. This works for arbitrary shared offsets. For several possible incoming states compute a space valid for each (intersect the period spaces, or compile per state). This is a predicate-dependent relaxation of the previous exact-stream model. It need not minimize the trellis width: compare against the original or any certified period subspace.
+
+The following deterministic algorithm finds the full global period space for fixed state width w, without enumerating words. First discard unreachable states at each layer, then merge states with identical accepting suffix functions by the backwards ordered pair of successor classes (at the end use the output bit). In each resulting layer enumerate permutations of its at most w residual classes. Start with the identity. Add an edge from permutation p to permutation q with label e at layer i exactly if q(delta(s,b))=delta(p(s),b XOR e) for every state and both input bits. End at the identity on terminal classes. Any successful path maps every run on x to the run on x+d while preserving the terminal output. Conversely a period d induces the permutation mapping the residual of each prefix to that of its prefix shifted by d: equal residuals stay equal because shifting every possible suffix by the same remaining bits is bijective and f is invariant. Translation by d is its own inverse, so the induced map is a permutation. It respects the transition equations. Thus the graph recognizes exactly K.
+
+At each permutation compute a basis for the span of reachable augmented prefix labels (1,prefix). Appending a fixed edge bit is linear on augmented vectors, using their first coordinate to append that bit. Taking the span across incoming edges is exact for this calculation. At the final identity project away the leading coordinate; the resulting span is K because the actual accepting labels already form a space. The graph has at most 2L(w!)^2 candidate edges, each checked on at most 2w transitions; label-space propagation adds polynomial factors in L. In particular w=3 suffices for the target automata and entails at most six permutations per layer. This does not imply that every such target has useful periods.
+
+For example let C={(z,z)} with n private bits read twice in the same order. Its middle-cut dimension is n. If the verifier tests even parity, K is the even-parity code, and C+K=K. Its middle-cut dimension is one for nonempty halves, independent of n. The residual predicate is simply even parity of the shared offset. In contrast any singleton accepting language has zero period space. Efficiency gain depends on the predicate and does not supply a cryptographic hiding theorem.
+
+~~~python
+from itertools import permutations
+from random import Random
+rng=Random(981)
+def basis(xs):
+    piv={}
+    for x in xs:
+        while x:
+            j=x.bit_length()
+            if j not in piv:
+                piv[j]=x
+                break
+            x^=piv[j]
+    return list(piv.values())
+def periods(tables):
+    reached=[{0}]
+    for tab in tables:
+        reached.append({t for s in reached[-1] for t in tab[s]})
+    classes={s:int(s==0) for s in reached[-1]}
+    layers=[]
+    for i in reversed(range(len(tables))):
+        pairs={s:tuple(classes[t] for t in tables[i][s]) for s in reached[i]}
+        table=sorted(set(pairs.values()))
+        # Terminal output classes may consist of 1 alone. Renumber the targets densely.
+        target=sorted({t for pair in table for t in pair})
+        layers.append([tuple(target.index(t) for t in pair) for pair in table])
+        classes={s:table.index(v) for s,v in pairs.items()}
+    live={(0,):[1]}
+    for i,tab in enumerate(reversed(layers)):
+        n=max(max(row) for row in tab)+1
+        dest={}
+        for q in permutations(range(n)):
+            xs=[]
+            for p,vs in live.items():
+                for e in (0,1):
+                    if all(q[row[b]]==tab[p[s]][b^e] for s,row in enumerate(tab) for b in (0,1)):
+                        xs.extend(v^((v&1)*e<<(i+1)) for v in vs)
+            if xs: dest[q]=basis(xs)
+        live=dest
+    vs=next(v for p,v in live.items() if tuple(range(len(p)))==p)
+    K={0}
+    for v in vs: K|={x^(v>>1) for x in K}
+    return K
+for _ in range(150):
+    L=rng.randrange(1,8)
+    tabs=[[[rng.randrange(3) for b in range(2)] for s in range(3)] for i in range(L)]
+    def accept(x):
+        s=0
+        for i,tab in enumerate(tabs): s=tab[s][(x>>i)&1]
+        return s==0
+    f=[accept(x) for x in range(1<<L)]
+    assert periods(tabs)=={d for d in range(1<<L) if all(a==f[x^d] for x,a in enumerate(f))}
+print("150 width-three schedules: full computed period spaces equal truth-table stabilizers")
+~~~
