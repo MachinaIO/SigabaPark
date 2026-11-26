@@ -296,3 +296,64 @@ def audit():
     print('all binary split trees checked on 81 profiles')
 if __name__=='__main__':test();audit()
 ~~~
+
+**Matrix-backend crossover.** The final listing feeds the YES control and its pinned local clauses to the read-once matrix compiler of [PR 99 at 58036ab](https://github.com/MachinaIO/SigabaPark/blob/58036abbee86216e6e0bf18a4a8234c6d55d82cb/dag/Notes/pq-we-live-clause-matrix-product.md). Assign variables in first-use order. Write m=alpha*w, where w is the compiled width. With a shortened root and final block, the interior alone has 2(h-2) alpha² w² residues at h>=2. The unsplit shape is (h,w)=(4224,9), with coefficient 683964 on alpha². Composing all 64 bags by the one-bit formula gives 4096 local encryptions, shapes (65 or 66, 7 or 8), and coefficient 29227136. At equal scale this costs 42.73 times as many interior residues. If all the local encryptions share a smaller scale, the monolithic-to-local alpha ratio must exceed 6.537 before the interior-residue comparison favors this split. Grouping into 2, 4, 8, 16 and 32 bags gives break-even ratios of 1.414, 1.998, 2.821, 3.979 and 5.594 respectively (rounded). When moduli change, multiply each residue count by its actual serialization width. Endpoint blocks, framing, parameter-dependent correctness/security margins, leaf sampling and traversal clocks are additional. These are measured program dimensions and derived size thresholds, not cryptographic parameter recommendations. The real dispatcher can use the cheap exact decision on this control. For a hard leaf backend, compare fully calibrated local and monolithic costs before committing to any split.
+
+To reproduce the last listing, save PR 99's first Python listing as frontend.py, this note's second listing as nand.py and its first as paths.py. Run python shape.py frontend.py nand.py paths.py.
+
+~~~python
+"""Compare matrix geometry at a common scale, using the frontend of PR 99."""
+from collections import Counter
+import runpy,sys
+def geometry(front,local,paths):
+    n=128;g=[];prev=0
+    def nand(a,b):
+        g.append((a,b));return n+len(g)
+    for i in range(64):
+        a,b=2*i+1,2*i+2;v=nand(a,b);tmp=nand(prev,v);prev=nand(tmp,tmp)
+        nand(0,0)
+        for _ in range(30):tmp=nand(prev,prev);prev=nand(tmp,tmp)
+    p=local['schedule'](n,g,list(range(0,len(g)+1,64)))
+    def shape(lo,hi,binding,require):
+        fixed={0:1,**binding}
+        clauses=[];order={}
+        def put(lits):
+            row=[]
+            for x,y in lits:
+                if x in fixed:
+                    if fixed[x]==y:return
+                else:row.append(order[x] if y else -order[x])
+            clauses.append(tuple(row))
+        for j in range(lo,hi):
+            a,b=p[0][j];z=n+j+1
+            for v in (a,b,z):
+                if v not in order and v not in fixed:order[v]=len(order)+1
+            put([(a,1),(z,1)]);put([(b,1),(z,1)])
+            put([(a,0),(b,0),(z,0)])
+        if require:put([(n+len(g),1)])
+        pr=front['compile_program'](clauses,len(order),0)
+        return len(pr[1]),len(pr[0])
+    def coeff(hw):
+        h,w=hw
+        assert h>=2
+        # If m=alpha*w the interior residue count is alpha^2 times this number.
+        return 2*(h-2)*w*w
+    whole=shape(0,len(g),{},True)
+    print('monolithic shape and interior coefficient',whole,coeff(whole))
+    for chunk in (64,128,256,512,1024,2048,4096):
+        p=local['schedule'](n,g,list(range(0,len(g)+1,chunk)))
+        d=tuple(1<<len(bd) for bd in p[2])
+        weights=Counter(e for _,_,e in paths['expand'](d)[0])
+        hist=Counter()
+        for (i,a,b),multiplicity in weights.items():
+            bind={x:a>>j&1 for j,x in enumerate(p[2][i])}
+            right={x:b>>j&1 for j,x in enumerate(p[2][i+1])}
+            assert all(x not in bind or y==bind[x] for x,y in right.items())
+            bind.update(right)
+            hw=shape(p[1][i],p[1][i+1],bind,i==len(p[3])-1)
+            hist[hw]+=multiplicity
+        real=sum(coeff(hw)*v for hw,v in hist.items())
+        print('bags, calls, total interior coefficient, required scale ratio',len(d)-1,sum(hist.values()),real,round((real/coeff(whole))**0.5,3))
+        if chunk==64:print('local shape histogram',dict(sorted(hist.items())))
+if __name__=='__main__':geometry(*(runpy.run_path(f) for f in sys.argv[1:]))
+~~~
