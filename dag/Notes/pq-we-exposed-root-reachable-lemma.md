@@ -309,7 +309,7 @@ adversary's choice of `Ψ`.
 | `ExposedRoot.basis_change_preimage` | `Winv W = 1` ⇒ (`A D = Y` ⇔ `(W A) D = W Y`) | §2 exact basis change |
 | `ExposedRoot.reachable_closure` | `V' S = K V` ⇒ `V'(S A + E) = K (V A) + V' E` | §2 hypothesis (a) |
 | `ExposedRoot.colocated_part` | `Σ_q β_q [q = π] X = β_π X`, for two blocks at once | §3 |
-| `ExposedRoot.cover_pad_card` | `M` invertible over a finite ring ⇒ `#{u : x + M u = t} = 1` | §1, §3, §5 |
+| `ExposedRoot.cover_pad_card` | `M` invertible over a finite ring ⇒ `Nat.card {u // x + M u = t} = 1` | §1, §3, §5 |
 | `ExposedRoot.dead_level_invisible` | reachable `d`-parts vanish after a level with both entries `0` | §4 |
 | `ExposedRoot.uncovered_readings_collide` | the two readings below an uncovered zero differ by `R_1(E_0 − E_1) + e_1(D_{2,0} − D_{2,1})` | §1 |
 | `ExposedRoot.phase_one_kernel_break` | `z S = 0` ⇒ `z (S a + E) = z E` | §6 |

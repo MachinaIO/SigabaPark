@@ -1,5 +1,5 @@
 import Mathlib.Data.Matrix.Mul
-import Mathlib.Data.Fintype.Pi
+import Mathlib.SetTheory.Cardinal.Finite
 import Mathlib.Tactic.Common
 
 /-- **Cover pad (note `pq-we-exposed-root-reachable-lemma`, §3).** In the co-located cover
@@ -10,8 +10,8 @@ cover slot `c`.
 Exactly one `u` gives each value, so the law of `x + M u` is uniform for every `x`, and the two
 hybrids have the same law exactly. With `M = s · 1` it also shows that a full-cube slot masks the
 exposed root row (§5). -/
-theorem AdvancedEncryption.WE.ExposedRoot.cover_pad_card {R : Type*} [Ring R] [Fintype R] [DecidableEq R] {n k : Type*}
-    [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+theorem AdvancedEncryption.WE.ExposedRoot.cover_pad_card {R : Type*} [Ring R] [Fintype R] {n k : Type*}
+    [Fintype n] [DecidableEq n] [Fintype k]
     (M Minv : Matrix n n R) (h1 : M * Minv = 1) (h2 : Minv * M = 1)
     (x t : Matrix n k R) :
-    (Finset.univ.filter (fun u : Matrix n k R => x + M * u = t)).card = 1 := by sorry
+    Nat.card {u : Matrix n k R // x + M * u = t} = 1 := by sorry

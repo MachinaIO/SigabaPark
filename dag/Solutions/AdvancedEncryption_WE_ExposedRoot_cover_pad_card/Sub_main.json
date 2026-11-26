@@ -1,1 +1,1 @@
-{"theorem": "AdvancedEncryption.WE.ExposedRoot.cover_pad_card", "proof_type": "prove", "explanation": "The filter is the singleton {Minv * (t - x)}: x + M u = t iff u = Minv (t - x), using both inverse identities."}
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.cover_pad_card", "proof_type": "prove", "explanation": "Every solution equals Minv (t - x) (left inverse), and Minv (t - x) is a solution (right inverse), so the subtype is a singleton."}
