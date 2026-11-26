@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LastPass.card_le_width_mul_of_fixed_partition", "proof_type": "prove", "explanation": "Each class c changes its label at some step s < T (otherwise induction gives lab T c = lab 0 c = false); at that step the whole fiber of c is in the changed set, so each fiber has at most k elements; sum over the W fibers."}

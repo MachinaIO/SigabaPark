@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LastPass.exists_unique_first_mismatch", "title": "Equality cubes: unique first mismatch position", "statement": "For y != t in Fin n -> Bool there is a unique j : Fin n with y i = t i for all i < j and y j != t j."}

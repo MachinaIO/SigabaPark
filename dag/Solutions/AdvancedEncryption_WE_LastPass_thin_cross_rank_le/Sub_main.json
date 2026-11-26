@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LastPass.thin_cross_rank_le", "proof_type": "prove", "explanation": "The matrix is P * Q with P x (k, i) = f k x * a k x i and Q (k, i) y = g k y * b k y i, so its rank is at most rank P <= card (Fin K x Fin t) = K t."}

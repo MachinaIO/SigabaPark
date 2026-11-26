@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LastPass.departure_kills_chain_clause", "title": "The departure bit kills the equality clause kept alive by the chain", "statement": "If clause j of Psi is exactly (x_a or not x_b) with a != b, then for every bit c the diagonal entries (j, j) of CVW18's CNF matrices cnfMat Psi b c and cnfMat Psi b (not c) sum to 1: exactly one of them is zero."}

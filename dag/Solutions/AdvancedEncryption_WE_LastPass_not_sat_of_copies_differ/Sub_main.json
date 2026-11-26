@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LastPass.not_sat_of_copies_differ", "proof_type": "prove", "explanation": "If z a = true and z b = false, the clause (not x_a or x_b) has no true literal; if z a = false and z b = true, the clause (x_a or not x_b) has none."}
