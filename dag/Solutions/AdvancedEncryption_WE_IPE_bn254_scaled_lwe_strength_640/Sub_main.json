@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IPE.bn254_scaled_lwe_strength_640",
+  "proof_type": "prove",
+  "explanation": "Bound the BKW table cost and all registered attack costs, then discharge the fixed-point interval checks by kernel reduction."
+}
