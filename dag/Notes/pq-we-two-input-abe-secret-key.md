@@ -196,3 +196,41 @@ beyond the worst case `d ≈ 2048`, so it is out of reach for BGG+-type items.
    in its smallest form.
 2. Even if it is closed, the 3-way split is at about `2^{123.6}`, not `2^{97}`. A further gain needs
    cheaper per-item BGG+ costs (depth), not more slots.
+
+## A cut-rank test for exact many-slot field masks
+
+Splitting n witness bits into r blocks of at most ceil(n/r) bits uses at most r*2^ceil(n/r) individual menu entries. For r=ceil(n/log2 n) this part is polynomial. This count by itself makes no guarantee about joint security, evaluator width, or key generation. To test one concrete route, suppose the *observable* pad at a tuple is the exact scalar product of the prefix and suffix state at a slot cut, over a finite field F_q. This includes a chain of arbitrarily sampled slot matrices with cut dimension d and scalar endpoints: even dependent matrices yield F(u,v)=A(u)B(v), where the row and column have length d. Suppose the observable output on the false instance is V_b(u,v)=F(u,v)+b at every tested tuple. All statements below concern this output interface.
+
+On a fixed s-by-s grid of distinct prefix and suffix choices the pad table has rank at most d. Thus a hybrid replacing it by independent field values fails on s=d+1 as soon as each side has that many choices. The ideal square matrix is invertible with probability product_(i=1)^s (1-q^(-i)), by counting successively independent columns. This is bounded away from zero even for q=2. Computing this test takes s^2 evaluations and polynomial field time. It applies without any independence hypothesis on the real slot secrets. Failure of this hybrid alone does not establish plaintext leakage for every low-rank table.
+
+There is a stronger conclusion for the natural control where the s prefix rows and s suffix columns are independent uniform vectors in F_q^d. Set s=d+h, h>=1. Write J=11^T. If the augmented s-by-(d+1) matrices [A,1] and [B^T,1] both have full column rank then AB+J has rank d+1 by factorization through the identity. AB always has rank at most d. Modulo the known line spanned by 1, each projected random column is uniform in dimension s-1, so full augmented rank has probability product_(i=0)^(d-1) (1-q^(i-(s-1))). Square this for the independent sides. This gives a lower bound on the difference of the probabilities that V_b has rank greater than d. For q=2, h=4 it is at least (1-1/8)^2 by a union bound on nonzero coefficient vectors in the projected kernel. Even access only to emitted values suffices. Forced inclusion of the constant vector among state coordinates invalidates this particular random-factor message bound; it does not invalidate the rank obstruction to independent pads.
+
+Consequently an r-way compiler cannot justify security by replacing an exact polynomial-width field matrix product with independent tuple masks on an exponentially large balanced cut. A wide enough cut on just one side, or modifying the observable output via a nonlinear map with its own proof, changes the test's premises. Ordinary WE only needs hiding of b. No impossibility for general multi-input ABE, rounded encodings or quantum-secure PRFs follows. The joint security proof, not the polynomial menu count, is what remains necessary.
+
+~~~python
+from itertools import product
+from fractions import Fraction
+def rank2(columns):
+    basis={}
+    for v in columns:
+        while v:
+            i=v.bit_length()-1
+            if i not in basis:
+                basis[i]=v
+                break
+            v ^= basis[i]
+    return len(basis)
+s,d=3,2
+one=(1<<s)-1
+factors=list(product(range(1<<s),repeat=d))
+large=0
+for A in factors:
+    for B in factors:
+        cols=[(A[0] if B[0]>>i&1 else 0)^(A[1] if B[1]>>i&1 else 0) for i in range(s)]
+        assert rank2(cols)<=d
+        big=rank2([x^one for x in cols])>d
+        assert big==(rank2((*A,one))==rank2((*B,one))==d+1)
+        large+=big
+assert Fraction(large,len(factors)**2)==Fraction(9,64)
+print("4096 factor pairs; exact message-test gap 9/64")
+~~~
