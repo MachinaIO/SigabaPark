@@ -111,16 +111,15 @@ theorem terminalScale_406 : 31.19677083 < terminalScale (Real.exp (logFloor 406)
       exact hh
     _ ≤ _ := mul_le_mul_of_nonneg_right hlo (by positivity)
 
-local notation "W" => EuclideanSpace ℝ (Fin 506)
 
 /-- Determinant and shortest-vector data of the 406 incoming windows.
 The modulus witness bounds the shortest vector, including ties. -/
 structure WindowPath where
   det : ℕ → ℝ
-  window : Fin 406 → Submodule ℤ W
+  window : Fin 406 → Submodule ℤ (EuclideanSpace ℝ (Fin 506))
   [discrete : ∀ i, DiscreteTopology (window i)]
   [lattice : ∀ i, IsZLattice ℝ (window i)]
-  winner : Fin 406 → W
+  winner : Fin 406 → (EuclideanSpace ℝ (Fin 506))
   shortest : ∀ i, IsShortest (window i) (winner i)
   modulus : ∀ i, ∃ z ∈ window i, z ≠ 0 ∧ ‖z‖ ≤ 3329
   initial : det 0 = (3329 : ℝ)^400
@@ -181,7 +180,6 @@ theorem floor_majorant_lt : terminalCountingConstant * ((52 / Real.sqrt 3) /
     terminalScale (Real.exp (logFloor 406)))^506 < 5.244 / 10^9 :=
   majorant_lt terminalScale_406.le
 
-local notation "grid" N => span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))
 
 /-- A realized terminal draw after a shortest-vector path, in projected-grid coordinates. -/
 structure TerminalDraw (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
@@ -194,11 +192,11 @@ structure TerminalDraw (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ
   [marksFinite : Fintype (Marks M K)]
   S : Submodule ℝ (EuclideanSpace ℝ (Fin N))
   dim : finrank ℝ S = 506
-  [gridDiscrete : DiscreteTopology (projectedModule (grid N) S)]
-  [gridLattice : IsZLattice ℝ (projectedModule (grid N) S)]
+  [gridDiscrete : DiscreteTopology (projectedModule ((span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ)))) S)]
+  [gridLattice : IsZLattice ℝ (projectedModule ((span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ)))) S)]
   embed : WindowSpace V →ₗᵢ[ℝ] S
-  image : ∀ w ∈ appendWindow K 0, embed w ∈ projectedModule (grid N) S
-  normalize : path.det 406 = Fintype.card (Marks M K) * ZLattice.covolume (projectedModule (grid N) S)
+  image : ∀ w ∈ appendWindow K 0, embed w ∈ projectedModule ((span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ)))) S
+  normalize : path.det 406 = Fintype.card (Marks M K) * ZLattice.covolume (projectedModule ((span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ)))) S)
   tors : ∀ a ∈ K, 3329 • a ∈ M
   sub : M ≤ K
   u : Marks M K → V

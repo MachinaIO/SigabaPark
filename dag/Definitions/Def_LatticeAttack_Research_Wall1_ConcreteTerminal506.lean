@@ -32,25 +32,24 @@ local instance preLattice (s : ChainState 911 (CoordSpace 505)) : IsZLattice ℝ
   (IsZLattice.span_top (K := ℝ) (L := s.M)).ge.trans (span_mono (old_le s))⟩
 
 abbrev frame (s : ChainState 911 (CoordSpace 505)) := s.frame.append
-local notation "grid" => span ℤ (Set.range (EuclideanSpace.basisFun (Fin 912) ℝ))
 
 theorem grid_realization (s : ChainState 911 (CoordSpace 505)) :
-    projectedModule grid (frame s).space = transport (frame s).embed (appendWindow (K s) 0) := by
+    projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin 912) ℝ))) (frame s).space = transport (frame s).embed (appendWindow (K s) 0) := by
   rw [transport_eq, AxisFrame.grid_eq, AxisFrame.integerSpan_append, ← s.marked]
 
 local instance appDiscrete (s : ChainState 911 (CoordSpace 505)) : DiscreteTopology (appendWindow (K s) 0) :=
   (appendWindow_lattice _ _).choose
 local instance appLattice (s : ChainState 911 (CoordSpace 505)) : IsZLattice ℝ (appendWindow (K s) 0) :=
   (appendWindow_lattice _ _).choose_spec
-local instance gridDiscrete (s : ChainState 911 (CoordSpace 505)) : DiscreteTopology (projectedModule grid (frame s).space) :=
+local instance gridDiscrete (s : ChainState 911 (CoordSpace 505)) : DiscreteTopology (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin 912) ℝ))) (frame s).space) :=
   grid_realization s ▸ inferInstanceAs (DiscreteTopology (transport _ (appendWindow (K s) 0)))
-local instance gridLattice (s : ChainState 911 (CoordSpace 505)) : IsZLattice ℝ (projectedModule grid (frame s).space) := by
+local instance gridLattice (s : ChainState 911 (CoordSpace 505)) : IsZLattice ℝ (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin 912) ℝ))) (frame s).space) := by
   constructor
   rw [grid_realization]
   exact IsZLattice.span_top
 
 theorem normalize (s : ChainState 911 (CoordSpace 505)) : ZLattice.covolume s.M =
-    Fintype.card (Marks s.M (K s)) * ZLattice.covolume (projectedModule grid (frame s).space) := by
+    Fintype.card (Marks s.M (K s)) * ZLattice.covolume (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin 912) ℝ))) (frame s).space) := by
   rw [grid_realization, transport_covolume, covolume_append, marks_mul_covolume _ _ (old_le s)]
 
 abbrev x (s : ChainState 911 (CoordSpace 505)) := s.winner

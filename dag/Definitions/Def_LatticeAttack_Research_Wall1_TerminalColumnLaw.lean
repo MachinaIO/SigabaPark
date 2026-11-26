@@ -12,17 +12,16 @@ open scoped RealInnerProductSpace
 
 variable {V : Type*} [NormedAddCommGroup V]
 variable {m q : ℕ} (L : Submodule ℤ V) (g : Fin m → V)
-local notation "K" => markedPreimage L g
 
 def columnLift (c : Fin m → ZMod q) : V := ∑ i, (c i).val • g i
 
-theorem columnLift_mem (c : Fin m → ZMod q) : columnLift g c ∈ K := by
+theorem columnLift_mem (c : Fin m → ZMod q) : columnLift g c ∈ (markedPreimage L g) := by
   rw [markedPreimage_eq]
   apply mem_sup_right
   exact sum_mem fun i _ ↦ (span ℤ (Set.range g)).toAddSubmonoid.nsmul_mem
     (subset_span (Set.mem_range_self i)) _
 
-theorem torsion_preimage (hg : ∀ i, q • g i ∈ L) {x : V} (hx : x ∈ K) : q • x ∈ L := by
+theorem torsion_preimage (hg : ∀ i, q • g i ∈ L) {x : V} (hx : x ∈ (markedPreimage L g)) : q • x ∈ L := by
   rw [markedPreimage_eq] at hx
   obtain ⟨a, ha, b, hb, rfl⟩ := mem_sup.mp hx
   obtain ⟨c, rfl⟩ := (mem_span_range_iff_exists_fun ℤ).mp hb
@@ -53,7 +52,7 @@ private theorem residue_eq [NeZero q] (hg : ∀ i, q • g i ∈ L) (c : Fin m �
   have h := coordHom_cast L g hg i ((c i).val : ℤ)
   simpa only [Int.cast_natCast, ZMod.natCast_zmod_val, natCast_zsmul, map_nsmul] using h
 
-def columnMark [NeZero q] (hg : ∀ i, q • g i ∈ L) : (Fin m → ZMod q) →+ Marks L K :=
+def columnMark [NeZero q] (hg : ∀ i, q • g i ∈ L) : (Fin m → ZMod q) →+ Marks L (markedPreimage L g) :=
   (residue L g hg).codRestrict _ fun c ↦
     ⟨_, columnLift_mem L g c, (residue_eq L g hg c).symm⟩
 

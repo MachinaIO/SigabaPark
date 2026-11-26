@@ -17,16 +17,11 @@ open scoped BigOperators
 private abbrev value (b : Digit 3) : ℝ := centered b
 noncomputable def moment (n : ℕ) := ∑ b : Digit 3, weight b * (centered b : ℝ)^n
 
-local macro "enumerateCBD" : tactic => `(tactic|
-  (unfold moment
-   change (∑ b : Fin 7, _) = _
-   norm_num [Fin.sum_univ_succ, weight, mass, centered, Nat.choose, Fin.val_succ]))
-
 theorem coordinate_moments : moment 0 = 1 ∧ moment 1 = 0 ∧ moment 2 = 3/2 ∧ moment 4 = 6 := by
-  refine ⟨?_, ?_, ?_, ?_⟩ <;> enumerateCBD
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> (unfold moment; change (∑ b : Fin 7, _) = _; norm_num [Fin.sum_univ_succ, weight, mass, centered, Nat.choose, Fin.val_succ])
 
 theorem odd_moments (k : ℕ) : moment (2*k+1) = 0 := by
-  enumerateCBD
+  (unfold moment; change (∑ b : Fin 7, _) = _; norm_num [Fin.sum_univ_succ, weight, mass, centered, Nat.choose, Fin.val_succ])
   simp only [pow_succ, pow_mul]
   norm_num
 
@@ -96,21 +91,24 @@ private theorem joint (s : List (Fin N × ℕ)) (hs : (s.map Prod.fst).Nodup) :
 
 private noncomputable def d (i j : Fin N) : ℝ := if i = j then 1 else 0
 
-local macro "evalJoint" s:term : tactic => `(tactic|
-   (calc
-     _ = _ := congrArg E (funext fun w ↦ by
-       show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) $s).prod
-       simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
-       <;> ring)
-     _ = _ := joint $s (by simp_all [ne_comm])
-     _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp))
-
 private theorem two (i j : Fin N) :
     E (fun w ↦ value (w i) * value (w j)) = (3/2) * d i j := by
   by_cases hji : j = i
   · subst j
-    evalJoint [(i,2)]
-  · evalJoint [(i,1), (j,1)]
+    (calc
+      _ = _ := congrArg E (funext fun w ↦ by
+        show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2)]).prod
+        simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+        <;> ring)
+      _ = _ := joint [(i,2)] (by simp_all [ne_comm])
+      _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+  · (calc
+      _ = _ := congrArg E (funext fun w ↦ by
+        show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,1)]).prod
+        simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+        <;> ring)
+      _ = _ := joint [(i,1), (j,1)] (by simp_all [ne_comm])
+      _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
 private theorem four (i j k l : Fin N) :
     E (fun w ↦ value (w i) * value (w j) * value (w k) * value (w l)) = (9/4) * (d i j * d k l + d i k * d j l + d i l * d j k) - (3/4) * d i j * d i k * d i l := by
   by_cases hji : j = i
@@ -119,43 +117,133 @@ private theorem four (i j k l : Fin N) :
     · subst k
       by_cases hli : l = i
       · subst l
-        evalJoint [(i,4)]
-      · evalJoint [(i,3), (l,1)]
+        (calc
+          _ = _ := congrArg E (funext fun w ↦ by
+            show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,4)]).prod
+            simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+            <;> ring)
+          _ = _ := joint [(i,4)] (by simp_all [ne_comm])
+          _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+      · (calc
+          _ = _ := congrArg E (funext fun w ↦ by
+            show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,3), (l,1)]).prod
+            simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+            <;> ring)
+          _ = _ := joint [(i,3), (l,1)] (by simp_all [ne_comm])
+          _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
     · by_cases hli : l = i
       · subst l
-        evalJoint [(i,3), (k,1)]
+        (calc
+          _ = _ := congrArg E (funext fun w ↦ by
+            show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,3), (k,1)]).prod
+            simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+            <;> ring)
+          _ = _ := joint [(i,3), (k,1)] (by simp_all [ne_comm])
+          _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
       · by_cases hlk : l = k
         · subst l
-          evalJoint [(i,2), (k,2)]
-        · evalJoint [(i,2), (k,1), (l,1)]
+          (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (k,2)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (k,2)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+        · (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (k,1), (l,1)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (k,1), (l,1)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
   · by_cases hki : k = i
     · subst k
       by_cases hli : l = i
       · subst l
-        evalJoint [(i,3), (j,1)]
+        (calc
+          _ = _ := congrArg E (funext fun w ↦ by
+            show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,3), (j,1)]).prod
+            simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+            <;> ring)
+          _ = _ := joint [(i,3), (j,1)] (by simp_all [ne_comm])
+          _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
       · by_cases hlj : l = j
         · subst l
-          evalJoint [(i,2), (j,2)]
-        · evalJoint [(i,2), (j,1), (l,1)]
+          (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (j,2)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (j,2)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+        · (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (j,1), (l,1)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (j,1), (l,1)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
     · by_cases hkj : k = j
       · subst k
         by_cases hli : l = i
         · subst l
-          evalJoint [(i,2), (j,2)]
+          (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (j,2)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (j,2)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
         · by_cases hlj : l = j
           · subst l
-            evalJoint [(i,1), (j,3)]
-          · evalJoint [(i,1), (j,2), (l,1)]
+            (calc
+              _ = _ := congrArg E (funext fun w ↦ by
+                show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,3)]).prod
+                simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+                <;> ring)
+              _ = _ := joint [(i,1), (j,3)] (by simp_all [ne_comm])
+              _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+          · (calc
+              _ = _ := congrArg E (funext fun w ↦ by
+                show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,2), (l,1)]).prod
+                simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+                <;> ring)
+              _ = _ := joint [(i,1), (j,2), (l,1)] (by simp_all [ne_comm])
+              _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
       · by_cases hli : l = i
         · subst l
-          evalJoint [(i,2), (j,1), (k,1)]
+          (calc
+            _ = _ := congrArg E (funext fun w ↦ by
+              show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,2), (j,1), (k,1)]).prod
+              simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+              <;> ring)
+            _ = _ := joint [(i,2), (j,1), (k,1)] (by simp_all [ne_comm])
+            _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
         · by_cases hlj : l = j
           · subst l
-            evalJoint [(i,1), (j,2), (k,1)]
+            (calc
+              _ = _ := congrArg E (funext fun w ↦ by
+                show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,2), (k,1)]).prod
+                simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+                <;> ring)
+              _ = _ := joint [(i,1), (j,2), (k,1)] (by simp_all [ne_comm])
+              _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
           · by_cases hlk : l = k
             · subst l
-              evalJoint [(i,1), (j,1), (k,2)]
-            · evalJoint [(i,1), (j,1), (k,1), (l,1)]
+              (calc
+                _ = _ := congrArg E (funext fun w ↦ by
+                  show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,1), (k,2)]).prod
+                  simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+                  <;> ring)
+                _ = _ := joint [(i,1), (j,1), (k,2)] (by simp_all [ne_comm])
+                _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
+            · (calc
+                _ = _ := congrArg E (funext fun w ↦ by
+                  show _ = (List.map (fun p : Fin _ × ℕ ↦ value (w p.1) ^ p.2) [(i,1), (j,1), (k,1), (l,1)]).prod
+                  simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, pow_one]
+                  <;> ring)
+                _ = _ := joint [(i,1), (j,1), (k,1), (l,1)] (by simp_all [ne_comm])
+                _ = _ := by simp_all [d, mu_small, eq_comm] <;> ring_nf <;> simp)
 
 private theorem E_sum {α : Type*} [Fintype α] (f : α → Outcome N → ℝ) :
     E (fun w ↦ ∑ i, f i w) = ∑ i, E (f i) := by

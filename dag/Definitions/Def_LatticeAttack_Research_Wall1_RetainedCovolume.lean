@@ -11,22 +11,21 @@ open MeasureTheory Metric Module
 
 namespace SigabaNeo.Wall1
 
-local notation "E" n => EuclideanSpace ℝ (Fin n)
 
 /-- Minkowski's elementary first-minimum constant in dimension n. -/
 noncomputable def minkowskiConstant (n : ℕ) : ℝ :=
-  2 / volume.real (ball (0 : E n) 1) ^ (1 / (n : ℝ))
+  2 / volume.real (ball (0 : (EuclideanSpace ℝ (Fin n))) 1) ^ (1 / (n : ℝ))
 
-private theorem unitVolume_pos (n : ℕ) : 0 < volume.real (ball (0 : E n) 1) :=
+private theorem unitVolume_pos (n : ℕ) : 0 < volume.real (ball (0 : (EuclideanSpace ℝ (Fin n))) 1) :=
   ENNReal.toReal_pos (measure_ball_pos volume _ one_pos).ne' measure_ball_lt_top.ne
 
 /-- A nonzero minimizer in the integer span of the window basis. -/
-def IsWindowShortest {n : ℕ} (B : Basis (Fin n) ℝ (E n)) (v : E n) : Prop :=
+def IsWindowShortest {n : ℕ} (B : Basis (Fin n) ℝ ((EuclideanSpace ℝ (Fin n)))) (v : (EuclideanSpace ℝ (Fin n))) : Prop :=
   v ∈ Submodule.span ℤ (Set.range B) ∧ v ≠ 0 ∧
     ∀ w ∈ Submodule.span ℤ (Set.range B), w ≠ 0 → ‖v‖ ≤ ‖w‖
 
-theorem shortest_norm_le_minkowski {n : ℕ} [NeZero n] (B : Basis (Fin n) ℝ (E n))
-    {v : E n} (hv : IsWindowShortest B v) :
+theorem shortest_norm_le_minkowski {n : ℕ} [NeZero n] (B : Basis (Fin n) ℝ ((EuclideanSpace ℝ (Fin n))))
+    {v : (EuclideanSpace ℝ (Fin n))} (hv : IsWindowShortest B v) :
     ‖v‖ ≤ minkowskiConstant n * ZLattice.covolume (Submodule.span ℤ (Set.range B)) ^
       (1 / (n : ℝ)) := by
   obtain ⟨w, hw, hw₀, h⟩ := minkowski_short_vector_det B
@@ -51,7 +50,7 @@ theorem projected_tail_covolume {F : Type*} [NormedAddCommGroup F] [InnerProduct
 
 /-- The reducer supplies the input covolume of each window and the retained-volume update. -/
 theorem retained_log_covolume_lower_bound {n : ℕ} [NeZero n] (T : ℕ) (D : ℕ → ℝ)
-    (B : ℕ → Basis (Fin n) ℝ (E n)) (v : ℕ → E n) (hD : 0 < D 0)
+    (B : ℕ → Basis (Fin n) ℝ ((EuclideanSpace ℝ (Fin n)))) (v : ℕ → (EuclideanSpace ℝ (Fin n))) (hD : 0 < D 0)
     (hwindow : ∀ t < T, ZLattice.covolume (Submodule.span ℤ (Set.range (B t))) = D t)
     (hshort : ∀ t < T, IsWindowShortest (B t) (v t))
     (hstep : ∀ t < T, D (t + 1) = D t / ‖v t‖) :

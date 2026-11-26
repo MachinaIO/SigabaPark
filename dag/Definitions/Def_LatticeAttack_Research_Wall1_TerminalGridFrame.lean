@@ -70,20 +70,19 @@ def analysisMap (f : AxisFrame n V) : V →ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n
 abbrev space (f : AxisFrame n V) := f.analysisMap.toLinearMap.range
 abbrev embed (f : AxisFrame n V) := f.analysisMap.equivRange
 
-local notation "axes" => EuclideanSpace.basisFun (Fin n) ℝ
 
 theorem project_axis (f : AxisFrame n V) (i : Fin n) :
-    f.space.orthogonalProjectionOnto (axes i) = f.embed (f.axis i) := by
+    f.space.orthogonalProjectionOnto ((EuclideanSpace.basisFun (Fin n) ℝ) i) = f.embed (f.axis i) := by
   apply ext_inner_left ℝ
   intro y
   obtain ⟨x, rfl⟩ := f.embed.surjective y
   rw [inner_orthogonalProjectionOnto_eq_of_mem_left, LinearIsometryEquiv.inner_map_map]
-  change ⟪f.analysisMap x, axes i⟫ = _
+  change ⟪f.analysisMap x, (EuclideanSpace.basisFun (Fin n) ℝ) i⟫ = _
   rw [real_inner_comm, EuclideanSpace.basisFun_inner]
   exact real_inner_comm _ _
 
 theorem grid_eq (f : AxisFrame n V) :
-    projectedModule (span ℤ (Set.range axes)) f.space =
+    projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin n) ℝ))) f.space =
       f.integerSpan.map (f.embed.toLinearEquiv.toLinearMap.restrictScalars ℤ) := by
   simp only [projectedModule, integerSpan, map_span, ← Set.range_comp]
   congr 2

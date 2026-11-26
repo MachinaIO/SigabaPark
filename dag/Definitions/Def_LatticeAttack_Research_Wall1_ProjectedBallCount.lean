@@ -16,18 +16,16 @@ namespace SigabaNeo.Wall1.TerminalProjection
 open Module Real MeasureTheory Submodule
 
 variable {N : ℕ}
-local notation "E" => EuclideanSpace ℝ (Fin N)
-local notation "axes" => EuclideanSpace.basisFun (Fin N) ℝ
 
-theorem projected_ball_count (S : Submodule ℝ E) (hd : finrank ℝ S = 506)
-    (R : ℝ) (hR : 0 < R) [DiscreteTopology (projectedModule (span ℤ (Set.range axes)) S)]
-    [IsZLattice ℝ (projectedModule (span ℤ (Set.range axes)) S)]
-    (A : Finset (projectedModule (span ℤ (Set.range axes)) S))
+theorem projected_ball_count (S : Submodule ℝ (EuclideanSpace ℝ (Fin N))) (hd : finrank ℝ S = 506)
+    (R : ℝ) (hR : 0 < R) [DiscreteTopology (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)]
+    [IsZLattice ℝ (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)]
+    (A : Finset (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S))
     (hA : ∀ x ∈ A, ‖x.val‖ ≤ R) (hneg : ∀ x ∈ A, -x ∉ A) :
     (A.card : ℝ) ≤ countingConstantAt (R * sqrt (2*π/506)) *
-      terminalBallVolume * R^506 / ZLattice.covolume (projectedModule (span ℤ (Set.range axes)) S) := by
+      terminalBallVolume * R^506 / ZLattice.covolume (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S) := by
   classical
-  let K := projectedModule (span ℤ (Set.range axes)) S
+  let K := projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S
   let z := R * sqrt (2*π/506)
   have hz : 0 < z := by dsimp [z]; positivity
   let X (x : K) := 253 - π * ‖x.val‖^2 / z^2
@@ -136,18 +134,18 @@ theorem projected_ball_count (S : Submodule ℝ E) (hd : finrank ℝ S = 506)
 realization of the appended preimage inside a projected grid and its determinant normalization. -/
 theorem projected_candidates_count {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [FiniteDimensional ℝ V] (M K : Submodule ℤ V) [DiscreteTopology K] [IsZLattice ℝ K]
-    [Fintype (Marks M K)] (S : Submodule ℝ E) (hd : finrank ℝ S = 506)
-    [DiscreteTopology (projectedModule (span ℤ (Set.range axes)) S)]
-    [IsZLattice ℝ (projectedModule (span ℤ (Set.range axes)) S)]
+    [Fintype (Marks M K)] (S : Submodule ℝ (EuclideanSpace ℝ (Fin N))) (hd : finrank ℝ S = 506)
+    [DiscreteTopology (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)]
+    [IsZLattice ℝ (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)]
     (e : WindowSpace V →ₗᵢ[ℝ] S)
-    (he : ∀ x ∈ appendWindow K 0, e x ∈ projectedModule (span ℤ (Set.range axes)) S)
+    (he : ∀ x ∈ appendWindow K 0, e x ∈ projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)
     {D : ℝ} (hD : D = Fintype.card (Marks M K) *
-      ZLattice.covolume (projectedModule (span ℤ (Set.range axes)) S))
+      ZLattice.covolume (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S))
     (R : ℝ) (hR : 0 < R) :
     (candidates K R).card / (Fintype.card (Marks M K) : ℝ) ≤
       countingConstantAt (R * sqrt (2*π/506)) * (R/terminalScale D)^506 := by
   classical
-  let L := projectedModule (span ℤ (Set.range axes)) S
+  let L := projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S
   let T := candidates K R
   let f : T ↪ L := ⟨fun x ↦ ⟨e x.val, he _ (mem_candidates.mp x.property).1⟩,
     fun x y h ↦ Subtype.ext (e.injective (congrArg Subtype.val h))⟩

@@ -16,21 +16,19 @@ open Submodule Module
 open scoped RealInnerProductSpace
 
 variable {N : ℕ}
-local notation "E" => EuclideanSpace ℝ (Fin N)
-local notation "axes" => EuclideanSpace.basisFun (Fin N) ℝ
 
 /-- A coordinate minor of full intrinsic rank that separates all vectors of the subspace. -/
-theorem exists_separating_coordinates (S : Submodule ℝ E) :
+theorem exists_separating_coordinates (S : Submodule ℝ (EuclideanSpace ℝ (Fin N))) :
     ∃ a : Fin (finrank ℝ S) ↪ Fin N, Function.Injective
-      (fun x : S ↦ fun i ↦ (x.val : E) (a i)) := by
+      (fun x : S ↦ fun i ↦ (x.val : (EuclideanSpace ℝ (Fin N))) (a i)) := by
   classical
   let P := S.orthogonalProjectionOnto.toLinearMap
-  let p (i : Fin N) := P (axes i)
+  let p (i : Fin N) := P ((EuclideanSpace.basisFun (Fin N) ℝ) i)
   obtain ⟨κ, a, ha, hspan, hli⟩ := exists_linearIndependent' ℝ p
   let := Fintype.ofInjective a ha
   have htop : span ℝ (Set.range p) = ⊤ := by
-    change span ℝ (Set.range (P ∘ axes)) = ⊤
-    rw [Set.range_comp, ← Submodule.map_span, (show span ℝ (Set.range axes) = ⊤ by simpa using (axes).toBasis.span_eq), Submodule.map_top]
+    change span ℝ (Set.range (P ∘ (EuclideanSpace.basisFun (Fin N) ℝ))) = ⊤
+    rw [Set.range_comp, ← Submodule.map_span, (show span ℝ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ)) = ⊤ by simpa using ((EuclideanSpace.basisFun (Fin N) ℝ)).toBasis.span_eq), Submodule.map_top]
     exact LinearMap.range_eq_top.mpr fun x ↦ ⟨x.val, S.orthogonalProjectionOnto_mem_subspace_eq_self x⟩
   let B := Basis.mk hli (hspan.trans htop).ge
   let e := Fintype.equivFinOfCardEq (finrank_eq_card_basis B).symm
@@ -60,16 +58,16 @@ private theorem integerGaussian_hasSum (d : ℕ) {a : ℝ} (ha : 0 < a) :
       pow_succ, mul_comm, add_comm] using hp
 
 /-- The dual Gaussian bound for the full marked preimage P_S ℤ^N at every positive scale. -/
-theorem projected_integer_dual_gaussian (S : Submodule ℝ E) {u : ℝ} (hu : 0 < u) :
-    let K := projectedModule (span ℤ (Set.range axes)) S
+theorem projected_integer_dual_gaussian (S : Submodule ℝ (EuclideanSpace ℝ (Fin N))) {u : ℝ} (hu : 0 < u) :
+    let K := projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S
     Summable (fun x : metricDual K ↦ Real.exp (-Real.pi*u^2*‖x.val‖^2)) ∧
       (∑' x : metricDual K, Real.exp (-Real.pi*u^2*‖x.val‖^2)) ≤
         terminalTheta u ^ finrank ℝ S := by
   classical
   intro K
   obtain ⟨a, ha⟩ := exists_separating_coordinates S
-  have hz (x : metricDual K) (i : Fin N) : ∃ z : ℤ, (z : ℝ) = ((x.val : S) : E) i := by
-    have hi : S.orthogonalProjectionOnto (axes i) ∈ K :=
+  have hz (x : metricDual K) (i : Fin N) : ∃ z : ℤ, (z : ℝ) = ((x.val : S) : (EuclideanSpace ℝ (Fin N))) i := by
+    have hi : S.orthogonalProjectionOnto ((EuclideanSpace.basisFun (Fin N) ℝ) i) ∈ K :=
       ⟨_, Submodule.subset_span ⟨i, rfl⟩, rfl⟩
     obtain ⟨z, hz⟩ := Submodule.mem_one.mp (x.property _ hi)
     refine ⟨z, ?_⟩
@@ -88,10 +86,10 @@ theorem projected_integer_dual_gaussian (S : Submodule ℝ E) {u : ℝ} (hu : 0 
   have hG := integerGaussian_hasSum (finrank ℝ S) hb
   have hh (x : metricDual K) : Real.exp (-Real.pi*u^2*‖x.val‖^2) ≤ G (f x) := by
     have hc : ∑ j, ((f x j : ℤ) : ℝ)^2 ≤ ‖x.val‖^2 := by
-      change _ ≤ ‖(x.val.val : E)‖^2
+      change _ ≤ ‖(x.val.val : (EuclideanSpace ℝ (Fin N)))‖^2
       rw [EuclideanSpace.real_norm_sq_eq]
       simp only [f, (hz _ _).choose_spec]
-      rw [← Finset.sum_map Finset.univ a (fun j ↦ ((x.val.val : E) j)^2)]
+      rw [← Finset.sum_map Finset.univ a (fun j ↦ ((x.val.val : (EuclideanSpace ℝ (Fin N))) j)^2)]
       exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _) (fun _ _ _ ↦ sq_nonneg _)
     apply Real.exp_le_exp.mpr
     simpa [G, b, neg_mul] using (mul_le_mul_of_nonpos_left hc (neg_nonpos.mpr hb.le))
@@ -106,10 +104,10 @@ theorem projected_integer_dual_gaussian (S : Submodule ℝ E) {u : ℝ} (hu : 0 
 
 
 /-- The Part 161 frequency bound on a full-rank, discrete projection of the integer grid. -/
-theorem projected_complex_gaussian (S : Submodule ℝ E) (z τ : ℝ) (hz : 0 < z)
-    [DiscreteTopology (projectedModule (span ℤ (Set.range axes)) S)]
-    [IsZLattice ℝ (projectedModule (span ℤ (Set.range axes)) S)] :
-    let K := projectedModule (span ℤ (Set.range axes)) S
+theorem projected_complex_gaussian (S : Submodule ℝ (EuclideanSpace ℝ (Fin N))) (z τ : ℝ) (hz : 0 < z)
+    [DiscreteTopology (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)]
+    [IsZLattice ℝ (projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S)] :
+    let K := projectedModule (span ℤ (Set.range (EuclideanSpace.basisFun (Fin N) ℝ))) S
     let d := finrank ℝ S
     let b : ℂ := ((Real.pi / z^2 : ℝ) : ℂ) * ⟨1, τ⟩
     ‖∑' x : K, Complex.exp (-b * ‖x.val‖^2)‖ ≤

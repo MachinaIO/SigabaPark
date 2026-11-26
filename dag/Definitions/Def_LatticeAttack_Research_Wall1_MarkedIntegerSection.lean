@@ -221,25 +221,23 @@ def markedGraphModule : Submodule ℤ V :=
     span ℤ (Set.range (fun j ↦ a j + b (.inr j)))
 
 variable (S : Submodule ℝ V)
-local notation "Λ" => projectedModule (markedGraphModule b q a) S
-local notation "g" => (fun i ↦ S.orthogonalProjectionOnto (b (Sum.inl i)))
 
 /-- A1 for the graph column presentation. -/
 theorem graph_markedPreimage (ha : ∀ j, a j ∈ span ℤ (Set.range (fun i ↦ b (.inl i)))) :
-    markedPreimage Λ g = projectedModule (cubicModule b) S := by
+    markedPreimage (projectedModule (markedGraphModule b q a) S) (fun i ↦ S.orthogonalProjectionOnto (b (Sum.inl i))) = projectedModule (cubicModule b) S := by
   rw [markedPreimage_projected, markedGraphModule, graph_sup_horizontal _ _ _ _ ha]
   congr 2
   exact congrArg Set.range (funext fun i ↦ by cases i <;> rfl)
 
-theorem graph_mark_multiple (i : ι) : q • g i ∈ Λ := by
+theorem graph_mark_multiple (i : ι) : q • (fun i ↦ S.orthogonalProjectionOnto (b (Sum.inl i))) i ∈ (projectedModule (markedGraphModule b q a) S) := by
   refine ⟨q • b (.inl i), Submodule.mem_sup_left (subset_span ⟨i, rfl⟩), ?_⟩
   exact map_nsmul S.orthogonalProjectionOnto _ _
 
 /-- The retained lattice's discreteness suffices for the integer section to be a lattice. -/
-theorem graph_integerSection_lattice [DiscreteTopology Λ] (hq : q ≠ 0)
+theorem graph_integerSection_lattice [DiscreteTopology (projectedModule (markedGraphModule b q a) S)] (hq : q ≠ 0)
     (ha : ∀ j, a j ∈ span ℤ (Set.range (fun i ↦ b (.inl i)))) :
     ∃ _ : DiscreteTopology (integerSection b S), IsZLattice ℝ (integerSection b S) := by
-  have h := markedPreimage_discrete Λ g q (graph_mark_multiple b q a S) hq
+  have h := markedPreimage_discrete (projectedModule (markedGraphModule b q a) S) (fun i ↦ S.orthogonalProjectionOnto (b (Sum.inl i))) q (graph_mark_multiple b q a S) hq
   rw [graph_markedPreimage _ _ _ _ ha] at h
   exact integerSection_lattice b S
 
@@ -247,8 +245,8 @@ theorem graph_integerSection_lattice [DiscreteTopology Λ] (hq : q ≠ 0)
 have kernel the cubic integer section, viewed inside the retained dual. -/
 theorem graph_markLabel_ker (hq : q ≠ 0)
     (ha : ∀ j, a j ∈ span ℤ (Set.range (fun i ↦ b (.inl i)))) :
-    (markLabel Λ g q (graph_mark_multiple b q a S)).ker =
-      (integerSection b S).toAddSubgroup.comap (metricDual Λ).subtype.toAddMonoidHom := by
+    (markLabel (projectedModule (markedGraphModule b q a) S) (fun i ↦ S.orthogonalProjectionOnto (b (Sum.inl i))) q (graph_mark_multiple b q a S)).ker =
+      (integerSection b S).toAddSubgroup.comap (metricDual (projectedModule (markedGraphModule b q a) S)).subtype.toAddMonoidHom := by
   rw [markLabel_ker _ _ _ _ hq, graph_markedPreimage _ _ _ _ ha, metricDual_projected_cubic]
 
 end Graph

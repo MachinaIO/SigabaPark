@@ -14,23 +14,21 @@ open MeasureTheory Metric Module
 namespace SigabaNeo.Wall1
 
 variable {n : ℕ}
-local notation "E" => EuclideanSpace ℝ (Fin n)
-local notation "e₀" => EuclideanSpace.basisFun (Fin n) ℝ
 
 /-- The covolume of the integer span in orthonormal coordinates. -/
-theorem minkowski_covolume_eq_abs_det (b : Basis (Fin n) ℝ E) :
-    ZLattice.covolume (Submodule.span ℤ (Set.range b)) = |(e₀).toBasis.det b| := by
+theorem minkowski_covolume_eq_abs_det (b : Basis (Fin n) ℝ (EuclideanSpace ℝ (Fin n))) :
+    ZLattice.covolume (Submodule.span ℤ (Set.range b)) = |((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis.det b| := by
   rw [ZLattice.covolume_eq_measure_fundamentalDomain _ volume
-    (ZSpan.isAddFundamentalDomain b volume), ZSpan.measureReal_fundamentalDomain b volume (e₀).toBasis]
-  simp [measureReal_def, measure_congr (ZSpan.fundamentalDomain_ae_parallelepiped (e₀).toBasis volume),
-    (e₀).volume_parallelepiped]
+    (ZSpan.isAddFundamentalDomain b volume), ZSpan.measureReal_fundamentalDomain b volume ((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis]
+  simp [measureReal_def, measure_congr (ZSpan.fundamentalDomain_ae_parallelepiped ((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis volume),
+    ((EuclideanSpace.basisFun (Fin n) ℝ)).volume_parallelepiped]
 
 /-- Minkowski's first-minimum bound at the critical closed-ball radius. -/
-theorem minkowski_short_vector_det [NeZero n] (b : Basis (Fin n) ℝ E) :
+theorem minkowski_short_vector_det [NeZero n] (b : Basis (Fin n) ℝ (EuclideanSpace ℝ (Fin n))) :
     ∃ v ∈ Submodule.span ℤ (Set.range b), v ≠ 0 ∧
-      ‖v‖ ^ n * volume.real (ball (0 : E) 1) ≤ 2 ^ n * |(e₀).toBasis.det b| := by
-  let V := volume.real (ball (0 : E) 1)
-  let D := |(e₀).toBasis.det b|
+      ‖v‖ ^ n * volume.real (ball (0 : (EuclideanSpace ℝ (Fin n))) 1) ≤ 2 ^ n * |((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis.det b| := by
+  let V := volume.real (ball (0 : (EuclideanSpace ℝ (Fin n))) 1)
+  let D := |((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis.det b|
   have hV : 0 < V := ENNReal.toReal_pos (measure_ball_pos volume _ one_pos).ne'
     (measure_ball_lt_top.ne)
   let r := (2 ^ n * D / V) ^ (n : ℝ)⁻¹
@@ -42,8 +40,8 @@ theorem minkowski_short_vector_det [NeZero n] (b : Basis (Fin n) ℝ E) :
   have hF := ZLattice.covolume_eq_measure_fundamentalDomain _ volume
     (ZSpan.isAddFundamentalDomain b volume)
   rw [minkowski_covolume_eq_abs_det] at hF
-  have hmeas : volume (ZSpan.fundamentalDomain b) * 2 ^ finrank ℝ E ≤
-      volume (closedBall (0 : E) r) := by
+  have hmeas : volume (ZSpan.fundamentalDomain b) * 2 ^ finrank ℝ (EuclideanSpace ℝ (Fin n)) ≤
+      volume (closedBall (0 : (EuclideanSpace ℝ (Fin n))) r) := by
     apply (ENNReal.toReal_le_toReal (ENNReal.mul_ne_top
       (ZSpan.fundamentalDomain_isBounded b).measure_lt_top.ne (by finiteness))
       (isCompact_closedBall _ _).measure_lt_top.ne).mp
@@ -57,19 +55,19 @@ theorem minkowski_short_vector_det [NeZero n] (b : Basis (Fin n) ℝ E) :
   obtain ⟨x, hx, hxr⟩ := exists_ne_zero_mem_lattice_of_measure_mul_two_pow_le_measure
     (ZSpan.isAddFundamentalDomain' b volume)
     (fun x hx ↦ by simpa [mem_closedBall_zero_iff] using hx)
-    (convex_closedBall (0 : E) r) (isCompact_closedBall _ _) hmeas
+    (convex_closedBall (0 : (EuclideanSpace ℝ (Fin n))) r) (isCompact_closedBall _ _) hmeas
   refine ⟨x, x.property, fun h ↦ hx (Subtype.ext h), ?_⟩
   exact (mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (norm_nonneg _)
     (mem_closedBall_zero_iff.mp hxr) n) hV.le).trans_eq hpow
 
 /-- Intrinsic Gram-determinant form of Minkowski's first-minimum bound. -/
-theorem minkowski_short_vector_gram [NeZero n] (b : Basis (Fin n) ℝ E) :
+theorem minkowski_short_vector_gram [NeZero n] (b : Basis (Fin n) ℝ (EuclideanSpace ℝ (Fin n))) :
     ∃ v ∈ Submodule.span ℤ (Set.range b), v ≠ 0 ∧
-      ‖v‖ ^ n * volume.real (ball (0 : E) 1) ≤ 2 ^ n * Real.sqrt (Matrix.gram ℝ b).det := by
-  rw [Matrix.gram_eq_conjTranspose_mul e₀ b, Matrix.det_mul, Matrix.det_conjTranspose]
-  have hm : (e₀).toBasis.toMatrix b = Matrix.of (fun i j ↦ (e₀).repr (b j) i) := by
+      ‖v‖ ^ n * volume.real (ball (0 : (EuclideanSpace ℝ (Fin n))) 1) ≤ 2 ^ n * Real.sqrt (Matrix.gram ℝ b).det := by
+  rw [Matrix.gram_eq_conjTranspose_mul (EuclideanSpace.basisFun (Fin n) ℝ) b, Matrix.det_mul, Matrix.det_conjTranspose]
+  have hm : ((EuclideanSpace.basisFun (Fin n) ℝ)).toBasis.toMatrix b = Matrix.of (fun i j ↦ ((EuclideanSpace.basisFun (Fin n) ℝ)).repr (b j) i) := by
     ext i j
-    exact (e₀).coe_toBasis_repr_apply _ _
+    exact ((EuclideanSpace.basisFun (Fin n) ℝ)).coe_toBasis_repr_apply _ _
   simpa [← sq, Real.sqrt_sq_eq_abs, Basis.det_apply, hm] using minkowski_short_vector_det b
 
 #print axioms minkowski_covolume_eq_abs_det
