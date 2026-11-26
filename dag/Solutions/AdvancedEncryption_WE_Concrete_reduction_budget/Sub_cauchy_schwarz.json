@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Concrete.reduction_budget", "proof_type": "prove", "explanation": "Cauchy-Schwarz (sq_sum_le_card_mul_sum_sq): adv^2 <= (sum eps)^2 <= L * sum eps^2; summing the hop bounds gives 2^P sum eps^2 <= L (c + T); and c + T <= (1 + T) c because c >= 1 and T >= 0."}
