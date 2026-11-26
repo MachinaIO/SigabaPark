@@ -519,3 +519,152 @@ def test():
     print('round-trip direct/seed groups:',groups)
 if __name__=='__main__':test()
 ~~~
+
+The fifth listing is a bounded public dispatcher for the information-theoretic compiler, with explicit leaf Enc and Dec callbacks. Run python dispatch.py labels.py implications.py nand.py. It constructs the whole-circuit canonical leaf first, checks separator and candidate-edge budgets before enumerating states, keeps a completed equality-only plan if the implication search exhausts its budget, and accepts a smaller plan using the supplied positive polynomial-time cost estimate. The default weight is program length plus one. Both parties can deterministically recompute the layout from the public input and configuration. Decryption projects the supplied original witness, verifies canonical certificates and selects authorized OR children before invoking leaf decryption. The optional seed wrapper is not needed by this entry point. Across 100 circuits and three caps it selected the whole leaf 206 times, a split tree 61 times, and a constant 33 times. All 11202 decryptions using valid witnesses returned the requested bits with the small exact-decision leaf. A separate exhaustive coin enumeration verified 362 complete unauthorized transcript histograms on AND/OR formulas with repeated predicates. This exercises the fallback and message handling under the stated backend interface.
+
+~~~python
+"""Bounded public compiler and callback-based Enc/Dec of the chosen representation."""
+from random import Random
+import sys,runpy
+
+def choose(lib,imp,schedule,n,gates,cuts,requested,weight=None):
+    weight=weight or (lambda key:1+len(key[0]))
+    # The single bag without gates is the constant true predicate.
+    if not gates:return dict(mode='constant',tree=('const',1),keys=[])
+    one=schedule(n,gates,[0,len(gates)])
+    mon,ports=lib['canonical'](one,n,0,0,0)
+    if abs(mon[1])==1:return dict(mode='constant',tree=('const',int(mon[1]>0)),keys=[])
+    fallback=dict(mode='whole',tree=('var',0),keys=[mon],ports=ports,private=one[3][0])
+    cap=min(requested,64*(1+n+len(gates))**2)
+    if cap<=0:return fallback
+    plan=schedule(n,gates,cuts);bd=plan[2]
+    if any(len(x)>=cap.bit_length() for x in bd):return fallback
+    dims=[1<<len(x) for x in bd]
+    if sum(a*b for a,b in zip(dims,dims[1:]))>cap:return fallback
+    dims,edges,ids,maps=lib['frontend'](plan,n);keys=list(ids)
+    def cost(tree):
+        op=tree[0]
+        if op=='const':return 0
+        if op=='var':return weight(keys[tree[1]])
+        return sum(cost(t) for t in tree[1:])
+    found=fallback;smallest=weight(mon)
+    def consider(tree,translations):
+        nonlocal found,smallest
+        stack=[(tree,0)]
+        while stack:
+            node,depth=stack.pop()
+            if depth>120:return
+            if node[0] in ('and','or'):stack.extend((ch,depth+1) for ch in node[1:])
+        count=lib['size'](tree)
+        if count>cap:return
+        c=cost(tree)
+        if c<smallest:
+            found=dict(mode='split',tree=tree,keys=keys,plan=plan,maps=maps,
+                       ids=ids,translations=translations)
+            smallest=c
+    # Each attempt has its own cap, so a failed optional phase preserves a completed plan.
+    try:
+        limit=lib['Limit'](cap)
+        terms=lib['path_terms'](dims,edges,limit)
+        consider(lib['circuit'](terms,limit),{})
+    except (lib['Budget'],RecursionError):pass
+    try:
+        limit=lib['Limit'](cap)
+        tr,cl=imp['implications'](keys,limit)
+        if tr:consider(imp['compile_closed'](dims,edges,cl,lib,limit),tr)
+    except (lib['Budget'],RecursionError):pass
+    return found
+
+def encrypt(comp,bit,coin,enc_leaf):
+    keys=comp['keys']
+    def emit(t,m):
+        op=t[0]
+        if op=='const':return m if t[1] else 0
+        if op=='var':return enc_leaf(keys[t[1]],m)
+        shares=[m]*(len(t)-1)
+        if op=='and':
+            for j in range(len(shares)-1):
+                shares[j]=coin();shares[-1]^=shares[j]
+        return [emit(c,b) for c,b in zip(t[1:],shares)]
+    return emit(comp['tree'],bit)
+
+def decrypt(lib,imp,comp,ct,n,word,dec_leaf):
+    certs={};keys=comp['keys']
+    def pack(x,ports):return sum((x>>j&1)<<i for i,j in enumerate(ports))
+    if comp['mode']=='whole':
+        local=pack(word,[x-1 for x in comp['private']])
+        w=pack(local,comp['ports'])
+        if lib['checkkey'](keys[0],w):certs[0]=w
+    elif comp['mode']=='split':
+        plan=comp['plan'];tr=lib['trace'](n,plan[0],word)
+        wirebits=lambda xs:sum(tr[x]<<j for j,x in enumerate(xs))
+        for i,vs in enumerate(plan[3]):
+            e=(i,wirebits(plan[2][i]),wirebits(plan[2][i+1]))
+            k,ports=comp['maps'][e]
+            if k in comp['ids']:
+                w=pack(wirebits(vs),ports)
+                if lib['checkkey'](k,w):certs[comp['ids'][k]]=w
+        certs=imp['extend'](certs,comp['translations'],keys)
+    present=sum(1<<i for i in certs)
+    def open_node(t,c):
+        op=t[0]
+        if op=='const':return c if t[1] else None
+        if op=='var':return dec_leaf(keys[t[1]],c,certs[t[1]])
+        if op=='or':
+            for j,child in enumerate(t[1:]):
+                if lib['evaluate'](child,present):return open_node(child,c[j])
+            return None
+        b=0
+        for j,child in enumerate(t[1:]):
+            value=open_node(child,c[j])
+            if value is None:return None
+            b^=value
+        return b
+    if not lib['evaluate'](comp['tree'],present):return None
+    return open_node(comp['tree'],ct)
+
+def test(lib,imp,base):
+    rng=Random(1337);counts={};opens=0
+    for case in range(100):
+        n=5;g=[tuple(rng.randrange(n+j+3) for _ in range(2)) for j in range(8)]
+        norm=base['schedule'](n,g,[0,8])[0]
+        for cap in (0,20,10000):
+            comp=choose(lib,imp,base['schedule'],n,g,[0,2,4,6,8],cap)
+            counts[comp['mode']]=1+counts.get(comp['mode'],0)
+            def enc(k,b):
+                d=sum(op[0]=='x' for op in k[0])
+                return b if any(lib['checkkey'](k,w) for w in range(1<<d)) else 0
+            def dec(k,c,w):
+                assert lib['checkkey'](k,w);return c
+            for b in (0,1):
+                ct=encrypt(comp,b,lambda:rng.randrange(2),enc)
+                for word in range(1<<n):
+                    if lib['trace'](n,norm,word)[-1]:
+                        assert decrypt(lib,imp,comp,ct,n,word,dec)==b;opens+=1
+    assert 'split' in counts and 'whole' in counts
+    print('dispatcher mode frequencies, valid decryptions:',counts,opens)
+    # Equality of the complete ideal-leaf transcript for every unauthorized set.
+    from itertools import product
+    from collections import Counter
+    def norm(c):return tuple(map(norm,c)) if isinstance(c,list) else c
+    tests=0
+    for _ in range(45):
+        def build(depth):
+            if depth==0 or rng.randrange(4)==0:return ('var',rng.randrange(4))
+            return (rng.choice(('and','or')),build(depth-1),build(depth-1))
+        tree=build(3);comp=dict(keys=list(range(4)),tree=tree)
+        def num(t):
+            if t[0]=='var':return 0
+            return (len(t)-2 if t[0]=='and' else 0)+sum(num(v) for v in t[1:])
+        for live in range(16):
+            if lib['evaluate'](tree,live):continue
+            bins=[Counter(),Counter()]
+            for b in (0,1):
+                for bits in product(range(2),repeat=num(tree)):
+                    it=iter(bits)
+                    ct=encrypt(comp,b,lambda:next(it),lambda i,m:m if live>>i&1 else 0)
+                    bins[b][norm(ct)]+=1
+            assert bins[0]==bins[1];tests+=1
+    print('exact unauthorized transcript histograms',tests)
+if __name__=='__main__':test(*(runpy.run_path(p) for p in sys.argv[1:]))
+~~~
