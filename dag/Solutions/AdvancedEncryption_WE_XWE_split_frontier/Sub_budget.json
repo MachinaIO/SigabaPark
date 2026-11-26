@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.split_frontier", "proof_type": "prove", "explanation": "Allocate as many bits as possible to the attribute block up to its three capacities, then fill the key block and put the remainder in the verifier."}

@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.hybrid_gain_budget", "title": "Squared advantage across a table of ciphertext hybrids", "statement": "Bounds squared endpoint advantage times a strength factor by the number of entries times the sum of individual reduction costs."}
