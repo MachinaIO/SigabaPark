@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ClassLock.dead_alive_nowhere", "title": "A slot program with both entries 0 at some level is alive on no string", "statement": "If m j b = false for both bits b, then for every string x it is not the case that m i (x i) = true for all levels i."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ClassLock.cover_flip_high_covered", "proof_type": "prove", "explanation": "Case on x L = b. If so, c is alive on x (agreement below L, entry (L, b), all-ones tail) and agrees with m' below l <= L. Otherwise m' and d agree along x."}
