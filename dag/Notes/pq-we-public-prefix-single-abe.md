@@ -42,6 +42,8 @@ The last row has one possible attribute. The encryptor can instead evaluate ever
 
 The cell counts were checked by running the actual residual evaluator over the entire rectangle. Running public reachability all the way to the output uses 32,137 and 32,550 candidate transitions respectively (about 0.04–0.05 s in local Python), and already decides both cases. These controls justify selecting the direct one-bit encryptor here. They do not benchmark ABE. The Lean proofs certify finite reachability and the aggregate numerical frontier; the generic Python circuit-cut implementation is differential-tested at every cut on all 625 two-input two-gate circuits and 100 further seeded circuits. The security reduction and registered machine-level submission remain open.
 
+**Switching algorithms when the suffix becomes wide.** Two further controls use a planted 68-clause CNF on the 16 suffix bits or its inconsistent variant. Both still test counter lane 3. In both cases the public frontier to the output exceeds a 1,024-candidate expansion budget. Stopping immediately after the counter leaves two states, 131,072 state/suffix pairs and 562 live suffix NANDs. Packing the residual NAND evaluation into bit planes (as in PR #81) yielded 28 and zero accepting pairs, independently checked by enumerating the original CNF. The local Python run took about 51–55 ms for constructing the prefix cut and checking its packed residual, excluding source generation, the deliberately unsuccessful full-frontier attempt, unary parsing and the independent source check. Thus even budget exhaustion in public prefix reachability does not imply that terminal ABE is advantageous; a different direct algorithm can finish these cases.
+
 ~~~python
 from math import isqrt
 from random import Random
@@ -209,4 +211,70 @@ for no in (False,True):
     direct=any(end.cell(*divmod(z,end.L)) for z in range(end.N))
     assert direct!=no
     print('public scan to output',end.steps,round(perf_counter()-t,3))
+
+def packed_scan(cut):
+    # Low coordinate of a bit position is its fresh-input assignment.
+    m=cut.N
+    ones=(1<<m)-1
+    w={0:ones}
+    lane=(1<<cut.B)-1
+    for j,v in enumerate(cut.live):
+        w[v]=sum(lane<<(i*cut.B) for i,s in enumerate(cut.states) if s[j])
+    for j,v in enumerate(cut.fresh):
+        step=1<<j
+        plane=((1<<step)-1)<<step
+        width=2*step
+        while width<cut.B:
+            plane |= plane<<width
+            width*=2
+        w[v]=sum(plane<<(i*cut.B) for i in range(len(cut.states)))
+    for v,a,b in cut.tail:w[v]=ones^(w[a]&w[b])
+    return w[cut.out]
+
+def wide(no):
+    rr=Random(8201)
+    g=circuit(False)[:1+112*22]
+    state3=128+len(g)-3*(6-3)
+    def nand(a,b):
+        g.append((a,b))
+        return 128+len(g)
+    def both(a,b):
+        c=nand(a,b)
+        return nand(c,c)
+    positives=list(range(113,129))
+    negatives=[nand(v,v) for v in positives]
+    clauses=[]
+    planted=0x6a35
+    for _ in range(68):
+        vs=rr.sample(range(16),3)
+        signs=[rr.randrange(2) for j in vs]
+        if not any((planted>>j&1)^t for j,t in zip(vs,signs)):signs[0]^=1
+        clauses.append(list(zip(vs,signs)))
+    if no:clauses[:8]=[list(enumerate(ts)) for ts in product(range(2),repeat=3)]
+    eq=0
+    for row in clauses:
+        a,b,c=[(negatives if sign else positives)[v] for v,sign in row]
+        ab=nand(nand(a,a),nand(b,b))
+        eq=both(eq,nand(nand(ab,ab),nand(c,c)))
+    while len(g)<4094:nand(0,0)
+    both(state3,eq)
+    return g,clauses
+
+for no in (False,True):
+    g,clauses=wide(no)
+    try:Cut(128,g,len(g),1024)
+    except OverflowError:pass
+    else:raise AssertionError('expected end-to-end frontier budget exhaustion')
+    t=perf_counter()
+    cut=Cut(128,g,1+112*22,1024)
+    plane=packed_scan(cut)
+    ms=1000*(perf_counter()-t)
+    source=sum(all(any((x>>j&1)^sgn for j,sgn in row) for row in clauses) for x in range(B))
+    assert plane.bit_count()==source and bool(source)!=no
+    assert cut.cell(*cut.locate(128,7|(0x6a35<<112)))!=no
+    for _ in range(100):
+        x=rng.getrandbits(128)
+        i,j=cut.locate(128,x)
+        assert cut.cell(i,j)==ev(g,x)==(plane>>(i*cut.L+j)&1)
+    print('capped wide suffix',no,cut.N,len(cut.tail),source,round(ms,1),'ms')
 ~~~
