@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.cover_dot_zero_iff", "proof_type": "prove", "explanation": "Count hit rectangles by a Boolean sum. The count is smaller than the modulus and is positive precisely when the rectangle-cover relation witnesses an active edge."}
