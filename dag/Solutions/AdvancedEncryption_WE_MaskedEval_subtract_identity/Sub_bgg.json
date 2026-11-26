@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedEval.subtract_identity", "proof_type": "prove", "explanation": "Rewrite the masked evaluator value with hO and the constrained-key evaluation with SigabaNeoStd's bgg_key_relation; the remaining identity is abelian-group arithmetic."}

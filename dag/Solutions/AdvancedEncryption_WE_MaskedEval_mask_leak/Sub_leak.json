@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedEval.mask_leak", "proof_type": "prove", "explanation": "By bgg_key_relation each difference D(z) = O(z) - EvalCk(z) equals P(stmt z) + v(z) (sG) + noise; two points of one statement whose values differ by 1 give sG up to noise, and subtracting v(zs) times it from D(zs) leaves P(stmt zs) plus noise (module arithmetic)."}
