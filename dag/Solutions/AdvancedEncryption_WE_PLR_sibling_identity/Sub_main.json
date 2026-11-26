@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PLR.sibling_identity", "proof_type": "prove", "explanation": "Rewrite y_{xb} = y_x D_b and y_{xb'} = y_x D_{b'}; then y_x D_{b'} D_{b'}^{-1} D_b = y_x D_b by Matrix.mul_nonsing_inv. For the subtree, y_{w z} = y_w (map D z).prod by reverse induction on z (List.reverseRecOn, List.prod_append, associativity), applied with w = xb."}
