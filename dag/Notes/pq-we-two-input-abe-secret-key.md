@@ -718,3 +718,42 @@ for j,(a,b) in enumerate(gates):
 assert (peak,preloads)==(2,0)
 print(len(gates)+preloads+1,2*peak+3,(4097-2)*7**2,(4224-2)*28**2)
 ~~~
+
+## Contracting a block after fixing one selector
+
+A single binary matrix pair can execute many consecutive NAND gates. Choose a selector z and simulate the block twice symbolically, fixing z to 0 and 1. Each incoming live wire starts as a distinct literal. For each simulated wire allow constants, literals and their complements. NAND with zero gives one; NAND with one negates its other argument; equal operands negate that operand and complementary operands give one. Stop before any operation outside those cases, or before using a second uninitialized primary. Thus neither simulation assumes unproved correlations among incoming wires. Any matched public block needs only polynomial preprocessing (two passes for a given candidate). Shorter unmatched portions can use the preceding gate compiler. Retain the original order, trace semantics and live-wire accounting at all block boundaries.
+
+For each outgoing live wire, under each branch, a constant routes the source to one of its rails, and a literal copies the corresponding incoming pair in the appropriate order. A selector that is a known wire adds its old opposite rail to the discrepancy counter once; a new primary requires no comparison and is stored if live on exit. Internal uses of z share that one branch choice. Other inputs are taken from stored rails. Hence each non-counter column still has at most one incoming unit, and at most one mismatch per block can enter the counter. A zero terminal counter still certifies an honest execution. With B compiled branch levels (including preloads and counting uncontracted gate levels) and one pin, H=B+1 and width is at most 2F+3 using maximum boundary liveness F. This changes the actual pair of matrices for a gate block rather than sampling and multiplying independent lattice encodings of the levels afterwards.
+
+On the 128-segment streaming control above, fix the unique new primary z of each segment. Its incoming gate value s is the only other input. Simulating the actual 32 NAND instructions gives output zero for z=0 and s for z=1. Thus all 32 instructions contract to the single map (s,z) -> s AND z. Only the running wire crosses each segment boundary. The general counter layout has H=129, width 5 and geometric coefficient (129-2)*25=3175, compared with 200655 before contraction. This input has no cryptographically hard core: its initial state is one, so its full predicate is the conjunction of its 128 primary bits and is satisfiable. A public decider on this instance emits the one-bit plaintext. The 3175 figure measures the matrix fallback alone.
+
+There is also an exact way to remove such a suffix from an otherwise arbitrary hard instance. Suppose the only incoming data is a single state bit, each block has a fresh private selector, and no eliminated bit occurs in the retained verifier or in another block. Compute backwards from the accepting set A={1}, replacing A at each block by {s: T(s,0) in A or T(s,1) in A}. This takes four table lookups per block. The residual verifier checks whether its computed boundary bit lies in the resulting two-element-domain subset. A valid full witness restricts to a valid residual one. Conversely extend any accepting residual trace by choosing a good outgoing branch at each block using the stored backward sets. No hardness assumption is changed, and an arbitrary retained circuit may still be hard. For the example suffix, every accepting residual witness lifts by setting its fresh bits to one. If a selector is shared across blocks this elimination can introduce incompatible choices and is not justified by this recurrence.
+
+~~~python
+from itertools import product
+def segment(s,z):
+    for i in range(32):
+        s=1-s*(z if i%3==0 else s)
+    return s
+assert all(segment(s,z)==s*z for s,z in product(range(2),repeat=2))
+# Every possible triple of one-bit transitions, including nonmonotone suffixes.
+def run(tab,s,z):
+    return (tab>>(2*s+z))&1
+for tabs in product(range(16),repeat=3):
+    sets=[{1}]
+    for tab in reversed(tabs):
+        sets.append({s for s in (0,1) if any(run(tab,s,z) in sets[-1] for z in (0,1))})
+    for s in (0,1):
+        def end(bits):
+            v=s
+            for tab,z in zip(tabs,bits): v=run(tab,v,z)
+            return v
+        assert (s in sets[3])==any(end(bits) for bits in product(range(2),repeat=3))
+        if s in sets[3]:
+            v=s
+            for i,tab in enumerate(tabs):
+                z=next(z for z in (0,1) if run(tab,v,z) in sets[2-i])
+                v=run(tab,v,z)
+            assert v==1
+print("8192 suffix/boundary cases; exact projection and witness extension")
+~~~
