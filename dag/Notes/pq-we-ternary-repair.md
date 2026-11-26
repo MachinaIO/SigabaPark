@@ -26,6 +26,8 @@ The span in the third row below is the set of truth tables of affine functions o
 
 **Terminal ABE.** For c trailing digits the key table has J·|C|^8·3^(r-c) entries and the ciphertext table 3^c. Under one fresh KP-ABE setup, each key fixes one actual anchor and the first r-c repairs. The encryptor can run these fixed repairs in the clear and hardwire the resulting 128-bit assignment into the predicate. The remaining predicate simulates c ternary choices and tests satisfaction; invalid encodings reject. This avoids selecting a shift or decoding a product code inside the policy. For the first row c=27 gives **8,638,651,399,680 keys and 7,625,597,484,987 ciphertexts** versus 2^64 of each in the raw 128-bit split. Even after center lookup and prefix precomputation, the predicates can have substantial sequential depth from up to 27 first-violated-clause searches. The message-switch proof conditions on the public shifts. On a false formula no path can accept under any issued key, so each hybrid challenges an unauthorized attribute under the same setup. Use the split-witness reduction of PR #64. The table sizes exclude ABE parameter, key-generation, policy-compilation and sequential lookup costs. In particular these figures cannot be substituted for the complete Ring-LWE cost estimate in PR #83.
 
+**Measured policy cost on the planted control.** Compile the actual selected functional-key predicate for the 190,490-shift setting. Shift index 703 yielded a near anchor. The first 11 repair choices were fixed in the key and evaluated before compilation. For each remaining digit use a balanced OR tree plus a prefix scan to find the first violated clause; group its three possible flips by variable, apply one flip, and check satisfaction after 27 rounds. Two public attribute bits encode each trit; the circuit rejects 11. A structurally hashed AND/inverter DAG was converted to fan-in-two NANDs with required inverters, output reachability and constant folding. This yielded **89,422 NANDs at depth 1,039** for this key, compared with **450 NANDs at depth 22** for the same CNF and the same compiler with the planted first 64 original bits fixed in an ordinary balanced split. The source NANDs contain padding. Both comparisons use the recovered CNF. The depth figures are binary NAND depths, not BGG+ effective noise bounds. The accepting path, 20 additional seeded ternary inputs, and an invalid two-bit encoding were checked. This is one measured pair of key predicates, with a roughly 47-fold depth increase. A uniform parameter choice must handle all keys, not just this pair. The table-entry reduction alone cannot establish an end-to-end improvement.
+
 **An alternate center-access tradeoff.** For 31 repairs take 120 independent affine maps from 29 bits to 128 bits, sampled as binary matrices plus offsets. Each map gives 2^29 pairwise independent uniform anchors, with repetitions allowed. For a fixed target let p=Vol(128,31)/2^128. For X the number of hits, E[X]=2^29 p, Var(X)=2^29 p(1-p); the second-moment bound gives Pr[X=0]≤(1-p)/(1-p+2^29 p). Raising this bound to power 120 gives at most 2^-129 by integer comparison. The maps need 460,800 public bits. There are 120·2^29·3^31 certificate labels, about 2^85.04; testing all 64,424,509,440 anchors in the worst case is much more costly for the witness holder. This illustrates why center lookup and seed size must accompany the certificate length.
 
 **Evidence.** Standalone scripts follow. The full-size SAT control is a planted 300-clause CNF compiled to exactly 4,096 NAND gates. The UNSAT variant replaces eight clauses by clauses excluding all assignments on three variables. The compiler recognizes both without auxiliary variables. A fixed test stream with the 9,842-shift code found a close center on shift index 48, generated an accepting certificate and rejected that certificate on the UNSAT control. Tests include all 625 two-input two-gate lists, 400 seeded small circuits, every starting point for each satisfying target of a small repair formula, and arbitrary three-digit paths on a contradiction. The reference encryptor has a finite fallback on unrecognized NANDs. The full-size random-walk trial budget and full ABE tables were not executed; neither a registered machine clock nor a quantum-secure ABE parameter instantiation has been verified here.
@@ -321,4 +323,110 @@ assert success_budget(128,165,128)[0]==1021393308818026961
 for b in (False,True):
     assert not enc(1,[(0,0)],b,1,4,rr.getrandbits)
     assert enc(1,[],b,1,4,lambda bits:0)==b
+class AIG:
+    def __init__(self,inputs):
+        self.base=inputs+1
+        self.ops={}
+        self.reverse={}
+    def both(self,a,b):
+        if -1 in (a,b) or a==-b:return -1
+        if a==1:return b
+        if b==1 or a==b:return a
+        pair=tuple(sorted((a,b)))
+        if pair not in self.reverse:
+            idx=self.base+len(self.ops)+1
+            self.ops[idx]=pair;self.reverse[pair]=idx
+        return self.reverse[pair]
+    def either(self,a,b):return -self.both(-a,-b)
+    def any(self,vs):
+        if not vs:return -1
+        while len(vs)>1:
+            vs=[self.either(vs[i],vs[i+1]) if i+1<len(vs) else vs[i]
+                for i in range(0,len(vs),2)]
+        return vs[0]
+    def xor(self,a,b):return self.either(self.both(a,-b),self.both(-a,b))
+    def failed(self,F,x):
+        return [-self.any([x[abs(v)-1] if v>0 else -x[-v-1] for v in row]) for row in F]
+    def first(self,bad):
+        m=1<<(len(bad)-1).bit_length()
+        tree=[-1]*m+bad+[-1]*(m-len(bad))
+        for i in reversed(range(1,m)):tree[i]=self.either(tree[2*i],tree[2*i+1])
+        enable=[-1]*(2*m)
+        enable[1]=1
+        for i in range(1,m):
+            enable[2*i]=enable[i]
+            enable[2*i+1]=self.both(enable[i],-tree[2*i])
+        return [self.both(enable[m+i],f) for i,f in enumerate(bad)]
+    def lower(self,out):
+        live={abs(out)}
+        for g,(a,b) in reversed(self.ops.items()):
+            if g in live:live.update((abs(a),abs(b)))
+        # Physical NAND outputs implement the negative polarity of each AIG AND.
+        literal={1:0,**{i:i-1 for i in range(2,self.base+1)}}
+        gates=[]
+        depth=[0]*self.base
+        def nand(a,b):
+            gates.append((a,b));depth.append(max(depth[a],depth[b])+1);return len(depth)-1
+        def use(v):
+            if v not in literal:literal[v]=nand(literal[-v],literal[-v])
+            return literal[v]
+        for g,(a,b) in self.ops.items():
+            if g in live:literal[-g]=nand(use(a),use(b))
+        output=use(out)
+        return gates,output,depth[output]
+
+def policy(F,initial,r,n):
+    A=AIG(2*r)
+    xs=[1 if initial>>i&1 else -1 for i in range(n)]
+    valid=1
+    for j in range(r):
+        lo,hi=2+2*j,3+2*j
+        digit=[A.both(-lo,-hi),A.both(lo,-hi),A.both(-lo,hi)]
+        valid=A.both(valid,-A.both(lo,hi))
+        select=A.first(A.failed(F,xs))
+        groups=[[[] for _ in range(3)] for _ in xs]
+        for row,h in zip(F,select):
+            for k in range(3):groups[abs(row[k%len(row)])-1][k].append(h)
+        xs=[A.xor(v,A.any([A.both(d,A.any(ids)) for d,ids in zip(digit,parts)]))
+            for v,parts in zip(xs,groups)]
+    return A.lower(A.both(valid,-A.any(A.failed(F,xs))))
+
+def run_gate(g,out,z,n):
+    w=[1]+[z>>i&1 for i in range(n)]
+    for a,b in g:w.append(1-(w[a]&w[b]))
+    return w[out]
+
+def policy_test():
+    rr=Random(851)
+    n=128;w=rr.getrandbits(n);cs=[]
+    for _ in range(300):
+        vs=rr.sample(range(1,n+1),3)
+        row=[v if rr.randrange(2) else -v for v in vs]
+        if first_bad([row],w) is not None:row[0]*=-1
+        cs.append(row)
+    F=extract(n,raw_cnf(n,cs,4096))
+    # One actual 38-trit certificate, with 11 fixed trits evaluated outside the key policy.
+    shifts=[rr.getrandbits(128) for _ in range(190490)]
+    j,idx,path=encode(F,w,shifts,38,16,[0,65535],128)
+    x=shifts[j]^sum((65535 if i else 0)<<(16*k) for k,i in enumerate(idx))
+    for d in path[:11]:
+        row=first_bad(F,x)
+        if row is None:break
+        x ^= 1<<(abs(row[d%len(row)])-1)
+    g,out,depth=policy(F,x,27,128)
+    ds=path[11:]
+    print('chosen shift',j)
+    for digs in [ds]+[[rr.randrange(3) for _ in range(27)] for _ in range(20)]:
+        z=sum(v<<(2*i) for i,v in enumerate(digs))
+        assert run_gate(g,out,z,54)==walk(F,x,digs)
+    assert run_gate(g,out,sum(v<<(2*i) for i,v in enumerate(ds)),54)
+    assert not run_gate(g,out,3,54)
+    print('27-trit policy',len(g),'NANDs, depth',depth)
+    # Fair comparator: compile the same exact CNF with half the source inputs hardwired.
+    A=AIG(64)
+    xs=[1 if w>>i&1 else -1 for i in range(64)]+list(range(2,66))
+    g,out,depth=A.lower(-A.any(A.failed(F,xs)))
+    assert run_gate(g,out,w>>64,64)
+    print('raw balanced-split policy',len(g),'NANDs, depth',depth)
+policy_test()
 ~~~
