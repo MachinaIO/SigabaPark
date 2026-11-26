@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.block_dominance_cover", "proof_type": "prove", "explanation": "Choose a dominating representative for each block and transport every covered clause through its original covering block. In reverse, retained assignments are valid."}

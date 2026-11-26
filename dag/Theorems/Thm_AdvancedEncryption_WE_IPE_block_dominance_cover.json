@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.block_dominance_cover", "title": "Clause coverage survives independent block dominance", "statement": "When retained block assignments are valid and dominate every valid assignment in the clauses it covers, a covering tuple exists exactly when a retained covering tuple exists."}
