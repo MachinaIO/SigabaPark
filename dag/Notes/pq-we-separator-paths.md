@@ -507,3 +507,51 @@ Precisely, suppose that except with probability epsilon_Y on each YES input ther
 For an asymptotic CircuitSAT embedding with both errors at most 1/3 this implies NP is contained in BPP. Independently repeating the decision test amplifies the constant gap. For this restricted family it even yields a direct one-bit WE: run the amplified classifier, emit the payload on acceptance and zero on rejection, and let the receiver read the bit. The YES error and the NO total variation distance are bounded by the respective classification errors. No code hardness assumption is used here. The implication is asymptotic; a fixed-size finite benchmark alone does not give a complexity-class inclusion.
 
 Consequently the straightforward use of honest RQC key generation and a cut entirely covered by valid other-message ciphertexts cannot by itself explain a general polynomial construction unless CircuitSAT has the indicated decision algorithm. Erasing the secret keys in Enc does not help: the independent classifier can re-run the same key generation and keep them. The argument also applies to a freshly sampled honest CRS whose full sampling algorithm reveals those keys and for which the embedding guarantee holds with high probability. It does not cover a word language with computationally hidden membership even given the compiler's generation coins, or a proof in which false-branch hiding has no such efficiently recognizable cut. This qualifies the embedding objective in the preceding section, not the security theorem of the cited RQC paper.
+
+## Directed threshold gates with n-t+1 public corrections
+
+Use a monotone threshold circuit of polynomially many wires as the public combination of named local statements. This is a circuit: a subgate can feed several parents. The compiler must prove that on YES an original witness efficiently supplies enough true leaves to activate the output, and on NO even jointly granting all unresolved leaves cannot activate it. This last condition is substantive: testing the clauses of a CNF with unrelated assignments does not implement SAT. Classical threshold secret sharing in monotone formulas is described by [Benaloh and Leichter](https://www.cs.cornell.edu/courses/cs754/2001fa/bena88.pdf). The following use of per-wire pads lets threshold gates share child seeds across parents and removes redundant public share words.
+
+Work in a publicly represented F_(2^k) with more elements than the maximum fan-in. Give every gate an independent uniform k-bit key K_g, and obtain distinct leaf keys as above. Expand a child key with a fixed quantum-secure PRG tree to a separate field pad p_i for each wire out of the child. Use a separate root slot to mask the payload. For a t-of-n gate, 1 <= t <= n, choose distinct public nonzero points x_1,...,x_n. Use the first t-1 wires as anchors. Interpolate the unique polynomial f of degree less than t with f(0)=K_g and f(x_i)=p_i for each anchor. Publish f(x_i)+p_i on each non-anchor wire, and nothing on anchor wires. Any t available children recover their evaluations (an anchor pad itself is an evaluation) and interpolate K_g. Require distinct children when counting distinct conditions; intentional duplicate wires give a weighted policy. Every wire still has a distinct slot.
+
+On NO process inactive leaves and then inactive gates in topological order. Inactive here means unreachable even with all unresolved leaves granted. Replace inactive leaf seeds or their pads using their false-leaf security as in the preceding sections. In the gate hybrid every inactive child wire now has its own independent random pad. Condition on the active child pads. Suppose a anchors and b non-anchors are active. The remaining t-1-a anchor pads are independent uniform, so f is uniform among polynomials satisfying the value at zero and the a active anchors. Since a+b<t, its evaluations at the b active non-anchors are jointly uniform for every fixed K_g by interpolation at distinct points. Corrections on inactive non-anchors are independently masked. Thus all corrections at this gate can be simulated without K_g: sample independent uniform words for the non-anchors. This conditional law holds jointly with other gates because inactive occurrence pads are exclusive. K_g's outgoing expansion can now be replaced by independent pads by a PRG hybrid, including the reserved payload slot at an inactive root. The reductions use the earlier nonuniform classification convention. Only polynomially many PRG nodes and the genuinely false leaf challenges are used. No iO intermediate is involved.
+
+The gate payload is exactly k * sum_g(n_g-t_g+1) bits, plus leaf material, final mask and any topology/framing. Direct interpolation and evaluation take polynomial field time (for instance O(t^2+nt) operations with standard interpolation and Horner evaluation). Decryption of a selected gate takes O(t^2) operations by direct Lagrange evaluation at zero, plus pad derivation. Each selected shared gate need only be decrypted once. For a 48-of-64 gate with 128-bit seeds this uses 17 corrections or 2176 bits versus 64 corrections or 8192 bits for separately masking all shares. Actual total cost depends on the leaves. This construction supplies a polynomial combiner for polynomial threshold DAGs, not a fixed-assumption general-NP leaf implementation.
+
+~~~python
+from itertools import combinations, product
+from collections import Counter
+# Exhaust in F_5 to check the interpolation law, using modular subtraction for masking.
+def eval_at(points, x):
+    value = 0
+    for i, (u,v) in enumerate(points):
+        weight = 1
+        for j,(w,_) in enumerate(points):
+            if i != j:
+                weight = weight*(x-w)*pow((u-w)%5,-1,5)%5
+        value += v*weight
+    return value%5
+
+for t in range(1,5):
+    for size in range(5):
+        for active in combinations(range(4), size):
+            hist = []
+            for key in range(5):
+                counts = Counter()
+                for hidden in product(range(5), repeat=4-size):
+                    it = iter(hidden)
+                    pads = [i%5 if i in active else next(it) for i in range(4)]
+                    points = [(0,key)] + [(i+1,pads[i]) for i in range(t-1)]
+                    shares = [eval_at(points,i+1) for i in range(4)]
+                    corr = tuple((shares[i]-pads[i])%5 for i in range(t-1,4))
+                    counts[corr] += 1
+                    if size >= t:
+                        opened = [(i+1,(pads[i]+(corr[i-t+1] if i>=t-1 else 0))%5)
+                                  for i in active[:t]]
+                        assert eval_at(opened,0)==key
+                hist.append(counts)
+            if size<t:
+                assert all(h == hist[0] for h in hist)
+                assert len(hist[0]) == 5**(5-t)
+print("64 threshold/subset cases: full correction histograms or witness reconstruction")
+~~~
