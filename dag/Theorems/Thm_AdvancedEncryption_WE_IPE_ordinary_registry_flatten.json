@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.ordinary_registry_flatten", "title": "Ordinary LWE registry strength at the flattened ring estimator view", "statement": "For positive power-of-two ring dimension, the scalar LWE registry has the same numeric strength at the flattened dimension and sample count, with unchanged error and secret laws."}

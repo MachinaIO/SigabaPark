@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.ordinary_registry_flatten", "proof_type": "prove", "explanation": "Expand both registry definitions. Their domain tests agree at positive power-of-two dimension and their estimator inputs coincide."}

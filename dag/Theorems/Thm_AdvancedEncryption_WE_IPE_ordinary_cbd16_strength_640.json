@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.ordinary_cbd16_strength_640", "title": "A 640-bit ordinary-LWE registry bound for dyadic predicates", "statement": "At dimension 262144, sample budget 4194304, modulus 2^1024 and CBD(16) for secret and error, the registered ordinary-LWE strength is at least 640."}

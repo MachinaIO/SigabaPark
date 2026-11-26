@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.dyadic_bkw_none", "title": "BKW estimator cutoff at a 512-bit modulus exponent", "statement": "The BKW search begins at block width two, so the table exceeds the existing cutoff at a modulus of at least 2^512 under the stated normalization hypotheses."}
