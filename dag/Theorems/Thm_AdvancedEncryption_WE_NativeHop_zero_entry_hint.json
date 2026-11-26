@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.NativeHop.zero_entry_hint", "title": "A zero entry of a GGH15 level is a hint: if A D = E then (S A + E') D = S E + E' D, which is short when S, E, E', D are", "statement": "For matrices over a ring, if A * D = E then (S * A + E') * D = S * E + E' * D."}

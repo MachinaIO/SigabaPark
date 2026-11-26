@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NativeHop.nand_reach_saturate", "proof_type": "prove", "explanation": "Strong induction on the wire index. Inputs are covered by hypothesis. For gate wire n+j both input wires are earlier, hence carry both values; NAND(true,true)=false and NAND(false,false)=true are then both in R(n+j)."}
