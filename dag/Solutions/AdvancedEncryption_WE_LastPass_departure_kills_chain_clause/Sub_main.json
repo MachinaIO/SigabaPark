@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LastPass.departure_kills_chain_clause", "proof_type": "prove", "explanation": "Since a != b, the clause contains a literal at level b only for the bit false, so the entry at (b, c) is 0 iff c = false; the two entries are 1 and 0 in some order."}

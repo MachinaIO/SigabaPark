@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LastPass.exists_unique_first_mismatch", "proof_type": "prove", "explanation": "Take the minimum of the nonempty set of mismatch positions; minimality gives the prefix condition, and two first mismatches are each <= the other."}
