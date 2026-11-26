@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedLeaf.untwisted_separator_iff", "proof_type": "prove", "explanation": "The dot product equals sum over k in U z of j_k * (sum_i v_i l(k,i)) (Fintype.sum_prod_type, split by membership). Forward: lam_k := j_k sum_i v_i l(k,i). Backward: pick i0 with v_i0 nonzero and l(k,i) := [i = i0] lam_k / (j_k v_i0)."}

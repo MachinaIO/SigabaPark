@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.MaskedLeaf.mask_of_affine_relation", "title": "An affine relation among the path rows recovers the mask from the noiseless path values", "statement": "Over a commutative ring R with a finite index type, if coefficients alpha_z satisfy sum alpha_z = 1 and sum alpha_z c_z = 0, then for every mask m and every matrix A, sum alpha_z (m + c_z A) = m."}
