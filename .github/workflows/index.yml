@@ -13,9 +13,13 @@ on:
 
 permissions: {}
 
+# One run at a time, and every waiting run is kept (`queue: max`): a run that is cancelled or
+# replaced marks its commit as failed. Each run publishes the latest `main` and `records`, so later
+# runs only repeat the work.
 concurrency:
   group: index
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   build:
