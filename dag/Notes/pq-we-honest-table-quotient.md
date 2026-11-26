@@ -1,0 +1,31 @@
+---
+title: Compressing fixed-gap ciphertexts by homogeneous honest-table constraints
+refs: [definition:WE_CircuitSAT, note:pq-we-fixed-gap-frontend]
+tags: [witness-encryption, codes, construction, complexity]
+---
+
+Use the binary fixed-matrix frontend of [Fenzi and Weissenberg, Construction 4.5, Section 4.3 and Appendix A (Construction A.4)](https://eprint.iacr.org/2026/2634). Its honest witness has sigma evaluation tables. Each is either zero or the indicator q_alpha. In each of tau blocks indexed by s in K=GF(2^e), tau=2^e, an active table selects one label in K^a. Across s, that label is (phi_0(s),...,phi_(a-1)(s)) with all phi of degree <c. This allows the following tightening and compression without computing a satisfying trace during encryption.
+
+**Constraints on every honest table.** For a block v_s take its binary parity and, for every nonempty subset I of the a label coordinates, compute its K-valued feature
+    u_I(s) = sum_lambda v_(lambda,s) product_(i in I) lambda_i.
+Impose constant parity across s and require each feature word to belong to the evaluation code of univariate polynomials of degree at most |I|(c-1) on K. These are homogeneous binary linear conditions. Every active table satisfies them by multiplying its coordinate polynomials; every zero table satisfies them as well. Thus appending these rows with zero targets preserves the witness map on YES, and can only increase the minimum solution weight on NO.
+
+Their joint binary codimension for one table before intersecting with other constraints is exactly
+
+    R = tau-1 + e sum_(j=1)^a binom(a,j) max(0, tau-1-j(c-1)).
+
+Indeed the feature map on one block is onto F2 x K^(2^a-1) as an F2-linear map. A putative binary linear relation among its outputs evaluates on a singleton label as a constant plus a sum of binary linear forms in the monomials. The zero label forces the constant to vanish. Induct on the size of the support of lambda; when that support is I only the term indexed by I remains after eliminating smaller terms, and its product ranges over all nonzero elements of K. Thus its linear form vanishes. Block features at distinct s can be assigned independently. Polynomial evaluation up to degree d has dimension min(tau,d+1) over K. Subtracting these dimensions gives the displayed rank. The sigma copies use disjoint coordinates. Some resulting rows may already belong to the paper's homogeneous checks; do not add their separate ranks without elimination. For fixed a, generator and parity-check matrices for these constraints are constructible by polynomial-time field and binary elimination.
+
+**Exact wire quotient.** Write the augmented system as L v=0, M v=b, with all fixed homogeneous rows in L (including the feature rows) and the remaining original rows in M. Set m=sigma tau^(a+1), r=rank(L), and let J have columns forming a basis for ker L. Instead of transmitting an m-bit header, draw the same original m-coordinate Bernoulli error E and publish
+
+    u = (M J)^T t + J^T E,     z = t.b + mu,
+
+where t is uniform over the rows of M. The per-bit per-repetition payload is m-r+1, with r>=sigma R. Compute the coordinates v=J w of the sparse lifted witness once, then output z+w.u. Its residual noise is exactly v.E even if w is dense. Thus the correctness estimate and the distance-based parity-observation bound of the frontend carry over (a parity of the new view is a parity of the augmented view). Independent repetitions preserve these statements. Sampling independent fresh noise in the shorter coordinates would change this distribution.
+
+The full augmented header is M^T t+L^T s+E with fresh uniform s. Given its quotient u, sample any uniform preimage under J^T to recover its exact joint law with the tag, since ker J^T=row(L). Conversely the quotient is deterministic. Relative to the *original* frontend, adding new homogeneous rows independently randomizes the old header by their row span, leaving the tag alone. Hence a distinguisher for the compressed construction gives one for the original by efficient postprocessing. Full-view post-quantum security of either candidate is still open.
+
+A systematic basis obtained from pivot and free coordinates of L lets decryption read w directly from the free coordinates of v; storing J costs at most m(m-r) bits as public size-class data. Dense quotient encoding can take O(m(m-r)) binary operations per sample in addition to target handling. The saving is a wire bound, with no general speedup in encryption asserted. Independent rows of M J can also be selected after checking their target consistency. This identifies the fixed search interface relevant to the shorter ciphertext: recovery of the remaining t from a noisy word with *correlated* noise J^T E. It avoids measuring hardness by recovery of mask coordinates that never enter the message pad. No hardness for this projected search interface or implication for worst-case target hiding is assumed here.
+
+**Removing the remaining mask from honest encryption.** For a consistent augmented system write H_*=[L;M], y_*=(0,b). Precompute a systematic basis K_* of ker H_* for the size class and solve H_* v0=y_* once per statement without a weight condition. Transmit just
+    K_*^T E,     mu+v0.E.
+This further reduces the per-repetition payload to m-rank(H_*)+1 and removes all secret-vector draws except E. In the full augmented ciphertext these quantities are deterministic linear functions of the header and tag: project the header by K_*^T and XOR the tag with its dot product with v0. To simulate back, uniformly lift the projected header and reconstruct the tag with v0. The full header conditioned on E is uniform on E+row(H_*), and the displayed residual tag depends only on E and mu, so the simulation is exact. For a witness v, read the kernel coordinates of v+v0 at the free positions and dot them with K_*^T E. The resulting pad error is v.E. Use a dummy wire of the same length after an inconsistency test. This version exposes the fixed syndrome-decoding question particularly directly: the header is exactly the syndrome of the independent Bernoulli error under K_*^T, and the pad is its parity at the public v0. Search hardness for E from this syndrome alone would still need a proof that this particular parity is hidden on the compiled NO targets.
