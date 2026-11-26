@@ -43,6 +43,14 @@ The test circuit has 128 private inputs, 16 unequal eight-input guards, and 4096
 
 At equal scale the interval plan saves 36.55% of the monolithic matrix payload and 79.09% of the selected multiply-add ceiling, while increasing sampled columns by 24.33%. Minimizing sampled columns in the interval family selects the whole circuit. The weighted prefix saves 19.35% of residues over the equal-depth prefix and has the lowest Dec ceiling in the table. Choose the objective using the backend's actual costs. The three algorithms are polynomial, but the table establishes no wall-clock speedup and no general WE proof under the registered PQ assumptions. The pair-policy recognizer is independently tested on all four-input monotone truth tables and the weighted optimizer against exact small tree costs. The control also replays actual NAND witnesses onto the selected guards and macros.
 
+### What a shorter preimage column costs inside Enc
+
+Counting columns alone treats every matrix as having the same dimension. For a dense reverse nearest-plane sampler with an already triangularized basis, one column of dimension m draws m one-dimensional Gaussian coefficients. Its triangular center update uses exactly m(m-1)/2 multiply-subtracts if each iteration updates only the still-unprocessed coordinates. Thus a leaf with P sampled columns contributes Pm scalar draws and Pm(m-1)/2 center updates. This models a specific sampler and excludes basis construction, finite-precision arithmetic costs, proposal iterations inside a scalar draw, matrix target preparation and final coefficient conversion.
+
+In the same control, the monolithic setup requires 1140073353216 scalar draws and 13789757243824128 center updates. The payload-optimized interval plan requires 723424145408 draws and 5112778832201728 updates. It therefore improves these two Enc operation counts even though it samples more, shorter columns. Optimizing center updates instead chooses a different layout with 5002750890530816 updates, 772234497280 transmitted residues and a Dec ceiling of 86410954752 multiply-adds. The listing replays the emitted macro calls to verify additive counts and exhausts all 120 distinct pairs to check the maximum selected cost.
+
+The payload-optimized layout continues to improve the three metrics over a range of common scalings. Keep the chosen tree fixed. If m=a w on every macro, a>=1 is integral and 1<=t<=12a, its smallest width can support t columns. Put A=sum (h-2)w² over emitted macros and let z=12. Full residue count is at most 2a²[A+(z+1)sum w]. Scalar draws are at most 2a²[A+z sum w]. Center updates are at most a³ sum[((h-2)w+z)w²]. For the whole shape H=976,W=189 the respective lower bounds are 2a²(H-2)W², 2a²(H-2)W², and a³(H-2)W²(W-1). For Dec use a² times the sum of (h-2)w²+zw on the selected calls, maximizing over pairs, versus at least a²(H-2)W². An accepting witness with more guards can select exactly two of them before routing. The verified upper/lower coefficient pairs are (22116383,34792254) for payload, (22113336,34792254) for scalar draws, (2440641946,6540943752) for triangular updates, and (7278138,34792254) for Dec. These establish at least 35%, 35%, 60% and 78% savings respectively in these counts for the stated common-scale range. A cryptographic instantiation still has to meet the noise, reduction, precision and correctness requirements and charge all omitted work.
+
 For reproduction use Python. Save the listings as cover.py, pair.py and intervals.py. Take labels.py and shapes.py from [PR 103 at 45c9fbb](https://github.com/MachinaIO/SigabaPark/blob/45c9fbbfb4f725c3301522f95ca881d3daa8568c/dag/Notes/pq-we-reusable-local-witnesses.md), nand.py from [PR 102 at d49bd9e](https://github.com/MachinaIO/SigabaPark/blob/d49bd9eeb7d5a4cacdfd6b4d774348e55ad6a0f9/dag/Notes/pq-we-separator-paths.md), and frontend.py from [PR 99 at 58036ab](https://github.com/MachinaIO/SigabaPark/blob/58036abbee86216e6e0bf18a4a8234c6d55d82cb/dag/Notes/pq-we-live-clause-matrix-product.md). Run python cover.py labels.py and python pair.py nand.py labels.py shapes.py frontend.py intervals.py.
 
 ~~~python
@@ -437,17 +445,17 @@ def plan(cost,d,objective):
     # Stored columns: residues, preimages, upper MAC count on any honest branch.
     @cache
     def best(a,b,t):
-        if b-a<t:return ((0,0,0),('empty',))
+        if b-a<t:return ((0,0,0,0,0),('empty',))
         options=[(cost[a,b,t],('leaf',a,b,t))]
         for k in range(a+1,b):
             if t==1:
                 lc,lp=best(a,k,1);rc,rp=best(k,b,1)
-                options.append(((lc[0]+rc[0],lc[1]+rc[1],max(lc[2],rc[2])),('or',k,lp,rp)))
+                options.append(((lc[0]+rc[0],lc[1]+rc[1],max(lc[2],rc[2]),lc[3]+rc[3],lc[4]+rc[4]),('or',k,lp,rp)))
             else:
                 lc,lp=best(a,k,2);rc,rp=best(k,b,2)
                 xc,xp=best(a,k,1);yc,yp=best(k,b,1)
                 options.append(((lc[0]+rc[0]+xc[0]+yc[0],lc[1]+rc[1]+xc[1]+yc[1],
-                                 max(lc[2],rc[2],xc[2]+yc[2])),('two',k,lp,rp,xp,yp)))
+                                 max(lc[2],rc[2],xc[2]+yc[2]),lc[3]+rc[3]+xc[3]+yc[3],lc[4]+rc[4]+xc[4]+yc[4]),('two',k,lp,rp,xp,yp)))
         return min(options,key=lambda v:(v[0][objective],v[0][0],v[0][1],v[0][2]))
     return best(0,d,2)
 
@@ -475,26 +483,49 @@ def dec(node,ct,active,leaf):
     return None if a is None or b is None else a^b
 
 def compare(n,g,guards,base,labels,shapes,front,alpha,tau):
-    d=len(guards);cost={};pred={}
+    d=len(guards);cost={};pred={};hw={}
     for a in range(d):
         for b in range(a+1,d+1):
             for t in (1,2):
                 if b-a<t:continue
                 key,ports=macro_key(n,g,guards,a,b,t,base,labels)
                 h,w=shapes['matrix_shape'](key,front['compile_program']);assert h>=2
-                m=alpha*w
-                cost[a,b,t]=(2*m*(1+tau)+2*(h-2)*m*m,2*((h-2)*m+tau),(h-2)*m*m+m*tau)
+                hw[a,b,t]=(h,w);m=alpha*w
+                columns=2*((h-2)*m+tau)
+                cost[a,b,t]=(2*m*(1+tau)+2*(h-2)*m*m,columns,(h-2)*m*m+m*tau,columns*m,columns*m*(m-1)//2)
                 pred[a,b,t]=(key,ports)
     rng=Random(701)
-    for obj in (0,1):
+    print('whole with scalar samples and triangular updates',cost[0,d,2])
+    for obj in (0,1,3,4):
         counts,node=plan(cost,d,obj);print('interval objective, ciphertext residues / preimage columns / selected MAC ceiling:',obj,*counts)
+        emitted=[]
+        enc(node,0,lambda:0,lambda k,v:emitted.append(k))
+        assert tuple(sum(cost[k][j] for k in emitted) for j in (0,1,3,4))==tuple(counts[j] for j in (0,1,3,4))
+        # Bound independent of the common integer scale a>=1 and 1<=t<=a*min_width.
+        hwlist=[hw[k] for k in emitted];H,W=hw[0,d,2];z=min([W]+[w for h,w in hwlist])
+        middle=sum((h-2)*w*w for h,w in hwlist);sw=sum(w for h,w in hwlist)
+        capC=middle+(z+1)*sw;capS=middle+z*sw
+        capT=sum(((h-2)*w+z)*w*w for h,w in hwlist)
+        baseC=(H-2)*W*W;baseT=baseC*(W-1)
+        maxD=0;observed=0
         # Evaluate all abstract availability patterns with exactly two guards.
         for pair in combinations(range(d),2):
             for msg in (0,1):
                 def check(k):
                     a,b,t=k;return sum(a<=i<b for i in pair)>=t
                 ct=enc(node,msg,lambda:rng.randrange(2),lambda k,s:s if check(k) else 0)
-                assert dec(node,ct,pair,lambda k,v:v if check(k) else None)==msg
+                used=[]
+                def recover(k,v):
+                    assert check(k);used.append(k);return v
+                assert dec(node,ct,pair,recover)==msg
+                observed=max(observed,sum(cost[k][2] for k in used))
+                maxD=max(maxD,sum((hw[k][0]-2)*hw[k][1]**2+z*hw[k][1] for k in used))
+        assert observed==counts[2]
+        if obj==0:
+            print('fixed layout, min width, scale-free upper/baseline pairs (C,S,T,D):',
+                  z,(capC,baseC),(capS,baseC),(capT,baseT),(maxD,baseC))
+            assert 100*capC < 65*baseC and 100*capS < 65*baseC
+            assert 100*capT < 40*baseT and 100*maxD < 22*baseC
         # For real original witnesses verify every selected aggregate predicate.
         for word in [0,(1<<n)-1]+[rng.getrandbits(n) for _ in range(20)]:
             tr=labels['trace'](n,g,word);live=[i for i,x in enumerate(guards) if tr[x]]
