@@ -552,7 +552,7 @@ The fourth listing plugs a small actual lattice-chain Enc/Dec into the prefix co
 
 Each row comprises both outer messages and all qualifying six-bit witnesses. It performs 216 leaf decryptions and checks 40 exact residuals across ten leaf encryptions. The failures at dimension four all stem from one valid local path with bit-one payload and identically zero ideal integer signal. The two-row replay preserves the first row, the chosen tensor matrices, the trapdoors and the final columns using the same primary stream, generating only the extra root noise from a separate stream. The second row fixes this failure on the tested instance. Relative to doubling the dimension, the two-row replay uses 31600 fewer bytes here. This comparison concerns correctness on these coins, not equivalent hardness.
 
-Retaining l root rows is again public postprocessing of the full ciphertext. For the two-layer backend there is also a simple correctness estimate. Let p be the underlying prime and let rho bound the maximum single-entry atom modulo p of the independent tensor matrices. For the bit-one guard path the logical row contains a unit. Given a terminal tensor factor S2 of rank r modulo p, each independent selected root row of S1 annihilates S2 with probability at most rho^r, by conditioning on all but r pivot coordinates. All l rows annihilate it with probability at most rho^(r l). For any 1<=k<=n, the probability rank(S2)<k is at most binom(n,k-1) rho^((n-k+1)^2): choose k-1 columns spanning the others (extend a spanning selection if needed), then each remaining independent column must satisfy at least n-k+1 independent constraints. Thus the total signal-loss probability is at most that term plus rho^(k l), capped at one. A surviving row and t nearly uniform final columns give the terminal small-interval bound of PR 99; add its statistical and evaluation-error terms. For longer chains the conditional rank argument still applies to the suffix product, whose rank distribution requires a separate bound. The extra rows increase the actual transmitted root size and selected arithmetic. Run OPENBLAS_NUM_THREADS=1 python lattice.py frontend.py pair.py with NumPy to reproduce the toy checks.
+Retaining l root rows is again public postprocessing of the full ciphertext. For the two-layer backend there is also a simple correctness estimate. Let p be the underlying prime and let rho bound the maximum single-entry atom modulo p of the independent tensor matrices. For the bit-one guard path the logical row contains a unit. Given a terminal tensor factor S2 of rank r modulo p, each independent selected root row of S1 annihilates S2 with probability at most rho^r, by conditioning on all but r pivot coordinates. All l rows annihilate it with probability at most rho^(r l). For any 1<=k<=n, the probability rank(S2)<k is at most binom(n,k-1) rho^((n-k+1)^2): choose k-1 columns spanning the others (extend a spanning selection if needed), then each remaining independent column must satisfy at least n-k+1 independent constraints. Thus the total signal-loss probability is at most that term plus rho^(k l), capped at one. A surviving row and t nearly uniform final columns give the terminal small-interval bound of PR 99; add its statistical and evaluation-error terms. For longer chains the conditional rank argument still applies to the suffix product, whose rank distribution is bounded in the final section below. The extra rows increase the actual transmitted root size and selected arithmetic. Run OPENBLAS_NUM_THREADS=1 python lattice.py frontend.py pair.py with NumPy to reproduce the toy checks.
 
 ~~~python
 from itertools import product
@@ -675,4 +675,99 @@ if __name__=='__main__':
     exercise(front,wrapper,4,1)
     assert exercise(front,wrapper,4,2)==0
     assert exercise(front,wrapper,8,1)==0
+~~~
+
+
+### Correctness through arbitrary chain depth
+
+The following calculation applies directly to the polynomial NAND compiler in PR 99. Fix a valid witness before sampling Enc. For modulus q=p^k assume every selected n-by-n tensor factor has independent entries modulo p with maximum atom at most rho<1, and successive factors are independent. Start from l distinct standard rows, 1<=l<=n. Track the rank over F_p after each multiplication. Rank zero is absorbing.
+
+For each prefix rank r let K[r,s] be the rank distribution after n steps of this auxiliary process: start at d=0; stay at d with probability rho^(r-d), otherwise increase by one. Indeed, given a prefix matrix of rank r and previously exposed output columns spanning dimension d, the next output column stays in that span only if the independent fresh input column solves r-d independent linear equations. After conditioning on its nonpivot entries the pivot entries are fixed, giving the claimed upper bound on the stay probability. Thus the actual new rank stochastically dominates this auxiliary law. Couple successive column tests by common uniform draws: at equal dimensions the real process jumps with at least the auxiliary probability, while a one-column jump cannot cross a strict lead. The same coupling shows the auxiliary final dimension is stochastically increasing in the starting prefix rank r. Induction over H independent factors now bounds simultaneous loss of all selected rows by (K^H)[l,0]. For independent uniform entries and rho=1/p the constraint probability is exact and so is the rank law. For one row this recovers 1-(1-rho^n)^H.
+
+For a valid bit-one path the logical message coordinate is a unit. On rank survival, choose the first surviving row as a function of the tensor factors. It has a unit coefficient over Z/q, so independent uniform terminal columns yield independent uniform evaluations on that row. In the notation of PR 99 the per-witness bit-one failure bound is epsilon_eval + eta + (K^H)[l,0] + ((4B+1)/q)^t. This charges the evaluation-error event for all retained entries and the statistical distance of the final public matrix. It requires no independence between the observed errors and the ideal signal. Bit zero only incurs the evaluation-error term. A simultaneous guarantee across witnesses would require additional accounting. See [VWW Construction 4.2 and Lemma 4.3](https://eprint.iacr.org/2022/1140.pdf).
+
+For H>=2 the ciphertext uses 2lm+2(H-2)m²+2mt residues. Selected dense Dec uses l((H-2)m²+mt) multiply-accumulates plus access, witness processing and classification. If H=1, transmit 2lt residues. Extra root rows can be generated with the existing public matrices and require additional root arithmetic and fresh error entries, but no extra trapdoor or preimage column. These are polynomial changes to the honest algorithms. The transmitted view is deterministic postprocessing of the full ciphertext. The backend's security assumptions still apply.
+
+At H=4096 and rho=1/2 the entries below give b such that the rank-loss term is at most 2^-b. Dimension n is the tensor dimension. The chosen rho is illustrative and must be checked for the instantiated entry law.
+
+| n | One row | Two rows | Three rows |
+|---:|---:|---:|---:|
+|32|20|39|58|
+|64|52|103|154|
+|128|116|231|346|
+
+The auxiliary kernel costs O(n l²) arithmetic steps with precomputed atom powers, and powering costs O(l³ log H) arithmetic steps. The fifth listing, survival.py, builds the kernel exactly and rounds every powered matrix entry upward to a dyadic with 512 fractional bits for the table. All entries are nonnegative, preserving the upper bound. Running python survival.py also checks small uniform and biased cases by exhaustive enumeration.
+
+~~~python
+"""Certified upper bound on loss of all retained rows along one fixed witness path."""
+from fractions import Fraction
+from itertools import product
+from math import comb
+
+def kernel(n,l,rho):
+    assert 1<=l<=n and 0<rho<1
+    out=[]
+    for r in range(l+1):
+        prob=[Fraction(1)]+[Fraction(0)]*l
+        for j in range(n):
+            nxt=[Fraction(0)]*(l+1)
+            for s in range(r+1):
+                stay=rho**(r-s)
+                nxt[s]+=prob[s]*stay
+                if s<r:nxt[s+1]+=prob[s]*(1-stay)
+            prob=nxt
+        assert sum(prob)==1
+        out.append(prob)
+    return out
+def upper(n,l,H,rho,precision):
+    assert H>=1 and precision>=1
+    den=1<<precision
+    K=kernel(n,l,rho)
+    mat=[[(v.numerator*den+v.denominator-1)//v.denominator for v in row] for row in K]
+    acc=[[den*int(i==j) for j in range(l+1)] for i in range(l+1)]
+    def mul(A,B):
+        return [[(sum(A[i][k]*B[k][j] for k in range(l+1))+den-1)//den
+                 for j in range(l+1)] for i in range(l+1)]
+    while H:
+        if H&1:acc=mul(acc,mat)
+        H//=2
+        if H:mat=mul(mat,mat)
+    return Fraction(min(den,acc[l][0]),den)
+def audit():
+    # Enumerate uniform binary n=2 tensor factors, then compare the exact rank law.
+    n=2
+    for l in (1,2):
+        states={tuple(1<<i for i in range(l)):1}
+        K=kernel(n,l,Fraction(1,2))
+        weights=[Fraction(int(i==l)) for i in range(l+1)]
+        for H in range(1,5):
+            out={}
+            for rows,count in states.items():
+                for cols in product(range(1<<n),repeat=n):
+                    rr=tuple(sum(((x&c).bit_count()%2)<<j for j,c in enumerate(cols)) for x in rows)
+                    out[rr]=out.get(rr,0)+count
+            states=out
+            weights=[sum(weights[i]*K[i][j] for i in range(l+1)) for j in range(l+1)]
+            actual=Fraction(states.get((0,)*l,0),sum(states.values()))
+            assert actual==weights[0] and actual<=upper(n,l,H,Fraction(1,2),40)
+    # Also enumerate biased binary factors and compare to the max-atom upper bound.
+    for l in (1,2):
+        states={tuple(1<<i for i in range(l)):1}
+        for H in range(1,4):
+            out={}
+            for rows,count in states.items():
+                for cols in product(range(4),repeat=2):
+                    rr=tuple(sum(((x&c).bit_count()%2)<<j for j,c in enumerate(cols)) for x in rows)
+                    mass=3**(4-sum(c.bit_count() for c in cols))
+                    out[rr]=out.get(rr,0)+count*mass
+            states=out
+            assert Fraction(states[(0,)*l],sum(states.values()))<=upper(2,l,H,Fraction(3,4),64)
+    for n in (32,64,128):
+        for l in (1,2,3):
+            v=upper(n,l,4096,Fraction(1,2),512)
+            # Largest integer b with v<=2^-b.
+            b=(v.denominator//v.numerator).bit_length()-1
+            assert v*(1<<b)<=1 and v*(1<<(b+1))>1
+            print('dimension / root rows / certified bits against row loss alone',n,l,b)
+if __name__=='__main__':audit()
 ~~~
