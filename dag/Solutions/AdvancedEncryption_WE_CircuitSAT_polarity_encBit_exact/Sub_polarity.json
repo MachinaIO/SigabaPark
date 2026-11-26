@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.CircuitSAT.polarity_encBit_exact", "proof_type": "prove", "explanation": "Fold certified wire functions through the actual registered wire indices. NAND exchanges positive and negative influences, and projecting the fold gives the original evaluator and the computed signs. The extremal lift dominates the original assignment."}

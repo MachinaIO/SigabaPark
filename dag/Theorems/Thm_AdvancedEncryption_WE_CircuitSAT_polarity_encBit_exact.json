@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.CircuitSAT.polarity_encBit_exact", "title": "Extremal completion preserves every accepting witness and computes the exact ciphertext bit", "statement": "Lifting the mixed bits of each accepting assignment preserves satisfaction, and the deterministic encBit is true exactly for a true message and a satisfiable registered NAND circuit."}
