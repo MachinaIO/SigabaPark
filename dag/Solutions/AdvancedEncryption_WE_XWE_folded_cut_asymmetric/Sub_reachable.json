@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.folded_cut_asymmetric", "proof_type": "prove", "explanation": "Use the four independent capacities e, j(e-s), k-s and h. Greedily fill them in this order; telescoping gives the exact frontier."}

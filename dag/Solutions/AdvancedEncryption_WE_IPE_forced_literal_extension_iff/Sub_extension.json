@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.forced_literal_extension_iff", "proof_type": "prove", "explanation": "Start with the reachability closure of the demands. An unset literal or its opposite can extend the closure consistently by the absence of a complementary cycle; iterate over the list. Conversely closure and consistency exclude each conflicting pair."}

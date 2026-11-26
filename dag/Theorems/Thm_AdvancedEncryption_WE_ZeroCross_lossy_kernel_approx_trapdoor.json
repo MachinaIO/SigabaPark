@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.lossy_kernel_approx_trapdoor", "title": "A lossy matrix B C + F with C K = 0 satisfies (B C + F) K = F K", "statement": "Over a commutative ring, if C K = 0 then (B C + F) K = F K."}

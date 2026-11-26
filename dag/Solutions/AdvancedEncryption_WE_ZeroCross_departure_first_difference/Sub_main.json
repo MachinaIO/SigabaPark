@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.departure_first_difference", "proof_type": "prove", "explanation": "Forward: take the least index of disagreement below l with Nat.find; minimality gives agreement before it. Backward: the disagreement at j contradicts agreement below l."}

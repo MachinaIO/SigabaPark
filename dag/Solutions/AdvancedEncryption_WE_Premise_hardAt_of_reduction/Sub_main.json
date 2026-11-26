@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Premise.hardAt_of_reduction", "proof_type": "prove", "explanation": "If the gain is 0 the bound is trivial. Otherwise beta <= (beta / p) * cost(A) since cost(A) >= p, so cost(B) <= (alpha + beta/p) * cost(A); then 2^k * gain_P(A) <= 2^k * gain_Q(B) <= 2^k * cost(B) / 2^H <= 2^k (alpha + beta/p) cost(A) / 2^H <= cost(A)."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWEGGH15.decodable_support", "proof_type": "prove", "explanation": "Injectivity gives sum_i [bad k i] alpha_i v k i = 0; linear independence (Fintype.linearIndependent_iff) gives each coefficient zero, which is alpha_i when bad k i holds."}

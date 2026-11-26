@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.folded_cut_exact", "title": "Exact image of a public prefix reachability computation", "statement": "A state occurs in the iterated finite union of transition images exactly when it has a realizable path with one allowed transition per prefix layer."}

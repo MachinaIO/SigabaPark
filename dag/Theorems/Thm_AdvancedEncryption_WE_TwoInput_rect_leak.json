@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.TwoInput.rect_leak",
+ "title": "Additive slot secrets in a split BGG+ ciphertext leak over every 2x2 rectangle of slot values",
+ "statement": "If the pair secret of slot values (x, y) is the sum a_x + b_y and the x-block of the joined BGG+ ciphertext is (a_x + b_y)(A - p_x G) + e, then the alternating sum over the rectangle {x, x'} x {y, y'} equals (p_x' - p_x)(b_y - b_y') G plus the alternating sum of the errors: the A-part cancels, so the difference of two slot secrets is decodable through the gadget trapdoor whenever the attribute values differ by a unit."
+}

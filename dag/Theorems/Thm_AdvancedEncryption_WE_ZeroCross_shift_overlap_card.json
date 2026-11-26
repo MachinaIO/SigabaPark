@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.shift_overlap_card", "title": "The window [0, B) minus its shift [t, t + B) has t elements when t <= B", "statement": "For natural numbers t <= B, the cardinality of range B minus Ico t (t + B) is t."}

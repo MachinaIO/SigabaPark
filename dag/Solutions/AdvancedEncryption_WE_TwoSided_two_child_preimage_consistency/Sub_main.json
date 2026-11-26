@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TwoSided.two_child_preimage_consistency", "proof_type": "prove", "explanation": "Forward: substitute Y_b = A D_b and cancel with Matrix.mul_nonsing_inv. Backward: take A = Y0 D0⁻¹ and use Matrix.nonsing_inv_mul."}

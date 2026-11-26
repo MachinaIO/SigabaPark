@@ -1,0 +1,6 @@
+{
+ "name": "WE_CircuitSAT_Capped",
+ "title": "Witness encryption for NAND-circuit SAT (128 inputs, 2^12 gates), lambda = kappa = 128, with cost at most 2^100",
+ "description": "AdvancedEncryption.WE.CircuitSAT.Capped.P: the problem of Def_WE_CircuitSAT (same relation, parameters, registry and cost) with a third proposition CostBounded: WE.cost impl <= 2^100 (so the ciphertext has at most 2^100 bits). The cap excludes submissions that cost at least about 2^128 by reading or deciding over the whole witness space: brute force (about 2^188), padding the ciphertext beyond the adversary's reach (about 2^128.6), and enumeration-based XWE (about 2^145). SubmissionProp := Spec P R. Checks: prop_costBound, not_costBounded_of_enc_time.",
+ "tags": ["primitive", "witness-encryption"]
+}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.FlipShift.one_zero_child_explains", "proof_type": "prove", "explanation": "Multiply B D = E on the right by D^{-1} (Matrix.mul_nonsing_inv) for the first claim; rewrite and reassociate (Matrix.vecMul_vecMul, Matrix.mul_assoc) for the second."}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.IPE.subgroup_score_gcd",
+  "title": "Zero test and gcd of a scaled prime-field score",
+  "statement": "For positive D and prime P, DP divides Da exactly when P divides a. Every nonzero field score gives gcd D."
+}

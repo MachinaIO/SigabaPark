@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Separator.template901_counts",
+  "proof_type": "prove",
+  "explanation": "Multiply the terminal-width bound by the scale and use positivity of the scale to bound the lower-order terms in the three explicit count formulas."
+}

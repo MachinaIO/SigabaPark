@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Separator.support_insert",
+  "title": "Dominance insertion preserves feasible path supports",
+  "statement": "After inserting a support and removing redundant supersets, an available predicate set contains a retained support exactly when it contained an old support or the new one."
+}

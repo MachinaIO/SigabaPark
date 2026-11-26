@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.SignNoise.exact_bit_floor", "proof_type": "prove", "explanation": "There is a unique maximal input array of sign subsets. Its probability is a reciprocal power of two, forcing a positive integer numerator and the stated denominator bound."}

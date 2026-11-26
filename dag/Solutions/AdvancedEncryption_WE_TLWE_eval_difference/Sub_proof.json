@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.eval_difference", "proof_type": "prove", "explanation": "Show by induction on the circuit that the evaluation recursion is additive in the encodings, then apply SigabaNeoStd's bgg_key_relation to the differences c1_i - c2_i."}

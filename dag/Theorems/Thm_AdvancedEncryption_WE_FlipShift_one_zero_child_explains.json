@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.FlipShift.one_zero_child_explains", "title": "A hidden row block with one zero child is determined by its short noise", "statement": "If B D = E with D square and det D a unit, then B = E D^{-1}, and for every row c and continuation D': c (B D') = (c E)(D^{-1} D')."}

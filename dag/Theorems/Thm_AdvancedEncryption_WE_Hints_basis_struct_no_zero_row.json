@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Hints.basis_struct_no_zero_row", "title": "The targets of BASIS_struct hints have no zero row: c W^{-1} R = 0 forces c = 0", "statement": "Over a field, if W is invertible, R has a right inverse (R Rr = 1) and c (W^{-1} R) = 0, then c = 0."}

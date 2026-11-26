@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.FlipShift.eq_zero_of_spanning_annihilated", "title": "A matrix annihilated by a spanning family of rows is zero", "statement": "Over a field, if the rows c x span the whole space K^kappa and c x M = 0 for every x, then M = 0."}

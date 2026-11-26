@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.TwoInput.dp_reach",
+ "title": "Reachable-state dynamic programming decides a streamed verifier with |S||B| step evaluations per block",
+ "statement": "For a step function h on states S and blocks B, the finsets R n defined by R 0 = {s0} and R (n+1) = image of h over R n x B contain exactly the states reached by folding h over a list of n blocks, and each step of the recurrence evaluates h at most |S| |B| times. Hence a verifier streamed with state width s and blocks of b bits is decided in about (number of blocks) 2^(s+b) evaluations, the same count as the middle layers of a layered ABE chain over that decomposition."
+}

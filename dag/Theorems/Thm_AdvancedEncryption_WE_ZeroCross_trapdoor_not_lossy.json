@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.trapdoor_not_lossy", "title": "A matrix with a right inverse is injective on row vectors and decodes noisy samples", "statement": "Over a commutative ring, if A K = 1 then s A = s' A implies s = s', and (s A + e) K = s + e K."}

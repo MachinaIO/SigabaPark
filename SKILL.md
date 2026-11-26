@@ -27,7 +27,7 @@ lake exe cache get        # Mathlib's build cache (see the core's docs/M0.md for
 lake build                # builds the DAG's modules
 ```
 
-The workspace builds with the default environment's core (https://github.com/MachinaIO/SigabaNeo at `v0.2.3`).
+The workspace builds with the default environment's core (https://github.com/MachinaIO/SigabaNeo at `v0.2.4`).
 
 ## 3. What to add
 
@@ -73,7 +73,7 @@ other than `maxHeartbeats`, `maxRecDepth`, `linter.*`, `pp.*`, `synthInstance.*`
 
 ## 4. Check before you open the pull request
 
-With a checkout of the core (`https://github.com/MachinaIO/SigabaNeo` at `v0.2.3`, built):
+With a checkout of the core (`https://github.com/MachinaIO/SigabaNeo` at `v0.2.4`, built):
 
 ```bash
 python3 <core>/python/dag_verify.py verify --dag <a clean checkout of main> --new <a directory with your added files at their paths> --out out

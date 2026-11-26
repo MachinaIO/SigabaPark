@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Separator.template901_counts",
+  "title": "Full matrix payload, selected multiplications and preimage columns for template 901",
+  "statement": "At every common positive integral scale a and terminal width t at most 454a, the three matrix counts for shape (1551,456a) each exceed four times their counts for (387,454a)."
+}

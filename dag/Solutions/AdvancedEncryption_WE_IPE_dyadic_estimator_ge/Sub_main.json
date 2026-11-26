@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.dyadic_estimator_ge", "proof_type": "prove", "explanation": "Extends the standard-library CBD estimator theorem to exponents at least 512 using the sharper BKW cutoff. All other attack proofs follow the core CbdQ proof."}

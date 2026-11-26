@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IPE.affine_key_offset",
+  "proof_type": "prove",
+  "explanation": "Expand scalar multiplication, sum the linear terms and cancel."
+}

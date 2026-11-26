@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Separator.cut_flip",
+  "title": "Component flip for one-bit witness-encrypted edge differences",
+  "statement": "Flipping a component preserves the source bit, the masked terminal under a message flip, and every live edge difference. The relabeling is a bijection on potential assignments."
+}

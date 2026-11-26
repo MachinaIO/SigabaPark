@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.zero_child_target_determined", "proof_type": "prove", "explanation": "Substitute E = A D, distribute, reassociate and cancel D Dinv = 1."}

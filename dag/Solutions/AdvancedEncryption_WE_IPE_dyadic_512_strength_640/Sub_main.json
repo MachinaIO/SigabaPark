@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.dyadic_512_strength_640", "proof_type": "prove", "explanation": "Kernel-reduced intervals cover the entire finite block-size range for 2^21 samples, modulus 2^512 and CBD(16) secret and error."}

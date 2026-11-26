@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.KSplit.table_sum_lower",
+ "proof_type": "prove",
+ "explanation": "Unweighted AM-GM (Real.geom_mean_le_arith_mean with unit weights) gives (prod N)^(1/k) <= (sum N)/k, and t = (t^k)^(1/k) <= (prod N)^(1/k) by monotonicity of rpow."
+}

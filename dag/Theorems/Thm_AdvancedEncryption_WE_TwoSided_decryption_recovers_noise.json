@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.TwoSided.decryption_recovers_noise", "title": "Decryption with a known label recovers the integer noise (centred lift)", "statement": "For q > 0, if b j = l j + z j (mod q) and 2|z j| < q for every j, then the centred lift ZMod.valMinAbs (b j - l j) equals z j for every j."}

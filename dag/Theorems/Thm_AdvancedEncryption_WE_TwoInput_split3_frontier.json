@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.TwoInput.split3_frontier",
+ "title": "Exact frontier for a three-table witness split with per-item cost exponents",
+ "statement": "Splitting m witness bits into three tables of 2^a, 2^b, 2^c items whose items cost 2^K1, 2^K2, 2^K3 keeps every table's total exponent at most E iff m + K1 + K2 + K3 <= 3E and each K_i <= E. This prices a 3-way split by per-item cost, not only by the item count 2^(m/3)."
+}

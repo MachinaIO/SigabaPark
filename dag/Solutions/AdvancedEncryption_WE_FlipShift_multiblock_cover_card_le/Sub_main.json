@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.FlipShift.multiblock_cover_card_le", "proof_type": "prove", "explanation": "X is contained in the union over p in F of the fibers; bound by Finset.card_biUnion_le, then each fiber by k, and card F by the card of the sigma type, sum_r W r (Fintype.card_sigma)."}

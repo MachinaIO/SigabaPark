@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.CNF.bounded_repair_complete", "proof_type": "prove", "explanation": "A satisfying target picks a literal with the opposite bit. Updating it erases exactly that coordinate from the Hamming disagreement set; induct and pad successful paths."}

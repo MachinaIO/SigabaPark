@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.linear_closure", "proof_type": "prove", "explanation": "Substitute ct, distribute, reassociate, rewrite with the two A-form hypotheses, and close with the module tactic."}

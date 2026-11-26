@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.binary_digit_projection", "title": "Boolean predicate coefficients select only the lowest gadget digit", "statement": "In any additive commutative monoid, a full inner-product FE gadget accumulator weighted by the bits of Boolean predicate coefficients equals its digit-zero projection."}

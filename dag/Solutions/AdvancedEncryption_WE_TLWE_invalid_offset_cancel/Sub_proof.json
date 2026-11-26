@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.invalid_offset_cancel", "proof_type": "prove", "explanation": "Apply bgg_key_relation to both circuits, rewrite the equal circuit values, distribute and rearrange with abel."}

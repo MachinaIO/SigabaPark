@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.weighted_attribute_factorization", "proof_type": "prove", "explanation": "Move the verified left feature map to the right by the dot-product adjunction and move the second map back to the ciphertext attributes."}

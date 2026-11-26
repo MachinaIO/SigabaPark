@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.shift_overlap_card", "proof_type": "prove", "explanation": "Show the set difference equals range t by extensionality and omega, then use card_range."}

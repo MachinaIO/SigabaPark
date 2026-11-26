@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Span.mask_fiber",
+  "proof_type": "prove",
+  "explanation": "Translate by the message difference times the direction and use subtraction for the inverse."
+}

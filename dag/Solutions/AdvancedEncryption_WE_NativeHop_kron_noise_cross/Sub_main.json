@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NativeHop.kron_noise_cross", "proof_type": "prove", "explanation": "Entrywise: (y1+e1)(y2+e2) = y1 y2 + (e1 y2 + y1 e2 + e1 e2) by ring."}
