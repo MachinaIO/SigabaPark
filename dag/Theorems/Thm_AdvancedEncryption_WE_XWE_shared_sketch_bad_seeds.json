@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.shared_sketch_bad_seeds", "title": "Counting bad seeds for a shared sketch across all compressed certificates", "statement": "The number of seeds that kill a residual for any certificate is bounded by the number of certificates times a residual cardinality bound times a per-residual collision bound."}

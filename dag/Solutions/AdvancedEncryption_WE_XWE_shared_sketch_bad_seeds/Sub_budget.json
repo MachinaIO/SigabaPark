@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.shared_sketch_bad_seeds", "proof_type": "prove", "explanation": "Apply the finite union cardinality bound to the certificate and residual sets in succession."}
