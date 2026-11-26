@@ -463,3 +463,44 @@ for _ in range(250):
         assert ends=={t for t in range(3) if possible(n,layers,start,t)}
 print("2250 start/target tests on three-state schedules with repeats, permutations and resets")
 ~~~
+
+## Parameter cost of partial mergers when rereads are unrestricted
+
+The exponent depending on the number of exceptional positions in the preceding decision baseline cannot in general be replaced by a fixed polynomial exponent unless parameterized CLIQUE is fixed-parameter tractable. Here is an explicit witness-preserving reduction. For a simple graph on N vertices and requested clique size h>=2, give the witness h vertex addresses of ceil(log2 N) bits each. Use isolated padding vertices to fill the address domain. For each pair of addresses test the badness bit f, one for a nonedge (including the diagonal), zero for an edge. A witness passes all pair tests iff its addresses form an ordered clique.
+
+A Boolean truth table on u bits has a character expansion over F_3 with at most 2^u terms. The coefficient for support S is 2^(-u) times the sum of f(x) chi_S(x) over the Boolean cube, in F_3. Implement translation of a ternary state by one term c chi_S(x) using only permutations: negate the state conditionally on each selected input bit, translate by c, then repeat the conditional negations. The total map is s -> s+c chi_S(x). Concatenating terms yields the permutation program P_f(s)=s+f(x); its inverse is obtained by reversing and inverting its steps. Constants can be implemented at an arbitrary bit position with both transitions equal. Pair predicates have u=2 ceil(log2 N), so at most 4N^2 terms and O(N^2 log N) instructions per pair. Coefficients can be computed in polynomial time independently of h's value in the exponent.
+
+Let M send 1 to 2 and fix 0 and 2. Compile each pair check as P_f, M, P_f inverse, M in execution order. Starting in 0, a good pair leaves 0 and a bad pair leaves 2. Starting in 2, either case leaves 2 (for a bad pair the intermediate states are 0,0,2,2). Thus the accumulated rejection bit persists at the *boundaries* even though it need not persist inside a permutation block. Start at 0 and accept only 0. There are exactly k=2 binom(h,2) designated merger positions, all using the same input-independent M. All other instructions are permutations. Total length is O(h^2 N^2 log N) for N>=2. This proves the parameterized implication by direct substitution: an f(k) poly(L) decision procedure here gives an f'(h) poly(N) CLIQUE procedure. Under the usual parameterized clique time hypothesis excluding g(h) N^o(h), it also rules out g'(k) L^o(sqrt(k)); see [Chen, Huang, Kanj and Xia](https://www.sciencedirect.com/science/article/pii/S0022000006000675) for parameterized clique lower bounds. Neither claim proves the preceding L^O(k) upper bound optimal.
+
+This uses arbitrary repeated reads for the character terms. It does not strengthen the parameter lower bound for schedules reading each bit only twice. It does show that sharing a single public partial merger and allowing arbitrary efficiently listed ternary permutations already gives a nontrivial WE target. A hypothetical polynomial-cost secure WE for these schedules would transport to CLIQUE, hence all NP by witness-preserving reductions such as the literal-selection reduction from 3SAT. The complexity obstruction applies to the strategy of publicly deciding the statement; it does not exclude computational WE.
+
+~~~python
+from itertools import combinations, product
+def terms(table):
+    n=len(table)
+    return [(s,(pow(n,-1,3)*sum(v*(-1)**((s&x).bit_count()%2)
+                                 for x,v in enumerate(table)))%3) for s in range(n)]
+def apply(s,x,coeffs,direction):
+    for mask,c in coeffs:
+        for j in range(4):
+            if (mask & x) >> j & 1: s=-s%3
+        s=(s+direction*c)%3
+        for j in reversed(range(4)):
+            if (mask & x) >> j & 1: s=-s%3
+    return s
+edges=list(combinations(range(4),2))
+for graph in range(64):
+    E={e for j,e in enumerate(edges) if graph>>j&1}
+    bad=[int(tuple(sorted((z>>2,z&3))) not in E) for z in range(16)]
+    coeffs=terms(bad)
+    for picks in product(range(4),repeat=3):
+        s=0
+        for a,b in combinations(picks,2):
+            z=4*a+b
+            s=apply(s,z,coeffs,1)
+            s=2 if s==1 else s
+            s=apply(s,z,reversed(coeffs),-1)
+            s=2 if s==1 else s
+        assert (s==0)==all(tuple(sorted(pair)) in E for pair in combinations(picks,2))
+print("4096 graph/address triples; emitted ternary permutation and merger steps agree with CLIQUE")
+~~~
