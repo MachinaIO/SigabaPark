@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Combine.leakage_chain", "title": "Leakage chain: hops f i <= K f(i+1) + eps over T steps give f 0 <= K^T f T + eps * sum_{i<T} K^i", "statement": "For real f, K >= 0 and eps, if f i <= K * f (i+1) + eps for every i < T then f 0 <= K^T * f T + eps * sum_{i in range T} K^i."}
