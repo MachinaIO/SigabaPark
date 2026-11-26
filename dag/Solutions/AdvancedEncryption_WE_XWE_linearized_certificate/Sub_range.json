@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.linearized_certificate", "proof_type": "prove", "explanation": "Expand the three components of the linear map. The first block fixes the selected operands, the second enforces the products, and the last enforces acceptance. Project forward by measurement and recover a satisfying run from any range witness."}
