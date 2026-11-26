@@ -43,3 +43,36 @@ for cols in product(range(4), repeat=3):
         count += 1
 print(count)
 ~~~
+
+### Polynomial amplification from a constant NO promise
+
+The NO promise can be relaxed to Z_s <= 1/4096, independent of lambda. Use the previous noise rate, so the raw YES crossover probability is at most 1/4 and the raw NO bit distributions have total variation q <= 1/64. The following explicit polarization preserves efficient witness decoding. Its purpose is a wider input promise; when the original exponentially small bound holds, the earlier linear repetition is cheaper. For the broader statistical polarization framework see [Sahai and Vadhan](https://salil.seas.harvard.edu/publications/complete-problem-statistical-zero-knowledge).
+
+Start with nine independent raw encryptions of the same bit, decoded by majority. The per-bit failure f is at most Pr[Bin(9,1/4)>=5] and the message distance d is at most 9q. Then apply the following level t times. Encrypt a bit as two fresh uniform XOR shares conditioned on their parity, each under the preceding scheme, and decode by XOR. Independently repeat this pair three times for the same bit and take majority. All calls use independent coins. One pair has failure at most 2f conditional on either message. Its two transcript laws have difference (P0-P1) tensor (P0-P1) divided by two, so their total variation is exactly d^2. Consequently the new failure and distance satisfy
+
+    f' <= 3(2f)^2,     d' <= 3d^2.
+
+With u=max(12f,3d), each level gives u' <= u^2. The nine-copy initialization has u <= 3/5 by exact binomial counting. For t=ceil(log2(2 lambda)), u_t <= (3/5)^(2 lambda) <= 2^(-lambda). The ciphertext uses exactly 9*6^t*(n+1) bits per message bit, and encryption and decoding perform 9*6^t raw calls plus linear tree overhead, all polynomial. This construction also works directly under a constant bound on the true one-copy distance even if the Fourier upper bound is loose. A strict extension of the previous sufficient promise is H=I, w=1 and a target of weight six: its unique solution gives Z_s=1/4096 for every security parameter. The witness relation and short-preimage counterexample for arbitrary NO instances are unchanged.
+
+On the preceding suggestion about NO-dependent advice, the existing [gap-structure argument](pq-we-gap-structure-routes.md) already handles arbitrary polynomial-size nonuniform simulation circuits. Merlin can supply the circuits; statistical matching of the endpoints on false inputs and the witness distinguisher on true inputs give a coAM protocol. Thus advice alone does not provide a general-NP embedding of the indicated statistical-simulation type unless NP is contained in coAM. The constant-promise result above uses no such embedding.
+
+~~~python
+from fractions import Fraction
+from math import comb
+f = sum(Fraction(comb(9,i)*3**(9-i),4**9) for i in range(5,10))
+d = Fraction(9,64)
+assert max(12*f,3*d) <= Fraction(3,5)
+assert Fraction(3,5)**2 < Fraction(1,2)
+for lam in (1,2,3,16,128):
+    t = (2*lam-1).bit_length()
+    assert 2*lam <= 2**t < 4*lam
+    print(lam, t, 9*6**t)
+~~~
+
+### Shorter ciphertext via polynomial secret sharing and error correction
+
+The expensive final levels can be replaced by a Reed-Solomon ramp from hiding to recovery. Choose N=32 lambda evaluation points, k=N/4, and m=ceil(log2(N+1)). Work over GF(2^m), and use N distinct nonzero points. An irreducible degree-m polynomial can even be selected deterministically by exhaustive search with polynomial-time irreducibility tests because 2^m=O(N). Encode the bit as the constant term of a polynomial of degree at most k with k independent uniform field coefficients. Evaluate at the N points. Encrypt each of the Nm resulting coordinate bits with the inner scheme above using only t levels, where t is the least nonnegative integer such that (3/5)^(2^t) <= 1/(16m). Thus both inner failure and inner distance are at most 1/(16m).
+
+For YES, conditional on the full polynomial each decoded symbol is wrong with probability at most 1/16, independently across symbols. If fewer than N/4 symbols are wrong, unique Reed-Solomon decoding succeeds since the distance is N-k. For NO, write each inner distribution as the common pointwise minimum of P0,P1 plus its residual. This realizes the transcript by a channel which independently reveals its input bit with probability d and otherwise uses common randomness. Only the upper bounding channel needs to reveal bits; the decomposition need not be efficiently sampled. Exposing the whole symbol whenever any bit is revealed dominates the real transcript. Each symbol is exposed independently with probability at most 1/16. Any k field evaluations are statistically independent of the constant term by the invertible Vandermonde minor at distinct nonzero points. Both the error and the statistical distance are bounded by the probability of at least N/4 bad symbols. The union bound gives binom(N,N/4)16^(-N/4) <= (e/4)^(N/4) < 2^(-lambda) for the chosen N, where e is Euler's number.
+
+The exact ciphertext length is 9*6^t*N*m*(n+1) bits. This is O((n+1) lambda log(2+lambda) (1+log log(2+lambda))^(log2 6)), improving the dependence on lambda from lambda^(log2 6). Field evaluation and unique decoding (e.g. Berlekamp-Welch with at most N/4 errors) have polynomial bit cost; symbols and field parameters are derived from lambda and need not be sent. The expression is an asymptotic improvement, without a claim of a small crossover or measured runtime.
