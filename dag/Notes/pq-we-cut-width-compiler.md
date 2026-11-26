@@ -592,3 +592,144 @@ def audit(lut,cut,mixed,front):
             if trace[-1]:assert front['eval_program'](pr,[trace[v] for v in order])[1]==0
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
+
+### Parameterize the affine space and test the remaining clauses with syndrome trellises
+
+Instead of testing every residual affine equation on the encrypted path, solve the system first, including any unit clauses. An inconsistent system gives a constant false statement. Otherwise row elimination and back substitution write every retained wire as an affine function of a subset of the original wires, the free coordinates. Every assignment to the free coordinates extends to exactly one solution of the linear part on the retained wires. Dec obtains the free coordinates just by selecting their wire values from its original trace. Coordinates unused after substitution may be omitted. This avoids adding a secret inverse-map computation. Different pivot choices can have very different costs.
+
+Each remaining signed clause is false precisely when all its substituted literals are false. For a clause with h literals this is a system of at most h binary affine equations C x = d, even when the support of an individual substituted form spans almost all free coordinates. If all literals remain signed individual coordinates, use the preceding shared-slot compiler directly. Remove constant true clauses, deduplicate conditions and fold constant false into the initial counter. For other systems use the following binary trellis. At the first relevant variable start with partial syndrome zero. At a variable with column c and path bit b, advance s to s+b c over F2. Drop the edge if the new syndrome cannot be completed to d by the remaining columns. On the final relevant variable enter the failure counter exactly when the completed syndrome equals d. Omit an unreachable d entirely. No distinct edges with the same source, destination and branch need a weight greater than one: a system with a genuinely multi-variable form spans at least two free-coordinate levels, so it has its own slots before closing. Test truth by counter zero; redundant original clauses need not retain their multiplicities. Each trellis has at most one live path on a fixed assignment, and each subinterval propagates any one initial state along at most one path. The source opens each trellis once, preserving polynomial bounds on integer subproducts. Choose the counter modulus using the total number of remaining conditions.
+
+At a cut let U and V be the spans of the preceding and remaining columns of this clause's system. The live syndromes are exactly U intersect (d+V): reachability gives U, and completability gives the coset. If nonempty, their number is 2^(dim U + dim V - dim(U+V)), by translating to U intersect V. This is the familiar state-space principle for linear-code trellises; see [Forney, Principles of Digital Communication II](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/bb895c1dee9ce0b39d6846e0aa984981_MIT6_451S05_FullLecNotes.pdf). Here the trellis counts violation of one nonlinear clause after substitution. The reference enumerates at most 2^h syndrome values per clause per level, reusing numerical slots independently at each cut. Since h<=K+1 for fixed table arity K, this is polynomial in the original circuit length even for long-range forms. For unrestricted arity this bound is exponential in h. Include the original projected relation and both pivot directions among the layouts compared.
+
+On the preceding 128-input mixed control, absorbing unit and parity constraints and using ascending pivots gives 7 levels, width 9, and interior coefficient 405 versus 10 levels, width 11 and 968 with explicit parity checks. Descending pivots give coefficient 605. The new accepted word set in each direction equals the full projection of the 14 accepted old words. The 58.16% reduction from 968 to 405 is in the same equal-scale interior payload, selected dense Dec arithmetic and one-dimensional sampling counts as before. A separate stress case substitutes two independent eight-input parities into one two-literal clause, keeping all sixteen primary inputs. In the grouped input order this takes 16 levels and width 5 including the three permanent coordinates. All 65536 input words were compared with direct parity evaluation. Earlier experiments with short witnesses and these structural costs do not establish quantum security or the total machine clock.
+
+Save the next listing as syndrome.py and run python syndrome.py frontend.py cut.py mixed.py affine.py lut.py. Besides the two controls it checks the exact projection by full enumeration on 2740 small word/message cases including inconsistent and degenerate systems.
+
+~~~python
+"""Systematic affine parameters and live syndrome trellises for substituted clauses."""
+from itertools import product
+from random import Random
+import sys,runpy
+
+def parameters(order,eqs,reverse):
+    index={v:i for i,v in enumerate(order)}
+    piv={}
+    for row,rhs in eqs:
+        a=sum(1<<index[v] for v in row)
+        while a:
+            p=a.bit_length()-1 if reverse else (a&-a).bit_length()-1
+            if p not in piv:piv[p]=(a,rhs);break
+            b,y=piv[p];a^=b;rhs^=y
+        else:
+            if rhs:return None
+    expr={v:(1<<i,0) for i,v in enumerate(order) if i not in piv}
+    for p in sorted(piv,reverse=not reverse):
+        a,rhs=piv[p];a^=1<<p;mask=0
+        while a:
+            b=a&-a;a^=b
+            m,s=expr[order[b.bit_length()-1]];mask^=m;rhs^=s
+        expr[order[p]]=mask,rhs
+    return expr
+
+def make(cs,eqs,order,bit,reverse,cut,mixed):
+    eqs=eqs+[(set([abs(c[0])]),int(c[0]>0)) for c in cs if len(c)==1]
+    expr=parameters(order,eqs,reverse)
+    if expr is None or () in cs:return mixed['compile_mixed']([()],[],bit,[[]],[0]),[]
+    canonical=[];systems=set()
+    for c in cs:
+        if len(c)<=1:continue
+        simple=[];checks=set()
+        for x in c:
+            mask,offset=expr[abs(x)]
+            rhs=offset^int(x<0)
+            checks.add((mask,rhs))
+            if mask.bit_count()==1:
+                v=order[mask.bit_length()-1];simple.append(-v if rhs else v)
+        if (0,1) in checks:continue
+        checks.discard((0,0))
+        if all(mask.bit_count()==1 for mask,_ in checks):canonical.append(tuple(simple))
+        else:systems.add(tuple(sorted(checks)))
+    canonical=cut['canonical'](canonical)
+    used={abs(v) for c in canonical for v in c}
+    for system in systems:
+        for mask,_ in system:
+            used.update(v for i,v in enumerate(order) if mask>>i&1)
+    free=[v for v in order if v in used]
+    paths=mixed['cuts'](canonical,free)
+    u,layers=mixed['compile_mixed'](canonical,free,bit,paths,mixed['choose'](paths,len(free)))
+    shifts={v:1<<i for i,v in enumerate(order)}
+    counts=[len(u)]*len(free);width=len(u)
+    for system in sorted(systems):
+        columns=[sum(1<<j for j,(mask,_) in enumerate(system) if mask&shifts[v]) for v in free]
+        goal=sum(rhs<<j for j,(_,rhs) in enumerate(system))
+        start=next(i for i,c in enumerate(columns) if c);end=max(i for i,c in enumerate(columns) if c)
+        suffix=[{0} for _ in range(end+2)]
+        for i in reversed(range(start,end+1)):
+            nxt=suffix[i+1];suffix[i]=nxt|{s^columns[i] for s in nxt}
+        if goal not in suffix[start]:continue
+        states={0:0}
+        for i in range(start,end+1):
+            new={}
+            for s,src in states.items():
+                for b in (0,1):
+                    value=s^(columns[i] if b else 0)
+                    if goal^value not in suffix[i+1]:continue
+                    if i==end:dst=1
+                    else:
+                        if value not in new:
+                            new[value]=counts[i];counts[i]+=1
+                        dst=new[value]
+                    layers[i][b].add((src,dst))
+            states=new
+        width=max(width,max(counts))
+    return (u+[0]*(width-len(u)),layers),free
+
+def audit(front,cut,mixed,aff,lut):
+    rng=Random(15152);tests=0
+    for n in range(1,8):
+        o=list(range(1,n+1))
+        for _ in range(20):
+            rng.shuffle(o)
+            eqs=[({i for i in o if rng.randrange(2)},rng.randrange(2)) for _ in range(rng.randrange(n+1))]
+            cs=cut['canonical']([tuple(v*rng.choice((-1,1)) for v in rng.sample(o,rng.randint(1,min(4,n)))) for _ in range(5)])
+            sols=[dict(zip(o,x)) for x in product((0,1),repeat=n) if
+                  all(sum(b for v,b in zip(o,x) if v in row)%2==rhs for row,rhs in eqs) and
+                  all(any(x[o.index(abs(v))]==(v>0) for v in c) for c in cs)]
+            for reverse,bit in product((False,True),(0,1)):
+                pr,free=make(cs,eqs,o,bit,reverse,cut,mixed)
+                image={tuple(s[v] for v in free) for s in sols}
+                for word in product((0,1),repeat=len(free)):
+                    row=front['eval_program'](pr,word)
+                    assert (row[1]==0)==(word in image) and row[2]==bit and sum(row)==row[1]+bit
+                    tests+=1
+    print('exhaustive word checks',tests)
+    n=128;gates=[]
+    def nand(a,b):
+        gates.append((a,b));return n+len(gates)
+    def xor(a,b):
+        t=nand(a,b);return nand(nand(a,t),nand(b,t))
+    v=1
+    for i in range(2,n-3):v=xor(v,i)
+    b=n-3;w=xor(v,b)
+    k=nand(v,n-2);j=nand(w,n-1);l=nand(b,n)
+    t=nand(k,j);t=nand(t,t);t=nand(t,l);nand(t,t)
+    cs,eqs,o=aff['relation'](n,gates,2,lut)
+    base=aff['compile_relation'](cs,eqs,o,1,cut,mixed)
+    good=[dict(zip(o,w)) for w in product((0,1),repeat=len(o)) if front['eval_program'](base,w)[1]==0]
+    for direction in (False,True):
+        pr,free=make(cs,eqs,o,1,direction,cut,mixed)
+        H=len(pr[1]);W=len(pr[0])
+        words=list(product((0,1),repeat=len(free)))
+        accepted={w for w in words if front['eval_program'](pr,w)[1]==0}
+        assert accepted=={tuple(s[v] for v in free) for s in good}
+        print('levels,width,interior coefficient,accepted words:',H,W,(H-2)*W*W,len(accepted))
+    # Deliberately long affine supports, tested with exogenous primary inputs kept.
+    d=8;o=list(range(1,2*d+3));z,t=o[-2:]
+    eqs=[(set(o[:d])|{z},0),(set(o[d:2*d])|{t},0)]
+    pr,free=make([(z,t)],eqs,o,1,True,cut,mixed)
+    assert free==o[:2*d]
+    for word in product((0,1),repeat=2*d):
+        assert (front['eval_program'](pr,word)[1]==0)==bool(sum(word[:d])%2 or sum(word[d:])%2)
+    print('two dense substituted forms: levels,width,checked words',len(pr[1]),len(pr[0]),1<<(2*d))
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
