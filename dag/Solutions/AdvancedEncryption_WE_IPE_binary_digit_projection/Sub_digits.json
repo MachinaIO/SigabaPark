@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.binary_digit_projection", "proof_type": "prove", "explanation": "A zero Boolean coefficient contributes nothing. The sole nonzero bit of one is digit zero, so the entire inner sum reduces to that term."}

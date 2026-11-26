@@ -1,6 +1,6 @@
 ---
 title: Witness encryption from binary inner-product predicates across a circuit cut
-refs: [definition:WE_CircuitSAT, note:pq-we-split-witness-abe, theorem:AdvancedEncryption.WE.IPE.cover_dot_zero_iff]
+refs: [definition:WE_CircuitSAT, note:pq-we-split-witness-abe, theorem:AdvancedEncryption.WE.IPE.cover_dot_zero_iff, theorem:AdvancedEncryption.WE.IPE.binary_digit_projection]
 tags: [circuit-sat, witness-encryption, predicate-encryption, lwe]
 ---
 
@@ -12,7 +12,7 @@ Cover the edge relation exactly by p complete bipartite rectangles. For each rec
 
 **Ordinary WE.** Use one fresh AFV master setup per encryption. Issue one key for each locally admissible left assignment, fixing its actual Boolean predicate vector. Encrypt the message bit once for each locally admissible right assignment, with its actual Boolean attribute. The known witness selects both entries. On a false statement every such pair has nonzero inner product. If either side is empty, a public fixed-zero mode suffices. Empty or singleton vector dimensions may be padded with zero coordinates to meet the PE interface. On a challenge entry, choose the same public attribute for both AFV challenges before setup, request only rejecting keys and use the challenge public parameters to generate all companion entries. This fits the weak selective attribute-hiding game (AFV Def. 2.2, Remark 2.3, Thm. 4.2). It needs no attribute privacy between different labels. The exponential numbers of entries, key queries, statistical errors and public enumeration work must be charged to a concrete reduction. A polynomial-time asymptotic theorem alone cannot certify this parameter regime or the quantum machine game.
 
-**Remove all higher gadget digits.** AFV writes the predicate coefficients in binary to form the key matrix and to combine ciphertext vectors at decryption. Every coefficient in the present compiler is 0 or 1. Use only digit zero of each coordinate. Start with the full AFV setup and ciphertext and project away the higher digit matrices and higher digit ciphertext vectors. With the same full coins, the restricted-key matrix and the decrypted bit are exactly unchanged. The retained setup matrices are sampled independently; in encryption keep the shared secret, base error and blinding matrix and sample only the retained independent sign matrices. This realizes the marginal law exactly. A reduction can project an ordinary AFV challenge, so this omission introduces no new assumption or hybrid. In the conservative analysis keep the full scheme's parameter requirements. Structurally, at AFV matrix width m, one ciphertext now has **1+(1+p)m residues** rather than 1+[1+p(1+floor(log2 q))]m. A functional key is still a short vector with 2m integer coordinates; its predicate label can be recomputed. One fresh setup retains 1+p public n_LWE by m matrices and a target vector. AFV decryption needs the label and public parameter dimensions; it does not perform the original circuit gate evaluations.
+**Remove all higher gadget digits.** AFV writes the predicate coefficients in binary to form the key matrix and to combine ciphertext vectors at decryption. Every coefficient in the present compiler is 0 or 1. Use only digit zero of each coordinate. Start with the full AFV setup and ciphertext and project away the higher digit matrices and higher digit ciphertext vectors. With the same full coins, the restricted-key matrix and the decrypted bit are exactly unchanged. The Lean theorem binary_digit_projection proves the common accumulator identity for both matrices and ciphertext vectors in any additive commutative monoid. The retained setup matrices are sampled independently; in encryption keep the shared secret, base error and blinding matrix and sample only the retained independent sign matrices. This realizes the marginal law exactly. A reduction can project an ordinary AFV challenge, so this omission introduces no new assumption or hybrid. In the conservative analysis keep the full scheme's parameter requirements. Structurally, at AFV matrix width m, one ciphertext now has **1+(1+p)m residues** rather than 1+[1+p(1+floor(log2 q))]m. A functional key is still a short vector with 2m integer coordinates; its predicate label can be recomputed. One fresh setup retains 1+p public n_LWE by m matrices and a target vector. AFV decryption needs the label and public parameter dimensions; it does not perform the original circuit gate evaluations.
 
 A further per-selected-key correctness calculation follows directly from AFV Eq. (4.3). With centered noise lifts x (base vector), e1,e2 (halves of the independently generated secret key), and x' (scalar error), the residual signed random term is a sum of independent Rademacher signs times e2_j x_k, repeated over the h=wt(v) retained coordinates. Conditional on x,e1,e2,x' its variance is h||e2||²||x||². The inequality cosh(t)≤exp(t²/2) and the exponential moment bound give absolute error at most
 
@@ -39,7 +39,7 @@ For the 67/61 split, the projected AFV ciphertext has 118m+1 residues per entry 
 
 A second 128-input/4,096-gate family tests the opaque route. Each side emits 16 parities of disjoint four-bit groups; 48 crossing NAND guards forbid adjacent parity pairs in a three-regular bipartite graph. Compilation produced 16 star coordinates and zero additional witnesses. This function has no width-three CNF on the original inputs: every partial assignment on at most three input bits can extend to all-even right parities, yet some full assignments violate a guard. A nontrivial width-three clause implied by the function would contradict the first fact. The inputs contain deliberately redundant padding and the parity system is easy; public enumeration of the two 16-bit profile domains already provides an assumption-free alternative. More generally at small p, a subset-zeta table on the p-bit masks can test for a compatible pair in O(p·2^p) Boolean operations after enumerating profiles. Cryptographic gains require comparison with such public solvers.
 
-**Reproduction.** Python 3 with NumPy. The truth-table checks cover 300 small CNFs, all local pairings in a 16-variable example, and raw gate lists including default-true forward reads and auxiliaries. The public-seed control is for reproducibility. No LWE samples, trapdoors or encrypted tables are generated.
+**Reproduction.** Python 3 with NumPy. The truth-table checks cover 300 small CNFs, all local pairings in a 16-variable example, and raw gate lists including default-true forward reads and auxiliaries. The public-seed control is for reproducibility. A separate arithmetic test compares the full and projected ciphertext-vector and public-matrix accumulators on shared coins for all 128 predicates of a seven-coordinate toy example. It does not generate trapdoor keys, instantiate secure parameters, or materialize the WE tables.
 
 ~~~python
 from itertools import product
@@ -390,4 +390,29 @@ for _ in range(80):
     n=r.randrange(1,6);s=r.randrange(8)
     g=[(r.randrange(n+s+1),r.randrange(n+s+1)) for j in range(s)]
     validate(n,g,set(range(1,n//2+1)),r.choice((1,2,8)),range(1<<n))
+# This 4-input mixed circuit exceeds a one-clause distribution cap.
+mixed=[(1,3),(2,4),(5,6),(7,7)]
+fallback=validate(4,mixed,{1,2},1,range(16))
+assert fallback[-1]>0
+print('named mixed-gate fallback:',fallback)
+# Check equality of full and projected AFV accumulators on common coins.
+# Arithmetic only: no key sampler, parameter selection, or security experiment.
+rng=np.random.default_rng(88)
+q=257;p=7;m=5;n=3;k=q.bit_length()-1
+A=rng.integers(q,size=(p,k+1,n,m),dtype=np.int64)
+B=rng.integers(q,size=(n,m),dtype=np.int64)
+secret=rng.integers(q,size=n,dtype=np.int64)
+noise=rng.integers(-2,3,size=m,dtype=np.int64)
+w=rng.integers(2,size=p,dtype=np.int64)
+Rs=2*rng.integers(2,size=(p,k+1,m,m),dtype=np.int64)-1
+def block(i,j):
+    return ((A[i,j]+(1<<j)*int(w[i])*B).T@secret+Rs[i,j].T@noise)%q
+full=np.array([[block(i,j) for j in range(k+1)] for i in range(p)])
+short=np.array([block(i,0) for i in range(p)])
+for mask in range(1<<p):
+    v=np.array([mask>>i&1 for i in range(p)],dtype=np.int64)
+    bits=np.array([(v>>j)&1 for j in range(k+1)]).T
+    assert np.array_equal((full*bits[:,:,None]).sum(axis=(0,1))%q,(short*v[:,None]).sum(axis=0)%q)
+    assert np.array_equal((A*bits[:,:,None,None]).sum(axis=(0,1))%q,(A[:,0]*v[:,None,None]).sum(axis=0)%q)
+print('full/projected matrix and ciphertext sums: 128 predicates')
 ~~~
