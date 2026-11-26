@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.folded_cut_frontier", "title": "Resource frontier for a public prefix and a balanced terminal ABE split", "statement": "With j internal public cuts of width s and exponent cap e at least s, the prefix and balanced terminal budgets cover m witness bits exactly when m+(j+1)s is at most (j+3)e."}
