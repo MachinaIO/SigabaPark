@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Ladder.prefix_exposure", "proof_type": "prove", "explanation": "Expand all products; s'^T G' X' = s'^T M_p cancels y's secret part, s^T B X' = s^T A X cancels against c X, and the remaining P s^T G X equals P s^T M_p."}

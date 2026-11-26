@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Ladder.hint_collision", "title": "A key-switching hint on a BGG+ attribute matrix leaks P s - s' through the gadget", "statement": "If K = s^T A + e - s'^T G and c = s^T (A - P G) + e_c, then K - c = (P s - s')^T G + (e - e_c)."}

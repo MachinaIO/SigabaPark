@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Ladder.gsw_mul", "title": "GSW multiplication identity (homomorphic PRF evaluation stays in the t^T G form)", "statement": "If t^T C_1 = x_1 t^T G + e_1, t^T C_2 = x_2 t^T G + e_2 and G X_2 = C_2, then t^T (C_1 X_2) = (x_1 x_2) t^T G + (x_1 e_2 + e_1 X_2)."}

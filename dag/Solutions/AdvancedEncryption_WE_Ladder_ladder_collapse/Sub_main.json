@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Ladder.ladder_collapse", "proof_type": "prove", "explanation": "Induction on i. In the step, s_i^T G G^{-1}(M_i) = s_i^T M_i cancels the previous value, and what remains is s_{i+1}^T B_{i+1} G^{-1}(M_i) plus the new error terms."}
