@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.evaluation_bad_seeds", "proof_type": "prove", "explanation": "Cover the bad evaluation points by the union of the roots of the nonzero residual polynomials and sum the individual degree bounds."}

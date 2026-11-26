@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.selector_support_cover", "proof_type": "prove", "explanation": "Choose a column basis. It must detect each nonzero row, giving a hitting set. Conversely choose one coordinate in each support from a hitting set; the unit rows span at most its cardinality."}
