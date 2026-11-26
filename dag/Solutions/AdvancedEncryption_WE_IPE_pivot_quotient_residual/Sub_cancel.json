@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.IPE.pivot_quotient_residual", "proof_type": "prove", "explanation": "Extend the sum by zero at the selected coordinates, use the dot product adjunction and the public syndrome, and cancel in the additive group."}
