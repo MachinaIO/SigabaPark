@@ -161,3 +161,86 @@ for reject in (False,True):
     assert eval_gates(g,rails(codes[0]))!=reject
     print('UNSAT' if reject else 'SAT',used,'active construction gates, 4096 total; 201 evaluations')
 ~~~
+
+## Arbitrary verifier bodies with certified pair conflicts
+
+For an arbitrary (possibly nonmonotone) body, changing its witness by greedy extension may lose acceptance. Instead retain any forest F of *certified* pair conflicts: every accepting witness must have independent support in F. A syntactically exposed guard is one way to certify edges. Extra conflicts outside F may be ignored because the decoder still runs the entire original verifier. This gives a bijection between forest-independent inputs and short codes, so the original witness itself is recovered. Efficiency depends on the number of independent sets in F; an empty forest yields no saving.
+
+Root each component and order children. For a vertex v let A(v), B(v) count its subtree assignments with v off and on. Then A(v) is the product of A(w)+B(w) over children, and B(v) the product of A(w). Multiply A+B across roots for the total M. The two cases occupy consecutive intervals with the second offset by A(v). Child intervals form a mixed-radix product using A(w) if v is on and A(w)+B(w) otherwise. Ordinary division with remainder inverts each digit. Induction on subtrees proves both inverses. Counts fit in n+1 bits. Preprocessing and either conversion take polynomial bit time. Codes beyond M are rejected. A public decoder followed by the original verifier preserves each individual witness and exact false-instance rejection.
+
+For a 128-vertex path, M=Fibonacci(130)=659034621587630041982498215, so 90 bits suffice (two binary ABE tables of 2^45 entries). For 64 independent edges, M=3^64 and 102 bits suffice (2^51 entries each); the monotone-body specialization earlier can drop another 38 bits because it only needs maximal extensions. The graph here may be a subgraph of all conflicts, so a certified spanning path suffices for the first count even in a denser graph. These bounds exclude decryption circuit and ABE costs.
+
+The following exhausts 874 topologically numbered rooted forests through six vertices and checks 1,000 random code round trips on each 128-vertex example.
+
+~~~python
+from itertools import product
+from random import Random
+
+class ForestCode:
+    """Vertex i has one earlier parent or -1. A set is its bit mask."""
+    def __init__(self, parents):
+        self.children = [[] for _ in parents]
+        self.roots = []
+        for v,p in enumerate(parents):
+            if p == -1:
+                self.roots.append(v)
+            else:
+                assert 0 <= p < v
+                self.children[p].append(v)
+        self.count = [(0,0)]*len(parents)
+        for v in reversed(range(len(parents))):
+            off,on = 1,1
+            for w in self.children[v]:
+                a,b = self.count[w]
+                off *= a+b
+                on *= a
+            self.count[v] = off,on
+        self.size = 1
+        for v in self.roots:
+            self.size *= sum(self.count[v])
+
+    def rank(self, mask):
+        def pack(vertices, forced):
+            acc,place = 0,1
+            for v in vertices:
+                off,on = self.count[v]
+                chosen = bool(mask & (1<<v))
+                assert not (chosen and forced)
+                digit = (off if chosen else 0) + pack(self.children[v],chosen)
+                acc += digit*place
+                place *= off if forced else off+on
+            return acc
+        return pack(self.roots,False)
+
+    def unrank(self, code):
+        assert 0 <= code < self.size
+        def unpack(vertices, forced, value):
+            mask = 0
+            for v in vertices:
+                off,on = self.count[v]
+                value,digit = divmod(value,off if forced else off+on)
+                chosen = digit >= off
+                if chosen:mask |= 1<<v
+                mask |= unpack(self.children[v],chosen,digit-off if chosen else digit)
+            assert value == 0
+            return mask
+        return unpack(self.roots,False,code)
+
+tested = 0
+for n in range(7):
+    for parents in product(*(range(-1,i) for i in range(n))):
+        f = ForestCode(parents)
+        valid = [x for x in range(1<<n) if all(p<0 or not ((x>>p)&(x>>v)&1)
+                                                for v,p in enumerate(parents))]
+        assert len(valid)==f.size and {f.rank(x) for x in valid}==set(range(f.size))
+        assert all(f.unrank(f.rank(x))==x for x in valid)
+        tested += 1
+print('small forests',tested)
+rng=Random(76)
+for family,parents in [('path',list(range(-1,127))),('matching',[i-1 if i%2 else -1 for i in range(128)])]:
+    f=ForestCode(parents)
+    for _ in range(1000):
+        c=rng.randrange(f.size)
+        assert f.rank(f.unrank(c))==c
+    print(family,f.size,(f.size-1).bit_length())
+~~~
