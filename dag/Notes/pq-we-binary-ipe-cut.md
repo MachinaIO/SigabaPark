@@ -409,24 +409,26 @@ assert fallback[-1]>0
 print('named mixed-gate fallback:',fallback)
 # Check equality of full and projected AFV accumulators on common coins.
 # Arithmetic only: no key sampler, parameter selection, or security experiment.
-rng=np.random.default_rng(88)
-q=257;p=7;m=5;n=3;k=q.bit_length()-1
-A=rng.integers(q,size=(p,k+1,n,m),dtype=np.int64)
-B=rng.integers(q,size=(n,m),dtype=np.int64)
-secret=rng.integers(q,size=n,dtype=np.int64)
-noise=rng.integers(-2,3,size=m,dtype=np.int64)
-w=rng.integers(2,size=p,dtype=np.int64)
-Rs=2*rng.integers(2,size=(p,k+1,m,m),dtype=np.int64)-1
-def block(i,j):
-    return ((A[i,j]+(1<<j)*int(w[i])*B).T@secret+Rs[i,j].T@noise)%q
-full=np.array([[block(i,j) for j in range(k+1)] for i in range(p)])
-short=np.array([block(i,0) for i in range(p)])
-for mask in range(1<<p):
-    v=np.array([mask>>i&1 for i in range(p)],dtype=np.int64)
-    bits=np.array([(v>>j)&1 for j in range(k+1)]).T
-    assert np.array_equal((full*bits[:,:,None]).sum(axis=(0,1))%q,(short*v[:,None]).sum(axis=0)%q)
-    assert np.array_equal((A*bits[:,:,None,None]).sum(axis=(0,1))%q,(A[:,0]*v[:,None,None]).sum(axis=0)%q)
-print('full/projected matrix and ciphertext sums: 128 predicates')
+def check_digit_projection():
+    rng=np.random.default_rng(88)
+    q=257;p=7;m=5;n=3;k=q.bit_length()-1
+    A=rng.integers(q,size=(p,k+1,n,m),dtype=np.int64)
+    B=rng.integers(q,size=(n,m),dtype=np.int64)
+    secret=rng.integers(q,size=n,dtype=np.int64)
+    noise=rng.integers(-2,3,size=m,dtype=np.int64)
+    w=rng.integers(2,size=p,dtype=np.int64)
+    Rs=2*rng.integers(2,size=(p,k+1,m,m),dtype=np.int64)-1
+    def block(i,j):
+        return ((A[i,j]+(1<<j)*int(w[i])*B).T@secret+Rs[i,j].T@noise)%q
+    full=np.array([[block(i,j) for j in range(k+1)] for i in range(p)])
+    short=np.array([block(i,0) for i in range(p)])
+    for mask in range(1<<p):
+        v=np.array([mask>>i&1 for i in range(p)],dtype=np.int64)
+        bits=np.array([(v>>j)&1 for j in range(k+1)]).T
+        assert np.array_equal((full*bits[:,:,None]).sum(axis=(0,1))%q,(short*v[:,None]).sum(axis=0)%q)
+        assert np.array_equal((A*bits[:,:,None,None]).sum(axis=(0,1))%q,(A[:,0]*v[:,None,None]).sum(axis=0)%q)
+    print('full/projected matrix and ciphertext sums: 128 predicates')
+check_digit_projection()
 
 def forget(clauses,private,cap=10000):
     cs=set(clauses)
