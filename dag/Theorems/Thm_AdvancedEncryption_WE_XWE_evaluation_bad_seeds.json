@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.XWE.evaluation_bad_seeds", "title": "Single public field seed for all candidate certificates", "statement": "The number of field points accepting any nonzero residual polynomial in any candidate family is bounded by the certificate count times the largest family size times the degree bound."}
