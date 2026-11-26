@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.GGH15.gammaTensorDiag_mul", "proof_type": "prove", "explanation": "Block multiplication (fromBlocks_multiply) with zero off-diagonal blocks, then the mixed-product property of the Kronecker product (Matrix.mul_kronecker_mul)."}

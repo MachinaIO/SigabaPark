@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.GGH15.path_identity", "proof_type": "prove", "explanation": "Induction on the number of levels: peel off level 0 (A_0 D_{0,x_0} = S_{0,x_0} A_1 + E_{0,x_0}), apply the induction hypothesis to the tail (levels shifted by Fin.succ), and regroup the sum with Fin.sum_univ_succ, List.take/List.drop of a cons and Matrix.mul_sum."}
