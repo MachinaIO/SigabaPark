@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Data.Fintype.Card
 
 /-- Free hops never empty a shared accepting state. Hybrid `i` routes every path `p` to a final
 state `route i p`, accepted iff `acc i (route i p)`. A hop is *free* if it is either a reroute

@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Data.Fintype.Card
 
 theorem solution {P K : Type*} [Fintype P] [Fintype K] [DecidableEq K]
     (route : ℕ → P → K) (acc : ℕ → K → Bool) (T : ℕ)
