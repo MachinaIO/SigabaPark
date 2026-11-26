@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.RingGGH15.ring_kernel_break", "proof_type": "prove", "explanation": "Expand the scalar actions, commute s1 s0, and cancel with abel."}
