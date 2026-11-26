@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Hints.rank_condition_necessary", "proof_type": "prove", "explanation": "Substitute u and t; distribute the dot product (add_dotProduct, smul_dotProduct), reassociate vecMul (Matrix.vecMul_vecMul) and move the matrix across the dot product (Matrix.dotProduct_mulVec)."}

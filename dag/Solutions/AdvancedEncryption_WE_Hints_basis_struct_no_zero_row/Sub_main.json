@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Hints.basis_struct_no_zero_row", "proof_type": "prove", "explanation": "Multiply on the right by Rr W: c (W^{-1} R Rr W) = 0; since R Rr = 1 and W^{-1} W = 1 (Matrix.nonsing_inv_mul) this is c = 0."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Hints.zero_row_hint_exposes", "proof_type": "prove", "explanation": "Distribute vecMul over the sum and the scalar (Matrix.add_vecMul, Matrix.smul_vecMul) and reassociate (Matrix.vecMul_vecMul); then rewrite with the hypothesis."}
