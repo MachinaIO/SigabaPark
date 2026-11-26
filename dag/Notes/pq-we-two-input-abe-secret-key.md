@@ -357,3 +357,51 @@ for _ in range(50):
         checks+=1
 print(checks,"occurrence strings: three-state two-pass acceptance equals lifted SAT")
 ~~~
+
+## Two live states admit a linear scan even with arbitrary rereads
+
+For the deterministic, *oblivious* model used in the preceding reduction, width two has a direct decision algorithm. Each position i queries a public bit index v_i shared by both states, possibly repeated arbitrarily. For a fixed answer a, its map on the state bit is either constant (a reset) or s -> s XOR b_i(a), where b_i(a) is the image of zero. A particular execution therefore has a last reset, or uses only permutations. Its final state depends on one constant and the parity of all later permutation flips. This is specific to a single input index per layer; state-dependent choices of the queried variable are outside the argument. For a broader width-two SAT model see [Makita et al.](https://www.jstage.jst.go.jp/article/transfun/E105.A/9/E105.A_2021EAP1120/_article).
+
+Scan right to left. For each variable maintain its allowed answers from the suffix requirement that *all* later maps are permutations. Also maintain the XOR coefficients of the suffix flips, using b_i(x)=b_i(0) XOR ((b_i(0) XOR b_i(1)) AND x). This affine extension is valid on the allowed domain even when the other answer resets. To test a reset at i, try its at most two constant-map answers a compatible with the suffix, temporarily pin v_i=a, and test if the reset value XOR suffix parity can equal the desired terminal state. With a product of unary domains, an affine bit takes both values iff some free variable has nonzero coefficient. Otherwise it takes only its fixed value. Then extend the permanent suffix by requiring a permutation at i and adding its flip. Stop extending if a domain becomes empty. Finally test the initial state as the no-reset case. Conversely each passing test yields an assignment: choose allowed answers meeting that parity; the unconstrained earlier prefix cannot affect the result after the reset. Thus this computes exact satisfiability without enumerating assignments or assuming independent occurrences.
+
+With indexed arrays the scan uses O(L+n) word operations for L positions and n bit variables and O(n) working words (besides the stored read schedule). Maintain the parity for the least allowed answer of every variable and a count of free variables with nonzero coefficient. Only one variable changes per step; temporarily pinning it also costs O(1). A public single-tape implementation must charge for addressing and parsing; a straightforward scan-based simulation remains polynomial. For either accepting terminal this gives an unconditional one-bit ciphertext: emit the plaintext if acceptance is attainable and zero otherwise. Both accepting terminals or no accepting terminals are immediate. The previous width-three construction already embeds ordinary NP with two reads per variable. Thus in this precise model a third state can record permanent failure across multiple local checks, whereas at width two a later reset erases all earlier state information. This delineates the structured subclass and does not provide security for the three-state construction.
+
+~~~python
+from itertools import product
+from random import Random
+def attainable(n,layers,start,want):
+    domain = [3]*n   # low and high bits permit answers zero and one
+    coeff = [0]*n
+    parity = free = 0
+    for i,table in reversed(layers):
+        old, c = domain[i],coeff[i]
+        least = int(old==2)
+        for a,(zero,one) in enumerate(table):
+            if zero==one and old & (1<<a):
+                fixed = parity ^ (c & (least^a))
+                if free-int(old==3 and c==1)>0 or zero^fixed==want:
+                    return True
+        new = old & sum(1<<a for a,(z,o) in enumerate(table) if z!=o)
+        if new==0:
+            return False
+        cnew = c ^ table[0][0] ^ table[1][0]
+        parity ^= (c & least) ^ table[0][0] ^ (cnew & int(new==2))
+        free += int(new==3 and cnew==1)-int(old==3 and c==1)
+        coeff[i],domain[i] = cnew,new
+    return free>0 or start^parity==want
+
+rng=Random(446)
+for n in range(1,7):
+    for _ in range(100):
+        layers=[(rng.randrange(n),tuple((rng.randrange(2),rng.randrange(2)) for _ in range(2)))
+                for _ in range(rng.randrange(21))]
+        for start in (0,1):
+            terminals=set()
+            for x in product(range(2),repeat=n):
+                s=start
+                for i,tab in layers:
+                    s=tab[x[i]][s]
+                terminals.add(s)
+            assert terminals=={t for t in (0,1) if attainable(n,layers,start,t)}
+print("600 schedules; 2400 start/target decisions agree with exhaustive evaluation")
+~~~
