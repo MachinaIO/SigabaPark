@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Exotic.canonical_linear_test_hsp", "proof_type": "prove", "explanation": "Rewrite F-equality by injectivity and rearrange with linear_combination; for the second part instantiate a = -s, b = 1 (which satisfies a + b s = 0) to get -s + t = 0."}

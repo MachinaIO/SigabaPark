@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Exotic.rank_support_mono", "proof_type": "prove", "explanation": "span_le: each entry sum_i H_ij e_i is a sum of F-multiples of spanning vectors; then Submodule.finrank_mono with the finite-dimensionality of the span of a finite family."}
