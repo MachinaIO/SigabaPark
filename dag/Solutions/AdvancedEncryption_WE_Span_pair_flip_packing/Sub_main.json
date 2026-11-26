@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Span.pair_flip_packing",
+  "proof_type": "prove",
+  "explanation": "The per-party sets are pairwise disjoint by their pair reconstruction hypothesis. Count their union and use containment in the message-one fiber."
+}
