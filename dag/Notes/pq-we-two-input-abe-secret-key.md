@@ -313,3 +313,47 @@ for trial in range(100):
             assert reconstructed==(v&secret).bit_count()%2
 print("100 ordered matrix programs; 25600 reconstructed evaluations")
 ~~~
+
+## Two passes: a structured positive case and an NP-complete ordering
+
+The same witness bits may be read in two different orders. For a block I contiguous in both orders, let P_I and Q_I be its matrix products in the first and second passes. Keep a basis of the vectors vec(P_I) tensor vec(Q_I), with one realizing assignment per basis element. For width w the dimension is at most w^4 (pad smaller matrices). Start at singletons by trying each possible bit. Suppose two disjoint children J,K partition I in first-pass order, and in the second pass occur either as J,K or as K,J. In the first case combine two representatives by (P_J P_K, Q_J Q_K); in the second by (P_J P_K, Q_K Q_J). On the tensor vectors this operation extends bilinearly, because each input pair occurs once in each tensor monomial of the result. Disjoint child assignments can be chosen independently. Consequently combining only basis representatives, at most w^8 pairs per node, and taking a basis again spans *all* attainable parent vectors. At the root the desired u P Q H is a linear contraction of the retained tensors. The earlier response-basis compiler applies to the projected augmented rows. A supplied binary common-interval decomposition is easy to check; alternatively recursively try interval splits with memoization to find one in polynomial time. This includes same-order and reverse-order passes and recursively swapped blocks. There is no need to remember all first-pass witness bits at the middle cut.
+
+In contrast, polynomial WE for unrestricted two-pass orders would already suffice for ordinary NP, even at width three. Given a nonempty CNF with nonempty clauses, introduce one bit for each *literal occurrence*, storing the variable value before applying its literal sign. Read all occurrence bits once in clause order. At any position the live states record whether this clause is satisfied so far, plus an absorbing failure state. Apply the sign, at the end of each clause fail if unsatisfied, otherwise reset. In the second pass group the *same occurrence bits* by variable. On the first bit of each group store its value; on every later bit keep it on agreement and go to the absorbing failure state on disagreement. A new group overwrites the stored value without reviving failure. At the end accept either live state. Position-dependent transitions are public deterministic three-by-three binary matrices (one 1 per row); every Boolean assignment is evaluated exactly even over F_2. Empty clauses or an empty conjunction can be handled directly. Each input bit is read exactly twice. For l literal occurrences this uses 2l transitions on a run and O(l) small matrix pairs, plus the read order. Tseitin conversion gives polynomial size for CircuitSAT. A satisfying original witness supplies all occurrence bits including auxiliary gate values; any accepting occurrence string recovers a consistent satisfying assignment. Hence an ordinary WE for this public read-order family with polynomial costs and a fixed-assumption proof transports to general NP with the same assumption and no obfuscation intermediary. This is a reduction target, not an instantiation.
+
+For the previous mask example compute f=(1-C,1) by a final linear map of the one-hot states. Reject maps to (1,1), accept to (0,1). On NO the offset condition holds, and a satisfying witness evaluates to the target. Thus polynomial generation of the genuine response basis for arbitrary second-pass permutations would decide SAT, by testing membership of (0,1). Width, layer size and number of reads are already constant per position here; the unmet cryptographic requirement is to enforce the same choices across the two orders without making reachability for all assignments publicly decidable. This concerns the augmented feature language of the preceding sections and does not give the missing public-encoding hybrid of PR 111.
+
+~~~python
+from itertools import product
+from random import Random
+rng=Random(912)
+checks=0
+for _ in range(50):
+    clauses=[[rng.choice((-3,-2,-1,1,2,3)) for _ in range(rng.randint(1,3))]
+             for _ in range(3)]
+    occ=sum(clauses,[])
+    order=sorted(range(len(occ)),key=lambda i:abs(occ[i]))
+    def run(bits):
+        state=0
+        i=0
+        for clause in clauses:
+            for pos,lit in enumerate(clause):
+                if state!=2:
+                    state=int(bool(state or bits[i]^(lit<0)))
+                    if pos+1==len(clause):
+                        state=0 if state else 2
+                i+=1
+        old=None
+        for i in order:
+            var=abs(occ[i])
+            if state!=2:
+                state=bits[i] if var!=old or state==bits[i] else 2
+            old=var
+        return state!=2
+    def accept(x):
+        return all(any(x[abs(v)-1]^(v<0) for v in c) for c in clauses)
+    valid={tuple(x[abs(v)-1] for v in occ) for x in product(range(2),repeat=3) if accept(x)}
+    for bits in product(range(2),repeat=len(occ)):
+        assert run(bits)==(bits in valid)
+        checks+=1
+print(checks,"occurrence strings: three-state two-pass acceptance equals lifted SAT")
+~~~
