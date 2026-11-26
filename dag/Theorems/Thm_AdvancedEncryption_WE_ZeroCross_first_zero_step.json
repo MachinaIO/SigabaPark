@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.first_zero_step", "title": "A sequence that starts non-zero and vanishes at step h has a first step j < h from non-zero to zero", "statement": "If f 0 is non-zero and f h = 0 then there is j < h with f j non-zero and f (j + 1) = 0."}

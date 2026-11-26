@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.first_zero_step", "proof_type": "prove", "explanation": "Take the least j with f (j + 1) = 0 (Nat.find); minimality gives j < h, and f j = 0 would contradict minimality (or f 0 non-zero when j = 0)."}

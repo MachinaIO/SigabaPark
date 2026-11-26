@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.departure_first_difference", "title": "A string lies outside a prefix cube iff it first differs from the prefix at some level", "statement": "For p, z : Fin n -> Bool and l, z disagrees with p somewhere below l iff there is j < l where z first differs from p."}

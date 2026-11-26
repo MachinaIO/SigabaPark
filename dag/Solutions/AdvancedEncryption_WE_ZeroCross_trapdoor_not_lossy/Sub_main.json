@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.trapdoor_not_lossy", "proof_type": "prove", "explanation": "Multiply by K on the right and use vecMul_vecMul with A K = 1; distribute over the sum for the decoding identity."}
