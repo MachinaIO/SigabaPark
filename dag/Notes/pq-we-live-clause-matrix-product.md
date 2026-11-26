@@ -1,6 +1,6 @@
 ---
 title: Read-once matrix programs for circuit witnesses with reusable clause coordinates
-refs: [definition:WE_CircuitSAT, note:pq-we-ggh15-chain-verdict]
+refs: [definition:WE_CircuitSAT, note:pq-we-ggh15-chain-verdict, theorem:AdvancedEncryption.WE.MatrixChain.terminal_box_count]
 tags: [witness-encryption, branching-programs, complexity, lwe]
 ---
 
@@ -28,7 +28,7 @@ Write B for the bound on the absolute centered evaluation error from VWW Lemma 4
 
     epsilon + H rho^n + eta + ((4B+1)/q)^t.
 
-Use t=ceil(lambda)+1, m>=t, and n with H rho^n negligible. For simultaneous correctness across every path, add H bits to the terminal repetition budget and set the other failure bounds with the corresponding margin; the standard per-witness claim already follows without that union bound. For H=1 the same argument uses A_1. Direct Enc only needs the selected root row and t target columns and t column-preimage draws per final branch, using independent per-column sampling with the shared trapdoor. All interior blocks remain full width. Enc can still use the original TrapGen for the final public matrix and discard its unused columns. These savings are exact dimensional and operation-count changes; no end-to-end lattice performance measurement is claimed. The second listing checks equality of the truncated and full products, the small-field row survival bound and exact uniformity for unit rows over two prime powers.
+The accompanying finite-ring theorem gives the exact box cardinality for a unit pivot and arbitrary offsets depending on all the remaining coordinates. More generally, a target terminal error 2^-lambda only needs t=ceil(lambda/log2(q/(4B+1))). When q >= (4B+1) 2^lambda, one terminal column suffices; this trades modulus headroom for smaller ciphertext and sampler counts. Check the ratio with the recomputed B, m and lattice hardness at the chosen parameters. At H=2, one root row and one terminal column require 4m residues and a single length-m dot product. For the conservative fixed-ratio setting use t=ceil(lambda)+1, m>=t, and n with H rho^n negligible. For simultaneous correctness across every path, add H bits to the terminal repetition budget and set the other failure bounds with the corresponding margin; the standard per-witness claim already follows without that union bound. For H=1 the same argument uses A_1. Direct Enc only needs the selected root row and t target columns and t column-preimage draws per final branch, using independent per-column sampling with the shared trapdoor. All interior blocks remain full width. Enc can still use the original TrapGen for the final public matrix and discard its unused columns. These savings are exact dimensional and operation-count changes; no end-to-end lattice performance measurement is claimed. The second listing checks equality of the truncated and full products, the small-field row survival bound and exact uniformity for unit rows over two prime powers.
 
 ~~~python
 """Binary matrix products for a CNF in a fixed variable order."""

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.MatrixChain.terminal_box_count",
+  "proof_type": "prove",
+  "explanation": "Keep the other coordinates and map each pivot to its terminal residue. Invert each translation and multiplication by the unit. Count the resulting product by the equivalence."
+}

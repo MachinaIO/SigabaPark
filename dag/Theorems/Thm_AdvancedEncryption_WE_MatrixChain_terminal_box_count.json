@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.MatrixChain.terminal_box_count",
+  "title": "Exact interval-box count with a unit pivot in every terminal column",
+  "statement": "For t columns with uniform pivot coordinates multiplied by a fixed unit and translated by an arbitrary function of the other coordinates, exactly |s|^t times the number of remaining choices land in the prescribed box."
+}
