@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.trapdoorLaw_tail", "title": "Tail bound for Def_SuccinctLWE's T: all columns shorter than sigma sqrt(lm+m)", "statement": "If dualMassE([I_l (x) B | W], sigma) <= 1/2 and sigma > 0, then T <- trapdoorLaw p B W is some T' with a column of Euclidean norm >= sigma sqrt(lm + m) with probability at most lnk * 3 * 2^{-(lm+m)}."}
