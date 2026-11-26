@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.EvalOnly.query_lower_bound",
+ "proof_type": "prove",
+ "explanation": "Sum the two per-bit bounds: sum over w of (p w false + p w true) <= 2q = sum over w of the constant 2q/|W|, so Finset.exists_le_of_sum_le gives w with p w false + p w true <= 2q/|W|. By the coupling bounds and correctness, A w's advantage on the false statement is at least 1 - eps - 2q/|W| >= 0; squaring is monotone on nonnegatives, and the security hypothesis (gain = squared advantage) bounds 2^k times that square by the cost."
+}

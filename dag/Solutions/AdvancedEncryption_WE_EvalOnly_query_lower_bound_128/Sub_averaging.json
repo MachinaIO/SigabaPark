@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.EvalOnly.query_lower_bound_128",
+ "proof_type": "prove",
+ "explanation": "Same averaging as the general lemma (self-contained proof): some w has p w false + p w true <= 2q/2^128 <= 1/4. With eps <= 1/100 the advantage of A w on the false statement is at least 74/100, its square at least 0.5476, and 2^128 * 0.5476 >= 2^127; the security hypothesis gives the cost bound."
+}
