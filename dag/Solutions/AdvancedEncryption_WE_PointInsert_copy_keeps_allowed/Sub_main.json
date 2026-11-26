@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PointInsert.copy_keeps_allowed", "proof_type": "prove", "explanation": "Direct case split on whether the pad is d."}

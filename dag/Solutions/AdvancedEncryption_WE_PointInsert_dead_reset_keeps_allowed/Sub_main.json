@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PointInsert.dead_reset_keeps_allowed", "proof_type": "prove", "explanation": "A prefix longer than L meets the dead entry at L, so the new pad is alive only on prefixes of length at most L, where its entries are unchanged."}

@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.PointInsert.copy_keeps_allowed", "title": "Replacing a pad by a copy of a program alive only on allowed prefixes keeps the invariant", "statement": "If pad d is replaced by a program src that is alive only on allowed prefixes and the other pads are unchanged, then every pad is alive only on allowed prefixes."}
