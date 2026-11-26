@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.CNF.bounded_repair_complete", "title": "Completeness of bounded ternary witness repair from a nearby assignment", "statement": "Whenever a failed test identifies three false literals of which the target satisfies one, an assignment within Hamming radius r of the target has a successful length-r sequence of ternary repairs."}
