@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.cover_pad_card", "proof_type": "prove", "explanation": "Every solution equals Minv (t - x) (left inverse), and Minv (t - x) is a solution (right inverse), so the subtype is a singleton."}

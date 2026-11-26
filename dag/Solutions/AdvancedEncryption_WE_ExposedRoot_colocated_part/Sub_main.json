@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.colocated_part", "proof_type": "prove", "explanation": "Finset.sum_eq_single at π: the other summands vanish because the if-branch is 0."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.uncovered_readings_collide", "proof_type": "prove", "explanation": "Rewrite Rv D1, distribute, reassociate R1 Am1 D2b, substitute the two level-2 relations, and cancel R1 R2 Am2 with abel."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.phase_one_kernel_break", "proof_type": "prove", "explanation": "Distribute, reassociate z S A, rewrite z S = 0."}

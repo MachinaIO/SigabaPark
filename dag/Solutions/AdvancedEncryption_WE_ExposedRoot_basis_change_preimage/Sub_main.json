@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.basis_change_preimage", "proof_type": "prove", "explanation": "Forward: reassociate and rewrite. Backward: multiply both sides on the left by Winv and cancel Winv * W = 1."}

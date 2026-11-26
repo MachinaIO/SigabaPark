@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ExposedRoot.reachable_closure", "proof_type": "prove", "explanation": "Distribute, reassociate V' S A, rewrite V' S = K V, reassociate."}

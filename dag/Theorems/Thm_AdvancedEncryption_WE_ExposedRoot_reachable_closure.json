@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ExposedRoot.reachable_closure", "title": "Reachable closure: if V' S = K V then V'(S A + E) = K (V A) + V' E, so exposed targets touch A only through its reachable rows V A", "statement": "For matrices over a ring, if V' * S = K * V then V' * (S * A + E) = K * (V * A) + V' * E."}

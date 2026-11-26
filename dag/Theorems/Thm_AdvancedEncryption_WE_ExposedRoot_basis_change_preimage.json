@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ExposedRoot.basis_change_preimage", "title": "Exposed-row basis change is exact: for invertible W, A D = Y iff (W A) D = W Y, so GGH15 preimages may be sampled in the basis [exposed rows; complement]", "statement": "For a left-invertible square matrix W (Winv * W = 1) over a ring, A * D = Y holds iff (W * A) * D = W * Y."}

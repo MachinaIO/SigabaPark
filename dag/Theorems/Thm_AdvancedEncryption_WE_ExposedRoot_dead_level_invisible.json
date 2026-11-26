@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ExposedRoot.dead_level_invisible", "title": "A slot with an all-zero level j is invisible after j: its columns vanish in every reachable row at every level i > j", "statement": "If each element of P (i+1) has the form u0 * N0 i + u1 * N1 i with u0, u1 in P i, and N0 j = N1 j = 0, then every element of P i is 0 for every i > j."}
