@@ -1,6 +1,6 @@
 ---
 title: Replace layered ABE by public prefix reachability and a single terminal ABE split
-refs: [definition:WE_CircuitSAT, note:pq-we-split-witness-abe, note:we-circuitsat-live-wire-baseline, theorem:AdvancedEncryption.WE.XWE.folded_cut_exact, theorem:AdvancedEncryption.WE.XWE.folded_cut_frontier]
+refs: [definition:WE_CircuitSAT, note:pq-we-split-witness-abe, note:we-circuitsat-live-wire-baseline, theorem:AdvancedEncryption.WE.XWE.folded_cut_exact, theorem:AdvancedEncryption.WE.XWE.folded_cut_frontier, theorem:AdvancedEncryption.WE.XWE.folded_cut_asymmetric]
 tags: [witness-encryption, attribute-based-encryption, circuit-sat]
 ---
 
@@ -19,6 +19,17 @@ One can transpose a Cartesian split by hardwiring the other coordinate in the ke
 This follows by filling the three capacities e, j(e-s), 2e-s, as proved by folded_cut_frontier. Any total between zero and j(e-s) can be distributed over j capped blocks by greedy filling. Empty blocks are allowed in this numerical model. An actual verifier must support the chosen boundaries and widths; a width guarantee at just one set of boundaries cannot be moved by arithmetic. Tightness is for the displayed caps, not a lower bound for all circuits. The exponents count transitions and table entries; one public transition, one ABE key and one ciphertext can have very different costs.
 
 For 128 bits, j=2 and s=16, the four-stage chain in #80 has best displayed exponent 40. The public-prefix construction reaches exponent 36 if those widths are available at suitable splits (35 fails since 128+48>175). Use prefix block sizes 36,20,20 and suffix size 52. At most 3·2^36 public transition evaluations suffice for the prefix. Hardwire the state and 18 suffix bits in each key, leaving 34 attribute bits. This uses at most 2^34 keys and exactly 2^34 ciphertexts. The pre-overhead single-challenge security budget in #64 is then 128+2·34=196 bits. If forced to retain #80's example of balanced boundaries 40,24,24,40, the public work cap stays at exponent 40; one still gets two terminal tables of at most 2^28 entries by assigning 12 suffix bits to the keys. For a public streamed verifier that remains narrow through the entire suffix, direct reachability all the way to the output is also available and may be cheaper. No general exponent-36 claim for 128-input NAND lists follows.
+
+**Separate caps for public work, keys and challenge ciphertexts.** Public transitions, ABE KeyGen and ABE Enc are different operations, so impose independent exponent caps E, K and H. Suppose s≤E and s≤K, keep the whole cut state in the key, and split suffix bits into left and right. The four bit capacities are E, j(E-s), K-s, H. The Lean theorem folded_cut_asymmetric proves exact feasibility in this model iff m+(j+1)s ≤ (j+1)E+K+H. With K=E this allows a direct trade between the largest non-challenge exponent E and the number of message-switch hybrids. The examples assume all indicated cuts have the stated width.
+
+| Prefix blocks then suffix (m=128, j=2, s=16) | Public exponent cap | Key exponent | Ciphertext exponent / log2 hops | Baseline 128 + twice log2 hops |
+|---|---:|---:|---:|---:|
+| 36,20,20 then 52 (18+34) | 36 | 34 | 34 | 196 |
+| 39,23,23 then 43 (23+20) | 39 | 39 | 20 | 168 |
+| 40,24,24 then 40 (24+16) | 40 | 40 | 16 | 160 |
+| 44,28,28 then 28 (28+0) | 44 | 44 | 0 | 128 |
+
+The last row has one possible attribute. The encryptor can instead evaluate every terminal state/left pair directly at the same enumeration exponent and dispense with ABE. Security floors above omit the ABE reduction time, loss and error. In particular they are not claimed LWE parameter strengths. A transition width that grows when moving a boundary can invalidate a numerical row.
 
 **Obtaining a sound cut from a raw NAND list.** The implementation normalizes default-true forward reads and prunes gates outside the output cone. It introduces each live input bit at first use, computes a NAND and projects to wires with future reads, deduplicating states. Stop at a specified gate boundary. The resulting states are the exact projected assignments on the live cut, and the only unread input bits required by the residual gate list are independent of that state. The suffix uses the stored actual wire values. The first-use invariant of the live-wire baseline establishes this at each gate. A cap is checked before allocating a new state expansion; on overflow this candidate cut is unavailable and the original split (#64) remains available. Finding an optimal boundary, implementing key generation and bounding the clock on the registered unary input remain open.
 
