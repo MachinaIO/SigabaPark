@@ -217,3 +217,48 @@ def check():
     return total
 print(check())
 ~~~
+
+## Using bounded-degree consequences to remove witness bits before encryption
+
+The certificate-dual method in [the construction survey](pq-we-new-directions.md) looks for the constant one in a truncated polynomial ideal. Even when this test fails, the *affine part* of the same span can shrink the witness dimension for any subsequent backend. Use Boolean multilinear polynomials over F_2 on the input bits and auxiliary gate bits, with the output pinned. For a chosen degree and public work budget collect true-on-solutions equations (polynomials equal to zero): for example the degree-bounded monomial multiples of the gate equations, reduced modulo x_i^2=x_i. Store columns for their occurring monomials. Retain the row space intersection with the affine polynomials in the primary inputs by eliminating every auxiliary-containing or degree-at-least-two column first. In row echelon form take the rows with zero eliminated part. This includes cancellations between rows whose individual nonlinear parts do not vanish. With a restricted list it may find fewer consequences, but every returned consequence still holds on all satisfying inputs.
+
+If one obtains 1=0, emit a fixed ciphertext independent of the bit. Otherwise solve the retained linear equations as x=x0+Bt, with t the free primary coordinates and k=number of free coordinates. Compile a verifier C'(t)=C(x0+Bt) using the original verifier C; retaining C prevents spurious solutions to the relaxation. For every satisfying x its free coordinates give t with C'(t)=1. Every satisfying t lifts by the displayed affine map. No witness is used in Enc. This is an exact YES/NO reduction on *all* instances, including unrefutable NO inputs. The false-instance hiding proof for the remaining ciphertext is a single call to the backend on C', with no statement-specific hardness assumption added by preprocessing. A fixed-assumption proof for a bounded-k backend therefore applies on the entire family reduced to its domain. An unresolved backend for general k remains unresolved.
+
+A pass costs polynomial time in the actual number of rows and columns (dense elimination O(R P min(R,P)) binary operations for R rows and P columns); use fixed degree or explicit polynomial budgets. Generate the final verifier from the original one and the final affine map, with at most O(n(k+1)) extra Boolean gates via XORs and constants. A subsequent pass can recompile the smaller verifier and repeat up to n times if each successful pass removes a primary dimension; compose affine maps before final code generation. The preprocessing and the resulting *gate count* must be charged for a circuit-sensitive backend; fall back to the original circuit if the reduction increases its certified budget. For a small residual k, an unconditional terminal implementation enumerates 2^k inputs, emits the payload iff one accepts and otherwise emits zero. Its ciphertext and receiver each cost one bit/read, and its sender costs the preprocessing plus O(2^k |C'|). In particular polynomial preprocessing and k=O(log |C|) suffice even for NO instances for which the original chosen row list does not span one. This is a tractable subclass; the reduction gives no such k bound for unrestricted circuits.
+
+For a scalable family take primary bits u,v,a_1,...,a_m, constraints a_i+uv=0 for all i and any additional polynomial-size verifier on those same bits. These equations can be supplied by an exact conjunction frontend. Subtracting the first equation from each other equation removes m-1 independent dimensions regardless of the additional verifier. The remaining three bits suffice, so the terminal sender makes at most eight verifier evaluations instead of up to 2^(m+2). Identifying shared products directly would achieve the same improvement in this family; elimination also applies when nonlinear terms cancel only in linear combinations of several rows.
+
+The example checks an unsatisfiable system of nonlinear constraints whose rows alone do not span one, and an adjacent satisfiable system. The first two constraints imply a=b by cancellation. After substitution the remaining equations can be checked by enumeration over three bits instead of four. The general identity for the source and compiled solution sets is checked for both outcomes.
+
+~~~python
+# Polynomials are sets of monomials, each monomial a mask of variable positions.
+a,b,u,v = (1,2,4,8)
+def value(poly,x):
+    return sum((x & m)==m for m in poly)%2
+for pin in (0,1):
+    # a=uv and b=uv imply a=b. Pin a(1+b) to 0 or 1.
+    eq = [{a,u|v},{b,u|v},{a,a|b} ^ ({0} if pin else set())]
+    high = sorted({m for row in eq for m in row if m.bit_count()>1})
+    basis = {}
+    aff = []
+    for row in eq:
+        row = row.copy()
+        for m in high:
+            if m in row:
+                if m in basis:
+                    row ^= basis[m]
+                else:
+                    basis[m]=row
+                    break
+        else:
+            aff.append(row)
+    assert aff == [{a,b}]
+    sols = {x for x in range(16) if all(not value(row,x) for row in eq)}
+    lifted = set()
+    for t in range(8):
+        x = ((t&1)*3) | ((t>>1)<<2)
+        if all(not value(row,x) for row in eq):
+            lifted.add(x)
+    assert lifted == sols and len(sols)==(0 if pin else 4)
+print("NO and YES fibers matched exactly; 16 to 8 candidates before residual checks")
+~~~
