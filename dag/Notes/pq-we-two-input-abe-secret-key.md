@@ -234,3 +234,30 @@ for A in factors:
 assert Fraction(large,len(factors)**2)==Fraction(9,64)
 print("4096 factor pairs; exact message-test gap 9/64")
 ~~~
+
+## Fixed LPN and the exact offset condition for correlated tuple values
+
+Consider a value-only alternative to the exact product test. Sample a uniform binary m-by-d matrix A, d-by-l uniform S and independent Bernoulli noise E of shape m-by-l; put Y=AS+E. Keep a fixed, statement-independent parameter family with quantum-hard decisional LPN for one m-sample column. Publish A. For each query tuple z the public circuit computes an m-by-l binary feature matrix T_x(z) and an offset bit g_x(z) without using S,E or b. The evaluator returns the bit <T_x(z),Y> + b*g_x(z), using the entrywise inner product. Reuse of cells of Y is intentional.
+
+With Y replaced by uniform U the *whole* value function is a uniform element of the image of the linear map D -> (<T_x(z),D>)_z translated by b*g_x. Thus the two message laws are identical exactly when there exists D with <T_x(z),D>=g_x(z) for every z. This does not demand an independent random function on tuples. For statement-only features, a nonuniform proof may establish this existence without an efficient algorithm for finding D. Replacing columns one by one costs at most l fixed LPN advantages per message, since given the challenge A the reduction can generate the other columns with fresh secrets and noise. It can implement coherent evaluations reversibly using its full challenge column; budget their circuit cost. The resulting bound for the value interface on a false x satisfying the offset condition is twice the sum of the column advantages. See the binary decisional experiment in [Non-Interactive Zero-Knowledge from LPN and MQ, Definition 4.2](https://eprint.iacr.org/2024/1254.pdf).
+
+If the condition fails, some at most m*l+1 tuples have feature matrices summing to zero but offset bits summing to one. Indeed select a basis among the flattened rows; interpolating their offsets defines a consistent functional there, so one additional row contradicts it. XORing these responses returns b exactly, for every Y and every noise draw. This gives a polynomial-size nonuniform distinguisher for a fixed offending x even if the tuple domain is exponential; efficient uniform discovery of the tuples is a separate issue. For features that depend on random A, a certificate hardwired before seeing A need not suffice. In particular the small-test statement here uses statement-only features.
+
+For an interface example take one nonzero fixed coefficient feature when C_x(z)=0 and zero otherwise, with g_x(z)=1. Every true witness reads b. On NO the offset condition holds and the functions are constant across tuples with a hidden random shift in the ideal game. Publishing Y as well as any response on a known tuple instead exposes b by subtraction. Trying to encode the offset by sending only (A,Y+bD) for an efficiently computed public D does not repair this: for *every* fixed x and D independent of Y given A, the two buffer distributions are computationally indistinguishable by the same column hybrids, including on YES. An efficient decoder with a hardwired valid witness would contradict this. Thus the fixed assumption can justify correlated masks and avoid the earlier rank objection at the value interface, but an explicit representation giving the witness these evaluations without exposing the seed buffer and offset separately remains necessary. No general public WE ciphertext follows.
+
+~~~python
+from itertools import product
+from collections import Counter
+for rows in product(range(4),repeat=3):
+    for g in range(8):
+        images = [sum(((row & d).bit_count()%2)<<i for i,row in enumerate(rows))
+                  for d in range(4)]
+        law = Counter(images)
+        same = law == Counter(y^g for y in images)
+        assert same == (g in images)
+        if not same:
+            assert any(all((h&y).bit_count()%2==0 for y in images)
+                       and (h&g).bit_count()%2 and h.bit_count()<=3
+                       for h in range(1,8))
+print("512 feature/offset systems; exact image criterion and short separating parities")
+~~~
