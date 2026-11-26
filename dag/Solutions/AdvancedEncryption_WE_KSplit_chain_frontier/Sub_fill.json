@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.KSplit.chain_frontier",
+ "proof_type": "prove",
+ "explanation": "Forward: each middle block contributes at most e - s, so summing gives m <= 2e + j(e - s), and a nonempty middle forces s <= e. Backward: put min(e,m) bits in the first block, min(e, rest) in the last, and distribute the remainder (at most j(e - s)) greedily over j middle blocks of capacity e - s."
+}

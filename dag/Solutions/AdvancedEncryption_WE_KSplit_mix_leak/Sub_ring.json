@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.KSplit.mix_leak",
+ "proof_type": "prove",
+ "explanation": "Distribute vecMul over subtraction and scalar multiplication, then ring pointwise."
+}

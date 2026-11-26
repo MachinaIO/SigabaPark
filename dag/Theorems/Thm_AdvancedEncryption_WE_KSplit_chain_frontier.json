@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.KSplit.chain_frontier",
+ "title": "Exact exponent frontier for the layered ABE chain over a bounded-width streaming verifier",
+ "statement": "For a witness of m bits cut into a first block a, j middle blocks and a last block c, with every middle layer paying its block length plus the state width s, all layer exponents are at most e exactly when m + j s <= (j+2) e and (j = 0 or s <= e)."
+}
