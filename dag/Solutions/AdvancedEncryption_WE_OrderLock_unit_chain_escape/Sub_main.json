@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.OrderLock.unit_chain_escape", "proof_type": "prove", "explanation": "Each step: give L and b explicitly, then check the four conditions by case analysis on the level (0..3 or larger) and the bit, with simp."}
