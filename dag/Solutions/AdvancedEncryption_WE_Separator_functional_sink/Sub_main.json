@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Separator.functional_sink",
+  "proof_type": "prove",
+  "explanation": "Directed reachability of the target is invariant across each edge by uniqueness of the successor. Induct over equivalence closure for one implication and over the directed path for the other."
+}

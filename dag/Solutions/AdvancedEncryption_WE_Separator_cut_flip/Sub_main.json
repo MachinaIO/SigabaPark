@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Separator.cut_flip",
+  "proof_type": "prove",
+  "explanation": "Use the pointwise xor involution and cancel the common component bit at both ends of each live edge."
+}
