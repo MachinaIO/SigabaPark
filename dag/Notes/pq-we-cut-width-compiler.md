@@ -733,3 +733,116 @@ def audit(front,cut,mixed,aff,lut):
     print('two dense substituted forms: levels,width,checked words',len(pr[1]),len(pr[0]),1<<(2*d))
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
+
+### One terminal coordinate for failure and message
+
+The count program carries an isolated message wire to the terminal level beside the nonnegative failure counter. Initialize the existing counter to the secret message bit instead and delete the isolated wire. Its tick-by-tick increments do not depend on the counter's value, so the terminal row has the single coefficient f+bit, where f is the failure count on the path. If a public empty clause already certifies NO, the listing uses a width-one constant-one program identical for both messages. This handles a nonzero initial failure count while keeping the initial vector binary. If there are at most c possible failures on a path, **choose a prime p>c+1**, with q a power of p, and recheck backend parameters. On a false statement every full path ends in a unit for either message; on a valid path the coefficient is exactly the bit. This keeps the same shortness test and abstracts the unit requirements of the parent note. The original full VWW assumptions and the open quantum reduction are still required. Publish only the message-independent layout and the encrypted program.
+
+A useful consequence of the prime-power setting is that the unit condition for *all prefixes of a NO path* follows from its terminal unit. If a prefix vector lay entirely in the ideal (p), no continuation by matrices over Z/q could yield a unit. The optimizer therefore need not preserve a dedicated public source wire at levels where it makes no contribution to the terminal coefficient.
+
+**Layer-specific compaction.** Trim nodes unreachable from both possible initial supports or unable to reach the counter, treating all branches as possible. Work only at internal cuts for merging. In a backward sweep, group coordinates with identical outgoing neighbor sets on each branch, provided their incoming neighbor sets are pairwise disjoint *on each branch*. Carry the sum of their values in one coordinate. Disjointness prevents two incoming unit edges from turning into a coefficient two. Dually, a forward sweep groups coordinates with identical incoming neighbor sets for each branch and disjoint outgoing neighbor sets on each branch: the grouped values agree, so store one copy. Induction at the merged cut proves equality of the terminal scalar for every path; the other cuts keep their exact linear update. The reference runs three bounded sweeps, compacts surviving names separately at each cut and pads to the maximum width. All decisions use the union of message supports and the same public layers. These operations have polynomial cost and can only decrease width. They are applicable to the preceding counter-based programs with an isolated message wire, binary edges and a terminal failure projection.
+
+Intermediate product entries remain bounded even after both kinds of merges. In the trimmed program every live node has a path from an initial support for bit one and a path to the terminal. After valid merges this remains true. Extend any subinterval and any chosen path segment between two live endpoints by such a prefix and suffix. Nonnegative weights imply that its matrix-product entry is bounded by the terminal count of the completed word, at most c+1. Padded inactive coordinates contribute nothing to positive-length products. This argument avoids a multiplicative norm penalty for each sweep.
+
+**Measured payload.** On the 4096-NAND control at cap four the new width is 4 rather than 5 at the same 170 levels, saving 36% of the previously reported interior square-block costs at common scale. In the independent two-of-three lattice diagnostic all three two-literal leaf programs go from width 4 to 2. At tensor dimension 4, two retained root rows, q=7^28, identical public threshold and the existing short-preimage wire format, the five leaf payloads per outer bit measured 38550 bytes for either message before folding. After folding they measured 19750 bytes for zero and 19666 for one. Each variant passed all 108 valid opens, used exactly two leaf calls per open and checked 40 preimage-path residuals. These are observed payloads on diagnostic coins, not fixed production lengths or a security parameter choice. The variable-length wire format is the public postprocessing analyzed in the wire listing. Changes in the underlying matrix dimension change the sampled matrices.
+
+Run python fold.py frontend.py cut.py mixed.py lut.py. The sixth listing tests exact terminal values on 7650 small path/message cases and equality of layouts for the two bits. To run the seventh listing, take pair.py, lattice.py and wire.py (listings two, four and six) from the [lattice diagnostic at e989563](https://github.com/MachinaIO/SigabaPark/blob/e989563647a13a444cce05b885796b377db9c9db/dag/Notes/pq-we-linear-guard-shares.md) and run OPENBLAS_NUM_THREADS=1 python replay.py fold.py frontend.py pair.py lattice.py wire.py.
+
+~~~python
+"""Fold the message into the failure sink, trim and merge binary layered states."""
+from itertools import product
+from collections import defaultdict
+from random import Random
+import runpy,sys
+
+def optimize(program,bit):
+    u,layers=program
+    assert u[2]==bit and u[0]==1 and all(a==b for layer in layers for E in layer for a,b in E if 2 in (a,b))
+    if u[1]:return [1],[[{(0,0)},{(0,0)}]]*len(layers)
+    u=list(u);u[1]=bit;u[2]=0
+    layers=[[{(a,b) for a,b in E if a!=2} for E in layer] for layer in layers]
+    H=len(layers);live=[{j for j,x in enumerate(u) if x}|{1}]
+    for layer in layers:
+        live.append({b for E in layer for a,b in E if a in live[-1]})
+    live[-1]&={1}
+    for i in reversed(range(H)):
+        live[i]&={a for E in layers[i] for a,b in E if b in live[i+1]}
+        layers[i]=[{(a,b) for a,b in E if a in live[i] and b in live[i+1]} for E in layers[i]]
+    def sweep(reverse):
+        for i in (range(H-1,0,-1) if reverse else range(1,H)):
+            adjacent=layers[i] if reverse else layers[i-1]
+            opposite=layers[i-1] if reverse else layers[i]
+            signatures=defaultdict(lambda:[set(),set()])
+            conflicts=defaultdict(set)
+            for bit,E in enumerate(adjacent):
+                for a,b in E:
+                    v,neighbor=(a,b) if reverse else (b,a)
+                    signatures[v][bit].add(neighbor)
+            for bit,E in enumerate(opposite):
+                for a,b in E:
+                    v,neighbor=(b,a) if reverse else (a,b)
+                    conflicts[v].add((bit,neighbor))
+            buckets=defaultdict(list);alias={}
+            for v in sorted(live[i]):
+                key=tuple(frozenset(S) for S in signatures[v])
+                for rep,used in buckets[key]:
+                    if conflicts[v].isdisjoint(used):
+                        used.update(conflicts[v]);alias[v]=rep;break
+                else:
+                    buckets[key].append((v,conflicts[v].copy()));alias[v]=v
+            live[i]=set(alias.values())
+            layers[i-1]=[{(a,alias[b]) for a,b in E} for E in layers[i-1]]
+            layers[i]=[{(alias[a],b) for a,b in E} for E in layers[i]]
+    for direction in (True,False,True):sweep(direction)
+    maps=[{v:i for i,v in enumerate(sorted(V))} for V in live]
+    W=max(1,*map(len,live))
+    initial=[0]*W
+    for a,i in maps[0].items():initial[i]=u[a]
+    return initial,[[{(maps[i][a],maps[i+1][b]) for a,b in E} for E in layer] for i,layer in enumerate(layers)]
+
+def audit(front,cut,mixed):
+    rng=Random(3841);words=0
+    for h in range(8):
+        for _ in range(15):
+            cs=cut['canonical']([tuple(rng.choice((-1,1))*v for v in rng.sample(range(1,h+1),rng.randint(1,min(h,4)))) if h else () for _ in range(12)])
+            o=list(range(1,h+1));rng.shuffle(o);paths=mixed['cuts'](cs,o);modes=mixed['choose'](paths,h)
+            pair=[]
+            for bit in (0,1):
+                orig=mixed['compile_mixed'](cs,o,bit,paths,modes);pr=optimize(orig,bit);pair.append(pr)
+                for x in product((0,1),repeat=h):
+                    expected=front['eval_program'](orig,x)[1]+bit if () not in cs else 1
+                    row=front['eval_program'](pr,x)
+                    assert row[0]==expected and sum(row)==expected
+                    words+=1
+            assert pair[0][1]==pair[1][1] and len(pair[0][0])==len(pair[1][0])
+    print('exact message/counter/path checks',words)
+    n=128;gates=[];prev=0
+    for i in range(1,n+1):
+        for j in range(32):
+            gates.append((prev,i if j%3==0 else prev));prev=n+len(gates)
+    return gates
+
+if __name__=='__main__':
+    front,cut,mixed,lut=map(runpy.run_path,sys.argv[1:])
+    gates=audit(front,cut,mixed)
+    for cap in (2,3,4):
+        cs,o=lut['frontend'](128,gates,cap);cs=cut['canonical'](cs)
+        paths=mixed['cuts'](cs,o);mode=mixed['choose'](paths,len(o))
+        raw=mixed['compile_mixed'](cs,o,1,paths,mode);out=optimize(raw,1)
+        print('table cap, levels, widths before/after',cap,len(o),len(raw[0]),len(out[0]))
+~~~
+
+~~~python
+import runpy,sys
+def audit(fold,front,prefix,lattice,wire):
+    def compile_fold(cs,h,bit):
+        return fold['optimize'](front['compile_program'](cs,h,bit),bit)
+    for clause in [(1,2),(1,-2),(-1,2)]:
+        for bit in (0,1):
+            old=front['compile_program']([clause],2,bit)
+            new=compile_fold([clause],2,bit)
+            print('leaf widths',clause,bit,len(old[0]),len(new[0]))
+    for f in [front,{**front,'compile_program':compile_fold}]:
+        assert wire['exercise'](f,prefix,lattice,4,2)==0
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
