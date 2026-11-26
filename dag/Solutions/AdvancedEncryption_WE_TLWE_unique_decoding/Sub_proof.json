@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.unique_decoding", "proof_type": "prove", "explanation": "By contradiction: a nonzero difference would have a coordinate of absolute value at least B, but the triangle inequality bounds it by |delta_i| + |delta'_i| < B."}

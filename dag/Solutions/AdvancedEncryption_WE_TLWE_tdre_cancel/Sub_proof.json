@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.tdre_cancel", "proof_type": "prove", "explanation": "Distribute the matrix product over the subtraction and rearrange with abel."}
