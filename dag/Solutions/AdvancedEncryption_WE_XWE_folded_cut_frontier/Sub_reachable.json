@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.folded_cut_frontier", "proof_type": "prove", "explanation": "Expand the aggregate capacities and allocate the first two budgets by truncating at their caps."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.XWE.folded_cut_exact", "proof_type": "prove", "explanation": "Induct through the prefix layers, composing a finite-set image witness with the path through the remaining layers."}
