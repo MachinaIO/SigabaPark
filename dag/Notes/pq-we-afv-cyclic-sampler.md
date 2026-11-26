@@ -18,7 +18,7 @@ Let tau=134+ceil(log2 C), where C bounds the number of entries in the WE table. 
 
 For F distinct nonzero magnitudes, binary powering and combining the results uses at most 2F(1+floor(log2 m)) cyclic products. Each exact product can use one integer multiplication with L byte-aligned coefficient slots of at least 2k+1 bits, followed by a linear fold and rounding pass. At the example parameters each packed multiplicand takes 62 MiB and the product up to 124 MiB, before multiplication scratch, alias records or interpreter overhead. A profile with many distinct magnitudes may spend more time in these products than the previous sampler spends on all its draws. The alias table itself can use L(k+1+log2 L) bits before packing overhead. On sequential tapes, one way to avoid D separate scans is to record random slot indices with output positions, sort by slot, merge once with the table while generating fresh threshold coins, then sort results back by position. Comparison sorting requires O(D log D) record comparisons and record movement; the additional tapes and preprocessing belong in any full cost bound. Neither the example-scale build nor a complete WE machine has been timed.
 
-**Reproduction.** The Python listing performs exact cyclic integer convolutions, exhaustively compares small profiles to all sign assignments, and checks the reconstructed alias mass exactly. It also exercises modular lifting, calculates the bounds, and benchmarks a small instance with a noncryptographic PRNG. On one local run with m=256, L=512, k=96 and 32,768 outputs, building the table took about 10 ms and drawing took about 15 ms, at 10.30 logical bits per output. Grouped popcount used 200 bits per output and took about 25 ms with negligible setup. These small total times are close; the entropy saving alone predicts little about wall time. The diagnostic checks the budget after each draw; the bounded construction above checks before consumption.
+**Reproduction.** The Python listing performs exact cyclic integer convolutions, exhaustively compares small profiles to all sign assignments, and checks the reconstructed alias mass exactly. It also exercises modular lifting, calculates the bounds, and benchmarks a small instance with a noncryptographic PRNG. On one local run with m=256, L=512, k=96 and 32,768 outputs, building the table took about 10 ms and drawing took about 15 ms, at 10.30 logical bits per output. Grouped popcount used 200 bits per output and took about 25 ms with negligible setup. These small total times are close; the entropy saving alone predicts little about wall time.
 
 ~~~python
 from math import ceil, log, sqrt, comb
@@ -96,11 +96,14 @@ rng=Random(2718)
 xs=[round(rng.gauss(0,2)) for _ in range(256)]
 L=512; k=96; trials=32768
 start=perf_counter(); w=table(xs,L,k); slots=alias(w); built=perf_counter()
-def draw():
-    i=rng.getrandbits(L.bit_length()-1); u,j=slots[i]
+def draw(available):
+    index_bits=L.bit_length()-1
+    if available<index_bits:raise RuntimeError("reservoir exhausted")
+    i=rng.getrandbits(index_bits); u,j=slots[i]
     if u==1<<k:return i,0
     if u==0:return j,0
     for t in range(k):
+        if index_bits+t>=available:raise RuntimeError("reservoir exhausted")
         b=rng.getrandbits(1); d=(u>>(k-t-1))&1
         if b!=d:return (i if b<d else j),t+1
     return j,k
@@ -113,8 +116,7 @@ for S0 in range(65):
     for z in range(S0+1):
         if abs(2*z-S0)<L: assert lift(z%L,S0,L)==z
 for _ in range(trials):
-    r,used=draw();charge+=9+used
-    if charge>12*trials+3*180:raise RuntimeError("reservoir exhausted")
+    r,used=draw(12*trials+3*180-charge);charge+=9+used
     y=(S-2*lift(r,S,L))%q
 end=perf_counter()
 print('small profile: setup ms, draws ms, logical bits per draw',round(1000*(built-start),2),round(1000*(end-built),2),round(charge/trials,3))
