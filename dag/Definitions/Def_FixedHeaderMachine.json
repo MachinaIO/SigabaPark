@@ -1,0 +1,9 @@
+{
+  "name": "FixedHeaderMachine",
+  "title": "Virtual fixed input header for a probabilistic tape machine",
+  "description": "Simulate a zero-oracle machine with a public replacement header and a shared suffix. Use an extra marker tape while preserving the original work tapes and coin-dependent control.",
+  "tags": [
+    "machines",
+    "compilation"
+  ]
+}

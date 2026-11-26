@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.fixed_header_cost",
+  "title": "A uniform cost bound for fixed-header simulation",
+  "statement": "When the sum of both fixed header lengths plus three fits under 2^29, the explicit header adapter costs at most 2^34 times its input machine under native transition-table accounting."
+}

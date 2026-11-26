@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.fixed_header_cost",
+  "proof_type": "prove",
+  "explanation": "Count setup and simulation states, bound the state-index bit length increase by 29, and charge the extra tape and entry width in the canonical transition table."
+}

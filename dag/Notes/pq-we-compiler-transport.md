@@ -1,6 +1,6 @@
 ---
 title: Witness encryption under public relation compilation and certified port projection
-refs: [definition:WE, theorem:AdvancedEncryption.WE.Compiler.transport, theorem:AdvancedEncryption.WE.Compiler.affine_port_image, theorem:AdvancedEncryption.WE.Compiler.checked_section]
+refs: [definition:WE, theorem:AdvancedEncryption.WE.Compiler.transport, theorem:AdvancedEncryption.WE.Compiler.affine_port_image, theorem:AdvancedEncryption.WE.Compiler.checked_section, definition:FixedHeaderMachine, theorem:AdvancedEncryption.WE.Compiler.fixed_header_cost, theorem:AdvancedEncryption.WE.Compiler.header_head_step]
 tags: [witness-encryption, correctness, reduction, compilation]
 ---
 
@@ -121,4 +121,64 @@ def port_control(lut,affine):
 if __name__=='__main__':
     import sys,runpy
     if len(sys.argv)>1:port_control(*map(runpy.run_path,sys.argv[1:]))
+~~~
+
+
+### A tape machine for the adversary's changed challenge header
+
+A WE challenge is a concatenation frame(paramsWord) ++ frame(encoded statement) ++ frame(ciphertext). The core's frame writes a leading one before each bit and a trailing zero. On each fixed false statement the simulation may hard-wire the two public headers. It suffices to simulate an attacker's read-only input src ++ z on a physical input dst ++ z, for every suffix z, with the source work tapes and all output symbols preserved. Common trailing bits of src and dst can be included in z. When the headers are identical the original machine itself suffices.
+
+FixedHeaderMachine is an explicit zero-oracle Sigaba Machine over the same fair coin alphabet. Let a and b be the source and target header lengths. Move the physical input head b cells to the right from its initial position one and plant a marker on one extra work tape in a final setup step. Run the source control with the virtual input position 0 through a encoded in finite control (0 is the left blank); one additional tag denotes the suffix. The physical input head parks at the first suffix cell while the simulated head reads the hard-wired header. In suffix mode read the physical symbol, and move the marker head by the same displacement as the physical head. A left move from the marker switches back to virtual position a while parking both heads. A right move from the physical right blank is clamped, so both heads stay. The original work actions, next/halt choice, output and corresponding coin are passed through. This includes empty headers and an empty shared suffix.
+
+For a source input position j and suffix length n, the intended control tag is min(j,a+1), the marker-tape head offset is max(0,j-a-1), and the physical input head is at b+1+max(0,j-a-1). The registered head-step theorem proves that every clamped source movement preserves all three coordinates under the adapter's update equations. Consequently the virtual reader sees the appropriate public header bit, suffix bit or boundary blank. After setup, coupling each fair coin to its corresponding source step and inducting on steps preserves the original work tapes, output and halt state. The first b+1 setup steps ignore their coins. The head arithmetic and machine cost are formalized; the full instantiation of the PMF run-equality premise of the transport theorem from this configuration simulation remains to be kernel-checked.
+
+**Cost with the native transition table.** For a source machine with s states, t steps and w work tapes the new counts are exactly b+1+s(a+2) states, t+b+1 steps and w+1 tapes. The extra clock is independent of the ciphertext length, even if the source machine crosses the header boundary repeatedly. In this machine model an additional tape triples the number of symbol combinations in the transition table and adds four bits per entry. The cost theorem bounds the complete time-plus-description cost by 2^34 times the original when a+b+3 <= 2^29. This is a conservative uniform bound and does not claim that a particular reduction loses 34 bits. In the registered 128-input, 4096-gate instance, unary wire indices are at most 4224 and length_encGates_le bounds the encoded gate list by 4096*(6*4224+3) bits. At (128,128) and empty description the parameter word is 515 bits. The full source header therefore uses at most 207643656 bits. To invoke this cost theorem one must separately bound the compiled target header (including its actual security parameters); an arbitrary polynomial compiler does not automatically meet this concrete bound. Using a target with lambda+34 bits requires a security theorem at that strength. This adapter concerns security-reduction costs; it charges no extra bytes to an honest ciphertext.
+
+**Transition replay.** Save the following listing as HeaderAudit.lean in a DAG Lake workspace with the definition built and run lake env lean HeaderAudit.lean. It interprets the actual adapter and source transition functions, including ordinary work tapes and mixed move/coin/output behavior. It checks 26352 coupled finite runs with empty and nonempty headers and suffixes, early halts, clock exhaustion, clamped moves, boundary crossings and repeated returns. The same simulation code covers arbitrary source transitions; the tests themselves range over the listed probes only.
+
+~~~lean
+import Definitions.Def_FixedHeaderMachine
+open SigabaNeo Turing SigabaNeo.Machine
+
+private def follow (A : Machine) (word coins : List Bool) : List Bool :=
+  let start := A.machine.initialConfig word
+  let endCfg := coins.foldl (fun cfg bit =>
+    match cfg.tapes.state with
+    | none => cfg
+    | some q =>
+      match A.machine.tr q cfg.tapes.inputSymbol cfg.tapes.workTapeSymbols Fin.elim0 bit with
+      | .step act w mv => cfg.step act w mv
+      | .query o _ => Fin.elim0 o) start
+  endCfg.tapes.output
+
+private def probe (moves : List SignType) (blank early : Bool) : Machine := by
+  refine ⟨1,moves.length+1,⟨0,?_⟩,moves.length⟩
+  intro q sym tapes _ coin
+  let m := moves[q.val]?.getD 0
+  let v := (sym.getD blank ^^ coin) ^^ (tapes 0).getD false
+  exact .step ⟨m,fun _ => (some (some v),m),some v,
+    if early && q.val == 2 then none else if h : q.val+1<moves.length+1 then some ⟨q.val+1,h⟩ else none⟩ Fin.elim0 Fin.elim0
+
+private def choices {α : Type} (xs : List α) : Nat → List (List α)
+  | 0 => [[]]
+  | n+1 => xs.flatMap fun x => (choices xs n).map (x :: ·)
+
+private def compareRuns : Nat × Bool := Id.run do
+  let mut count := 0
+  for a in [[],[false],[true,false,true]] do
+    for b in [[],[true],[false,true,false]] do
+      for suffix in [[],[false],[true,false]] do
+        for moves in choices ([-1,0,1] : List SignType) 5 ++
+            [[1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,1,1]] do
+          for blank in [false,true] do
+            for early in [false,true] do
+              let A := probe moves blank early
+              let B := fixedHeaderMachine A a b.length
+              let coins := (List.range moves.length).map (fun j => j%3==0)
+              let x := follow A (a++suffix) coins
+              let y := follow B (b++suffix) (List.replicate (b.length+1) true ++ coins)
+              if x != y then return (count,false)
+              count := count+1
+  return (count,true)
+#eval compareRuns
 ~~~
