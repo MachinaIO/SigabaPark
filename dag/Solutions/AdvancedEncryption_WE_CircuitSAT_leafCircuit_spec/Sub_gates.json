@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.CircuitSAT.leafCircuit_spec", "proof_type": "prove", "explanation": "Preserve the gate list with predOf, use its Boolean semantics and ring-valued bit evaluation, and transfer the straight-line length bound to the corresponding circuit."}

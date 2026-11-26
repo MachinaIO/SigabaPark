@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.zmodBox_abort_le", "proof_type": "prove", "explanation": "All proposals in an inner ball survive the shift. Its modular cardinality and the big-box cardinality agree with the one-coefficient specialization of the registered ring-box ratio."}
