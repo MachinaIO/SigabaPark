@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.PIT.boolean_cube_single_seed", "title": "One-sided, single-seed testing of a multilinear Boolean residual", "statement": "The univariate binary-exponent encoding vanishes at every field seed if all Boolean evaluations vanish. Otherwise at most 2^m-1 seeds are zeros."}

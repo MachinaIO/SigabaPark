@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.PIT.boolean_cube_single_seed", "proof_type": "prove", "explanation": "Recover zero coefficients by induction over Boolean subsets. Distinct binary exponents isolate each coefficient in the univariate polynomial. Bound its degree by a geometric sum and count roots."}
