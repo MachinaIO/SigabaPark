@@ -47,6 +47,8 @@ Further replace any crossing subclause t that contains a variable used by no oth
 
 The last row introduces five flags on the left and three on the right. Its local elimination widths are 23 and 25. The key and ciphertext exponents are respectively 49.02 and 45.25. The squared-advantage single-challenge floor becomes 219 bits before reduction costs. These are counts of extendible labels on a planted YES control. The WE false-statement game is played on NO inputs. To use the 219-bit arithmetic floor uniformly on this branch, decide from public data whether the ciphertext count is at most 41,923,871,289,682 (and whether resource caps for dimension, key count and preprocessing hold). Use this PE branch only when its caps pass; otherwise dispatch to a separately analyzed scheme. The branch selection is message-independent. The NO cases of the fallback require their own security and clock bounds. The YES measurement by itself gives no uniform LWE parameter claim. The reference checks the projected label sets against explicit images on small inputs.
 
+A separate NO control keeps this 67/61 partition and replaces eight existing crossing clauses only. The replacements exclude all eight assignments on variables 1, 3 (left) and 2 (right), so each left/right pair fails at least one crossing clause, even though the two original plant halves still pass all local constraints. Rebuilding the cover and projecting the leaf features gives dimension 111, 429,125,273,565,376 keys and 33,507,597,876,906 ciphertexts. This NO instance also passes the ciphertext-count cap just described. The eight-clause argument establishes global rejection without enumerating those tables.
+
 **General NANDs and a separation control.** From a raw NAND list, normalize forward reads to true. Determine which gates depend solely on left, right or constant wires. Treat each side-local gate as an opaque, locally evaluated Boolean atom, which does not increase witness length. Distribute the remaining gates to CNF over those atoms only while an explicit size cap permits. If the output polarity overflows, retain truth values of mixed gates in its dependency cone as extra witness bits; enforce each named NAND by its two binary implications and one ternary implication and require the output. Local atoms are always evaluated on actual inputs, never guessed. A satisfying original input extends by recording its mixed gate values; conversely the clauses force the unique correct values in gate order. The augmented bits may be partitioned between the two sides before the same cover compiler. This fallback can add as many bits as there are mixed gates; revert to the original #64 split when the added cost is excessive. The local model counter above applies directly to clauses on input variables; local restrictions involving opaque functions require enumeration or another counting algorithm.
 
 A second 128-input/4,096-gate family tests the opaque route. Each side emits 16 parities of disjoint four-bit groups; 48 crossing NAND guards forbid adjacent parity pairs in a three-regular bipartite graph. Compilation produced 16 star coordinates and zero additional witnesses. This function has no width-three CNF on the original inputs: every partial assignment on at most three input bits can extend to all-even right parities, yet some full assignments violate a guard. A nontrivial width-three clause implied by the function would contradict the first fact. The inputs contain deliberately redundant padding and the parity system is easy; public enumeration of the two 16-bit profile domains already provides an assumption-free alternative. More generally at small p, a subset-zeta table on the p-bit masks can test for a compatible pair in O(p·2^p) Boolean operations after enumerating profiles. Cryptographic gains require comparison with such public solvers.
@@ -505,4 +507,20 @@ for _ in range(60):
         return (x&sum(1<<(i-1) for i in keep))|sum(int(fails(t,x))<<(h-1) for t,h in flags.items())
     image={pack(x) for x in range(128) if not any(fails(t,x) for t in local)}
     assert image=={ix.convert(j,True) for j in range(ix.total)}
+# NO control: both local plant halves still pass. Contradiction straddles the cut.
+L=improve(F)|{12,76,36};other=set(range(1,129))-L
+orig_cross=[i for i,row in enumerate(F) if any(abs(v) in L for v in row) and any(abs(v) in other for v in row)]
+triple=sorted(L)[:2]+sorted(other)[:1]
+negative=F.copy()
+for i,signs in zip(orig_cross[:8],product((-1,1),repeat=3)):
+    negative[i]=[j*s for j,s in zip(triple,signs)]
+loc,edges,cover=compile_cnf(128,negative,L)
+ns=[]
+for side,vs in enumerate((L,other)):
+    ends={e[side] for e in edges}
+    exposed,cs,z,flags=leaf_basis(vs,loc[side],ends,w)
+    ix=LocalIndex(exposed,cs);ns.append(ix.total)
+    assert ix.convert(ix.convert(z,False),True)==z
+assert all((profile(cover,x,0)&profile(cover,x,1))!=0 for x in (w,0,(1<<128)-1))
+print('crossing contradiction',triple,len(cover),ns)
 ~~~
