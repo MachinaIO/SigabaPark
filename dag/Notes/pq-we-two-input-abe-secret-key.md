@@ -993,3 +993,41 @@ for trial in range(100):
             assert len(left)*len(right)==1<<(len(sub)+len(cut-keep))
 print("100 stream codes; all caps, cuts and exact subset optima checked")
 ~~~
+
+## Optimality over all linear bits of the private stream
+
+The previous greedy bound in fact holds for any choice of linear measurements of the stream, at the same fixed read order and with the same exact private-parity trellis width. Let G be the minimal-span basis already computed for C, and take any residual subcode U of C. Choose a minimal-span basis H of U. Express each h in H in the basis G. Among the rows used for h, select the one starting earliest. Distinct starts in G imply that its first nonzero coordinate survives in h. Likewise the last coordinate of h is the maximum end among its constituent rows, since ends in G are distinct. Thus the selected G-row interval lies within the interval of h. The selected rows are distinct because H has distinct starts. They form a subset of G of size dim U and their crossing counts are at most those of H *simultaneously at every cut*. By the cut-dimension identity in the previous section these counts are exactly the linear trellis width exponents of the respective subcodes.
+
+In particular, revealing k independent linear measurements on C leaves an affine translate of a codimension-k subcode U. The translate adds known offsets and does not change cut dimensions. Whenever such measurements meet a cap b, the subset above leaves at most the same width using the same k. Conversely deleting k rows is realized by revealing their k coefficients. The preceding greedy algorithm therefore minimizes k over all linear measurements on C, even if the alternative first changes basis. This strengthens the scope of the previous fixed-basis statement. It does not optimize the read order, nonlinear summaries, or smaller semantic automata for a particular acceptance predicate.
+
+The following check uses minimal() and span() in the preceding listing. It enumerates every subspace of four coefficient bits and compares its entire cut profile to that of the selected rows, including the zero and full subcodes.
+~~~python
+from random import Random
+rng=Random(645)
+subspaces={frozenset({0})}
+for v in range(1,16):
+    subspaces |= {s | frozenset(x^v for x in s) for s in list(subspaces)}
+assert len(subspaces)==67
+def encode(u,G):
+    out=0
+    for j,g in enumerate(G):
+        if (u>>j)&1: out ^= g
+    return out
+checks=0
+while checks<6700:
+    G=minimal([rng.randrange(1,256) for _ in range(4)])
+    if len(G)!=4: continue
+    for s in subspaces:
+        U={encode(v,G):v for v in s}
+        H=minimal(U)
+        starts={h&-h for h in H}
+        selected=[g for g in G if g&-g in starts]
+        V=span(selected)
+        assert len(V)==len(U)
+        for i in range(9):
+            def width_product(code):
+                return len({x% (1<<i) for x in code})*len({x>>i for x in code})
+            assert width_product(V)<=width_product(U)
+        checks+=1
+print(checks,"subcodes: all cut profiles dominated at equal residual dimension")
+~~~
