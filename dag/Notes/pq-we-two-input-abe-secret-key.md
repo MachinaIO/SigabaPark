@@ -938,3 +938,58 @@ for trial in range(100):
             assert reached==actual
 print("2400 residual reachable-state sets checked against 38400 private executions")
 ~~~
+
+## A tunable witness budget for high private-parity cuts
+
+Rather than paying the full trellis width or enumerating the whole private witness, leave selected private linear coordinates in the residual witness. Form the binary code C of length L consisting of attainable private answer streams (a_i z)_i, temporarily omitting the shared offsets. Compute a generator basis of this image in minimal-span form: basis strings have distinct first nonzero positions and distinct last nonzero positions. Start with echelon rows with distinct starts. If two ends coincide, add the later-starting row to the earlier-starting row. Its start stays fixed and its end decreases, so this procedure terminates in polynomial time. Keep coefficient transformations or solve in the generator basis to map an honest z to its coefficients. Every coefficient vector gives an attainable stream by definition of the image. See [Forney, chapter 10](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/1b67ae9f5c124c3bd56c8649afa5af47_chap10.pdf) for trellis-oriented bases.
+
+A basis row with endpoints l,r crosses exactly the cuts l<=i<r. For any subset of rows the first and last endpoints remain distinct. Thus the dimension of its prefix projection is the number of rows starting by i, and the suffix projection dimension is the number ending after i (distinct pivots). Subtracting the dimension of the whole subcode gives exactly the number of crossing rows as the cut dimension used above. Choose some coefficients as new shared witness bits. XOR their generator contributions into the public query forms on the shared inputs and apply the preceding projection to the remaining subcode. This operation moves actual stream coefficients, not arbitrarily chosen parity constraints that could introduce new dependencies. Even a malicious choice of the retained coefficients extends to an original private input whenever the residual trellis accepts. Honest encryption computes the layout from the statement alone.
+
+For a prescribed cut-width cap b, scan cuts left to right. Whenever more than b remaining intervals cross a cut, remove one with farthest right endpoint and retain its coefficient in the witness. Singleton rows cross no cut and never need removal. This minimizes the number k of retained bits *among subsets of this fixed generator basis*. For an exchange proof, take an optimal deletion set containing earlier greedy deletions. At a violation it must delete an additional interval crossing that cut. Exchange that interval for the greedy choice if necessary. Earlier cuts were already feasible after the earlier greedy deletions alone, and at every later cut the exchanged-out shorter interval cannot outlast the greedy one. This preserves feasibility and size. The minimum need not hold over nonlinear encodings or all choices of generator basis.
+
+If the core witness uses s bits (shared ports can be derived from it), the new split-ABE verifier takes s+k bits instead of s+dim(C). It uses at most O(L*w*2^b) guarded trellis transitions for w states plus polynomial bit arithmetic and the core verifier. Balanced splitting needs 2^floor((s+k)/2) keys and 2^ceil((s+k)/2) attribute ciphertexts. These counts inherit the original split backend's assumptions, concrete losses, and policy-depth dependence. Enumerate the at most dim(C)+1 width caps and charge actual verifier and key costs before choosing one. At cap zero the construction can still eliminate all singleton rows. For a repeated full basis of d independent private coordinates in the same order, its natural minimal-span rows all cross the middle. The tradeoff there is exactly k=max(0,d-b) for that basis. For general NP this tradeoff does not guarantee both small k and small b.
+
+~~~python
+from itertools import combinations
+from random import Random
+rng=Random(292)
+def minimal(rows):
+    starts={}
+    for x in rows:
+        while x:
+            lo=x&-x
+            if lo not in starts:
+                starts[lo]=x
+                break
+            x^=starts[lo]
+    ends={}
+    for lo,x in sorted(starts.items(),reverse=True):
+        while x.bit_length() in ends: x^=ends[x.bit_length()]
+        assert x&-x==lo
+        ends[x.bit_length()]=x
+    return list(ends.values())
+def span(rows):
+    s={0}
+    for x in rows: s|={v^x for v in s}
+    return s
+for trial in range(100):
+    raw=[rng.randrange(256) for _ in range(rng.randrange(1,8))]
+    rows=minimal(raw)
+    assert span(rows)==span(raw)
+    crossing=[{j for j,x in enumerate(rows) if (x&((1<<i)-1)) and (x>>i)} for i in range(9)]
+    for b in range(len(rows)+1):
+        keep=set()
+        for cut in crossing:
+            while len(cut-keep)>b:
+                keep.add(max(cut-keep,key=lambda j:rows[j].bit_length()))
+        opt=next(k for k in range(len(rows)+1)
+                 if any(all(len(cut-set(p))<=b for cut in crossing)
+                        for p in combinations(range(len(rows)),k)))
+        assert len(keep)==opt
+        sub=[x for j,x in enumerate(rows) if j not in keep]
+        for i,cut in enumerate(crossing):
+            left=span(x&((1<<i)-1) for x in sub)
+            right=span(x>>i for x in sub)
+            assert len(left)*len(right)==1<<(len(sub)+len(cut-keep))
+print("100 stream codes; all caps, cuts and exact subset optima checked")
+~~~
