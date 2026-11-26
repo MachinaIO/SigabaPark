@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.MultiPass.no_honest_rectangle", "title": "No rectangle of honest strings at a cut when the prefix or the suffix determines the witness", "statement": "Honest strings are (pre w, suf w) for witnesses w. If pre or suf is injective, then any S x T all of whose pairs are honest has |S| <= 1 or |T| <= 1."}

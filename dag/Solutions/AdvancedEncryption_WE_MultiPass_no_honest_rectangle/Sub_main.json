@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MultiPass.no_honest_rectangle", "proof_type": "prove", "explanation": "Pick two distinct elements on each side; three honest witnesses for (x,u), (x',u), (x,u') collide under the injective map, forcing x = x' or u = u'."}

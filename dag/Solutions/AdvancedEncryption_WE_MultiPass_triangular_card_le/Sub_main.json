@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MultiPass.triangular_card_le", "proof_type": "prove", "explanation": "The m x m change matrix is lower triangular with nonzero diagonal (Matrix.det_of_isLowerTriangular), so it is a unit and has rank m; it factors through Matrix.of Y as in change_rank_le, so m <= card iota."}

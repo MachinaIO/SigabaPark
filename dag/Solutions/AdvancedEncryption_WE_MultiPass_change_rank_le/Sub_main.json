@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MultiPass.change_rank_le", "proof_type": "prove", "explanation": "Factor the change matrix as (Matrix.of X) times the matrix of the changes on the unit vectors Pi.single k 1 (linearity of L t, Finset.univ_sum_single), then Matrix.rank_mul_le_left and Matrix.rank_le_card_width."}
