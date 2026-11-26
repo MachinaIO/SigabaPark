@@ -1,9 +1,9 @@
 import SigabaNeoStd.Lattices.BoxSampler
-import SigabaNeoStd.Lattices.RingBoxes
+import Definitions.Def_RingBoxesCopy
 import SigabaNeoStd.Lattices.SimNorm
 import SigabaNeoStd.Lattices.Homomorphic.Eval
 
-open Matrix SigabaNeo.Lattices Cslib
+open Matrix SigabaNeo.Lattices Cslib AdvancedEncryption.WE.RingBoxesCopy
 open scoped ENNReal
 
 /-- **Exact simulation of the leaf key.** If `B Tm = G` and `A = B R − G`, the leaf-key law with
