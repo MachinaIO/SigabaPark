@@ -757,3 +757,60 @@ for tabs in product(range(16),repeat=3):
             assert v==1
 print("8192 suffix/boundary cases; exact projection and witness extension")
 ~~~
+
+## Projecting a two-state suffix with repeated and shared affine queries
+
+Keep arbitrary prefix witness data y, including any derived port bits checked by the retained verifier. Let s be its outgoing state bit. Let z be bits private to the suffix, unused by the prefix. Layer i of an oblivious two-state suffix selects its public state map using l_i(y,z), an affine Boolean form. It may read the same private or shared data at many positions. There is an explicit polynomial-size predicate on (y,s) equivalent to existence of a single z taking the suffix to target t. The previous independent-selector recurrence did not cover this case.
+
+Take the at most 2L+1 last-reset cases as in the two-state decision algorithm, but keep y and s symbolic. In a reset case impose l_i=a and start the remaining parity at the specified reset value. In the no-reset case start at s. For each later layer restrict l_j to the answers giving a permutation. This restriction is vacuous, contradictory, or one affine equation. Its flip bit on the allowed assignments is the image of state zero, an affine function of the single bit l_j (use its table value on both answers to extend it). XOR all these flips with the starting bit and set the result equal to t. Each branch is now one affine system in (y,s,z); no constraint on states or queries before the last reset is needed. In particular two contradictory answers to a repeated linear query cannot survive as independent choices.
+
+Eliminate z in each branch by putting its columns first in Gaussian elimination, discarding pivot rows for z and retaining all residual equations, including a possible 0=1. This is exact: any solution of the remaining rows extends by back substitution with free private bits set to zero. Publish or recompute the OR of the surviving affine systems on (y,s) as part of the residual verifier. Each consistent disjunct needs at most dim(y)+1 independent equations. A dense implementation with L positions and N total coordinates needs O((L+1)(L+N+1)^3) binary operations for elimination; constructing the affine rows and compiling their tests are polynomial too. Every full satisfying witness restricts to an accepting residual witness; every accepted residual witness lifts by one affine solve in a passing branch. The core can compute y and s by arbitrary polynomial-size circuits on its own witness; no requirement of affine dependence *inside* the core is imposed. Thus this removes all private suffix bits before a WE backend even when suffix queries share them extensively. The new verifier's size and depth must be charged. It inherits the chosen backend's assumptions and does not solve an arbitrary three-state suffix or an arbitrary retained core.
+
+For example start at zero and flip on z, then on z XOR y. Reaching one is possible exactly when y=1. Independent per-position choices would also admit y=0. More generally private bits can cancel from the residual predicate even if they appear at every query.
+
+~~~python
+from itertools import product
+from random import Random
+rng=Random(677)
+# Low two positions private; next two shared; bit 4 incoming state; bit 5 constant.
+one=32
+def project(rows):
+    rows=list(rows)
+    for bit in (1,2):
+        j=next((j for j,r in enumerate(rows) if r&bit),None)
+        if j is not None:
+            pivot=rows.pop(j)
+            rows=[r^pivot if r&bit else r for r in rows]
+    return rows
+def parts(layers,target):
+    cases=[(-1,0,16)]+[(i,a,one*lo) for i,(_,maps) in enumerate(layers)
+                         for a,(lo,hi) in enumerate(maps) if lo==hi]
+    out=[]
+    for i,a,par in cases:
+        rows=[] if i<0 else [layers[i][0]^(a*one)]
+        for form,maps in layers[i+1:]:
+            allowed=[b for b,(lo,hi) in enumerate(maps) if lo!=hi]
+            if not allowed: rows.append(one)
+            if len(allowed)==1: rows.append(form^(allowed[0]*one))
+            par ^= maps[0][0]*one
+            if maps[0][0]!=maps[1][0]: par ^= form
+        out.append(project(rows+[par^(target*one)]))
+    return out
+def val(row,x): return (row&x).bit_count()%2
+for _ in range(150):
+    layers=[(rng.randrange(16)+one*rng.randrange(2),
+             [tuple(rng.randrange(2) for s in range(2)) for b in range(2)])
+            for i in range(rng.randrange(12))]
+    for target in (0,1):
+        disj=parts(layers,target)
+        for y,s in product(range(4),range(2)):
+            shared=one+4*y+16*s
+            got=any(all(val(row,shared)==0 for row in system) for system in disj)
+            ends=set()
+            for z in range(4):
+                state=s
+                for form,maps in layers: state=maps[val(form,shared+z)][state]
+                ends.add(state)
+            assert got==(target in ends)
+print("2400 shared-input/state/target comparisons against exhaustive private witnesses")
+~~~
