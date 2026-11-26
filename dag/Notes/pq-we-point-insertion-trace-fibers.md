@@ -85,3 +85,46 @@ for modulus in (2,3,4):
         assert len(law)==modulus**2 and max(law.values())==1
 print("depths 0 through 5; moduli 2, 3, 4")
 ~~~
+
+## Inserting across many inputs with a partial evaluation certificate
+
+For the all-inputs-before-gates order, a public rejecting input prefix can certify many complete input fibers at once. Extend its assigned primary bits by three-valued NAND propagation in topological order. A known zero operand forces output one and supplies its binary Tseitin clause; two known ones force output zero and supply the ternary clause. Unknown values stay unconstrained. If the output is forced to zero, backtrack the justifications from that output, keeping one zero operand when there is a choice and both one operands otherwise. Retain the distinct gate conclusions in topological order, say q of them. This cone, determined from the circuit and the prefix alone, certifies rejection on every completion. Nonselected operands may remain completely undetermined.
+
+On the subcube defined by the prefix, use q+1 disjoint cubes of full (input,gate) traces. For cube i<=q fix the first i-1 selected gate conclusions to their certified values, flip selected gate i and stop. All free input bits and all unselected gate bits remain wildcards. Its justification clause fails identically: all operands needed by that clause are already fixed. The last cube fixes all q conclusions and violates the output unit. Conversely the first incorrect selected conclusion, or its absence, locates each trace in exactly one cube. Merge the two siblings on the last selected gate, then work back up to the first. For prefix length b and n inputs this replaces a per-completion partition with only q+1 local insertion obligations and q sibling merges across 2^(n-b) input fibers. These are generally wildcard cubes in the *original* coordinate order. A single product indicator represents each with both transitions live at wildcard levels. That representation alone does not give the public APG insertion or a law-preserving merge across skipped levels. A lemma requiring a contiguous fixed prefix cannot be applied unchanged.
+
+A deterministic cover can explore input prefixes left-to-right, emitting a leaf once propagation forces rejection; otherwise split on the next input bit. For a false circuit every full assignment terminates. With L emitted leaves this visits 2L-1 prefixes and takes O(L*(n+g)) straightforward preprocessing, with a certificate for each leaf; stop at a chosen budget for a partial cover. When joining the leaves one must also account for L-1 binary input-prefix merges. This improves the count for structured formulas, with exponential worst case and no implication that a general polynomial-hop proof exists. At full depth the backtracked cone can still omit gates whose values are unnecessary. The obstacle for [PR 111 section 7](https://github.com/MachinaIO/SigabaPark/pull/111) is now specifically a joint public-encoding hop across the wildcard coordinates; the cover does not establish indistinguishability or reduce ciphertext length by itself.
+
+~~~python
+from itertools import product
+
+# Bits x0,x1 head the input; unrelated gates depend on the eight free inputs.
+n = 10
+gates = [(2,3),(4,5),(0,1),(6,7),(8,9),(12,12)]
+output = n+len(gates)-1
+known = {0:0}
+reason = {}
+for z,(a,b) in enumerate(gates,n):
+    zero = next((v for v in (a,b) if known.get(v)==0), None)
+    if zero is not None:
+        known[z],reason[z] = 1,[zero]
+    elif known.get(a)==known.get(b)==1:
+        known[z],reason[z] = 0,[a,b]
+assert known[output]==0
+needed = {output}
+for z in reversed(range(n,output+1)):
+    if z in needed:
+        needed.update(reason[z])
+forced = [(z,known[z]) for z in sorted(needed) if z>=n]
+assert forced==[(12,1),(15,0)]
+counts = [0,0,0]
+for suffix in product(range(2),repeat=n-1):
+    for y in product(range(2),repeat=len(gates)):
+        vals = (0,)+suffix+y
+        j = next((i for i,(v,b) in enumerate(forced) if vals[v]!=b),2)
+        counts[j] += 1
+        # Binary clause (x0 OR g12), ternary (!g12 OR !g12 OR !g15), output unit.
+        assert not (vals[0] or vals[12]) if j==0 else (
+               not ((not vals[12]) or (not vals[15])) if j==1 else not vals[output])
+assert counts == [16384,8192,8192]
+print("512 input completions and 64 gate assignments; three certified cubes",counts)
+~~~
