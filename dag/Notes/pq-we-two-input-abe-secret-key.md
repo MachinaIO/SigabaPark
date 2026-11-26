@@ -629,3 +629,92 @@ for bits in product(range(2),repeat=7):
         assert (r[C],r[B])==(bad,msg)
 print("256 binary matrix chains: exact disagreement count and message coordinate")
 ~~~
+
+## Computing the gate output inside the chain
+
+At a binary level the branch bit may select a linear map of the *entire old state*. This lets one gate operand select the map and the other arrive through saved coordinates. Keep a permanent unit source, discrepancy counter and message coordinate, and a pair of indicator coordinates per live wire. Process gates topologically. For a NAND choose a previously unseen primary operand as selector if present, otherwise choose either operand. If both operands are distinct unseen primaries, insert one preceding level to initialize the other from its branch bit. This extra level consumes one new input and the ensuing gate level consumes the other. If operands coincide there is no extra level. Constants and unavailable references are resolved to the specified public value at the read site.
+
+At the gate level with branch bit v, initialize an unseen selector to v or, for a known selector, add its stored indicator for 1-v to the counter. For a public constant selector charge a mismatch directly from the unit source, or hardwire its effective choice and ignore the branch. If v=0, set the output pair to the public one encoding true. If v=1, copy the other operand's two rails in reverse order. A tied operand uses v as its other value. All output sources are from the old layer (or the permanent unit), so the compiler needs no within-level nonlinear operation. Carry only wires with future uses, including the terminal result. At the final projection add its false rail to the counter and retain the message. A fixed final level with identical branches suffices. Equality checks are never subtracted. Thus on every independent branch string a zero final counter forces all selector rereads to agree, each computed output is the correct NAND, and the final output is true. The converse follows by reading the chosen operand from an honest evaluation. Incorrect choices may propagate incorrect internal values, but an earlier discrepancy remains in the counter.
+
+For g>=1 gates and n used primary variables this has H<=g+floor(n/2)+1 binary levels: extra preloads correspond to disjoint pairs of first-seen inputs. At each layer pack its live wires in pairs, reusing indices between different layers, and pad to the common width 2F+3 for maximum live wire count F at a cut. A conservative unoptimized bound uses F<=n+g. Each non-counter column receives at most one incoming unit, including when a rail is copied to several destinations. The counter column carries itself and at most one additional unit at a level. Consequently for *any* contiguous product of h selected matrices, starting with any basis row, every non-counter entry is at most one and the counter entry at most h+1. The maximal row sum is at most width+h. This bounds plaintext product growth before lattice encoding, not the noise of the sampled preimages. From the designated source the terminal failure count is at most g+1, so the prime-base unit-pivot choice of the live-clause benchmark can use p>max(g+1,2) for this part. The remaining backend requirements persist.
+
+For the 128-primary, 4096-gate cap this gives at most 4161 levels including the pin, versus the preceding 12289. Live width must be measured for the actual gate order before claiming a ciphertext-size improvement. All additions and copies above are binary matrix entries; this is a frontend improvement with no proof of fixed-assumption hiding for the backend.
+
+~~~python
+from itertools import product
+from random import Random
+def compile_gates(n,gates):
+    # Unpacked coordinates for easy independent matrix evaluation.
+    rail=lambda w,b:3+2*w+b
+    known=set()
+    levels=[]
+    for i,(a,b) in enumerate(gates):
+        if b not in known and a in known: a,b=b,a
+        if a!=b and b not in known:
+            levels.append([[(0,rail(b,v))] for v in range(2)])
+            known.add(b)
+        pair=[]
+        for v in range(2):
+            edges=[(rail(a,1-v),1)] if a in known else [(0,rail(a,v))]
+            z=n+i
+            if not v or a==b:
+                edges.append((0,rail(z,1-v if a==b else 1)))
+            else:
+                edges.extend((rail(b,t),rail(z,1-t)) for t in range(2))
+            pair.append(edges)
+        levels.append(pair)
+        known.update((a,z))
+    return levels
+
+rng=Random(510)
+checks=0
+for _ in range(100):
+    n=3
+    gates=[(rng.randrange(n+i),rng.randrange(n+i)) for i in range(4)]
+    levels=compile_gates(n,gates)
+    assert len(levels)+1<=len(gates)+n//2+1
+    solutions=set()
+    for inp in product(range(2),repeat=n):
+        vals=list(inp)
+        for a,b in gates: vals.append(1-vals[a]*vals[b])
+        if vals[-1]: solutions.add(inp)
+    reached=set()
+    for choices in product(range(2),repeat=len(levels)):
+        row=[1,0,1]+[0]*(2*(n+len(gates)))
+        for pair,v in zip(levels,choices):
+            old=row[:]
+            # Defined rails have permanent identities in this unpacked version.
+            for i,j in pair[v]: row[j]+=old[i]
+        if row[1]+row[-2]==0:
+            for inp in product(range(2),repeat=n):
+                if all(not row[3+2*i+1-b] for i,b in enumerate(inp)): reached.add(inp)
+        assert row[2]==1
+        checks+=1
+    assert reached==solutions
+print(checks,"independent level strings; exact primary solution sets on 100 NAND circuits")
+~~~
+
+On the exact stream_control family of the live-clause note, the first gate of each 32-gate segment reads the newly introduced primary bit as selector. Every other gate has only known operands. No preloads occur. Only the current segment's primary input and the latest gate output can survive a cut, so F=2 gives H=4097 and width 7 versus the earlier interleaved clause frontend's H=4224 and width 28. At common internal dimension multiplier and common modulus bit length, the interior-block geometric coefficient (H-2)*width^2 is 200655 versus 3310048. These are geometry counts; actual security/noise parameters may differ, and this stream is also amenable to public decision.
+
+~~~python
+n=128
+gates=[]
+prev=0
+for i in range(1,n+1):
+    for step in range(32):
+        gates.append((prev,i if step%3==0 else prev))
+        prev=n+len(gates)
+last={v:j for j,g in enumerate(gates) for v in g}
+last[prev]=len(gates)
+live=set()
+peak=preloads=0
+for j,(a,b) in enumerate(gates):
+    new={v for v in (a,b) if 1<=v<=n and v not in live}
+    preloads+=int(len(new)==2)
+    live.update(new)
+    live.add(n+j+1)
+    live={v for v in live if last.get(v,-1)>j}
+    peak=max(peak,len(live))
+assert (peak,preloads)==(2,0)
+print(len(gates)+preloads+1,2*peak+3,(4097-2)*7**2,(4224-2)*28**2)
+~~~
