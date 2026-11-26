@@ -814,3 +814,64 @@ for _ in range(150):
             assert got==(target in ends)
 print("2400 shared-input/state/target comparisons against exhaustive private witnesses")
 ~~~
+
+## Removing private bits from a three-state suffix by sparse character support
+
+Allow all three-state maps, including partial mergers. Write y for the shared Boolean ports, z for the private Boolean bits, and s for the incoming ternary state supplied by the retained verifier. Each layer has an affine Boolean query l(y,z) and two deterministic maps on the three states. Compute the exact acceptance indicator backwards for each entering state as a dictionary of binary characters over F_3. Initialize the three terminal indicators to their constant acceptance bits. If G_0 and G_1 are the two successor dictionaries for a given state, update to (G_0+G_1)/2 + chi_l*(G_0-G_1)/2. Here chi_l=(-1)^l; its affine constant contributes a sign, and multiplication by its linear part XORs the support indices. Combine equal indices modulo three and delete zeros. This is just the two cases of a Boolean selector and preserves the zero/one values of the indicator. It works across arbitrary rereads; there is no enumeration of reset positions or merger states. With maximum intermediate dictionary size D per state this takes O(L D) dictionary insertions up to constant factors, plus polynomial costs for bitsets, key lookup and coefficient arithmetic. A budgeted compiler can abort before a large intermediate table and use the original backend. Final sparsity alone does not certify that cost.
+
+For each possible start state, split the final supports by their private part U. The resulting polynomial is sum_U a_U(y) chi_U(z). At fixed y it is identically zero in z iff every a_U(y) vanishes: the binary character matrix is invertible in F_3. Compile the residual acceptance predicate as the OR of nonzero coefficient tests for the state selected by the retained verifier. Each a_U is evaluated by parities of the shared ports and addition modulo three. This projects every private suffix bit without treating distinct occurrences as independent. It also works if the shared ports are arbitrary outputs computed by the core from its own witness. This yields a polynomial construction whenever intermediate dictionary sizes are polynomial, regardless of the number of partial mergers.
+
+There is a constructive, shared-input-independent witness list. Take the union of the distinct private supports over the three initial states, of size r. Build a basis among the realizable evaluation rows (chi_U(z))_U, starting with all ones and processing private bits in order. For each bit extend every retained row both ways by either identity or flipping the signs in the coordinates containing that bit; retain independent rows and one realizing prefix per row. Linear dependence survives a common sign update, so induction preserves the full evaluation span. At the end its dimension is r by character independence, yielding r actual private strings, even when their domain is exponential. For any shared ports and start state with a nonzero coefficient vector, at least one listed string has nonzero evaluation and hence accepts. A zero dictionary needs no strings. Basis generation is polynomial in r and the private bit length; one may instead just use the coefficient test if only decision is needed. Unlike summing accepting multiplicities in F_3, it remains correct when the number of accepting completions is divisible by three. The projection transports WE to the residual verifier and adds no assumption. It does not bound D for general CircuitSAT, or provide the residual cryptographic backend.
+
+~~~python
+from random import Random
+rng=Random(840)
+for trial in range(80):
+    layers=[(rng.randrange(16),rng.randrange(2),
+             [[rng.randrange(3) for s in range(3)] for b in range(2)])
+            for j in range(rng.randrange(1,11))]
+    polys=[{0:1},{},{}]
+    for mask,offset,maps in reversed(layers):
+        updated=[]
+        for s in range(3):
+            p={}
+            for b in (0,1):
+                for u,c in polys[maps[b][s]].items():
+                    for v,a in ((u,2*c),(u^mask,2*c*(-1)**(b^offset))):
+                        p[v]=(p.get(v,0)+a)%3
+            updated.append({u:c for u,c in p.items() if c})
+        polys=updated
+    supports=sorted({u&3 for p in polys for u in p})
+    reps=[(0,[1]*len(supports))] if supports else []
+    for j in range(2):
+        piv={}
+        new=[]
+        for z,row in reps:
+            for b in (0,1):
+                v=[v*(-1)**(b*((u>>j)&1))%3 for u,v in zip(supports,row)]
+                h=v[:]
+                for i in sorted(piv):
+                    c=h[i]
+                    h=[(a-c*d)%3 for a,d in zip(h,piv[i])]
+                if any(h):
+                    i=next(i for i,a in enumerate(h) if a)
+                    piv[i]=[(a*pow(h[i],-1,3))%3 for a in h]
+                    new.append((z+(b<<j),v))
+        reps=new
+    assert len(reps)==len(supports)
+    for y in range(4):
+        for s,p in enumerate(polys):
+            cs={}
+            for u,c in p.items():
+                cs[u&3]=(cs.get(u&3,0)+c*(-1)**((u>>2)&y).bit_count())%3
+            ok=[]
+            for z in range(4):
+                x=4*y+z
+                state=s
+                for mask,o,maps in layers: state=maps[((x&mask).bit_count()%2)^o][state]
+                val=sum(c*(-1)**(u&z).bit_count() for u,c in cs.items())%3
+                assert val==int(state==0)
+                if val: ok.append(z)
+            assert bool(ok)==any(cs.values())==any(z in ok for z,row in reps)
+print("3840 direct evaluations; 960 exact projections and witness-list checks")
+~~~
