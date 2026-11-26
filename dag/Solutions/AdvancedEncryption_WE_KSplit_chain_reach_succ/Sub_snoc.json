@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.KSplit.chain_reach_succ",
+ "proof_type": "prove",
+ "explanation": "Split a list of length n+1 as a prefix plus a last element (List.eq_nil_or_concat) and use foldl over an append; conversely append the last block."
+}

@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.KSplit.table_sum_lower",
+ "title": "AM-GM floor for split-witness tables",
+ "statement": "If k nonnegative table sizes N_i have product at least t^k (the tables jointly index at least t^k witness tuples), then their sum is at least k t. With t = 2^(m/k) this is the k 2^(m/k) floor for any scheme whose decryption reads one entry from each of k explicitly generated tables."
+}

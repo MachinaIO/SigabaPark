@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.KSplit.mix_leak",
+ "title": "Two BGG+-style encodings of different attributes on one matrix and one secret reveal a multiple of s^T G",
+ "statement": "Over a commutative ring, (s A - x s G + e) - (s A - x' s G + e') = (x' - x) s G + (e - e'): publishing both attribute values of one encoded block under one secret leaks a noisy multiple of s^T G, so the secret is decodable when x' - x is a unit."
+}

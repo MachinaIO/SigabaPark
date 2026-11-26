@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.KSplit.chain_reach_succ",
+ "title": "Reachable streaming states after n+1 blocks are one-step images of those after n",
+ "statement": "A state is reached by folding the step function over some list of n+1 blocks from s0 iff it is h s' w for some w and some s' reached by a list of n blocks. This is the layer-by-layer invariant of the chain security proof: after layer n+1 is switched, the revealed next-layer keys are exactly those for reachable states."
+}
