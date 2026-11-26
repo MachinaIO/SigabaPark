@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TLWE.antitone_chain_few_changes", "proof_type": "prove", "explanation": "Induction on N with the invariant (number of changes before N) + dim U_N <= dim U_0: each strict drop decreases the dimension by at least one (Submodule.finrank_lt_finrank_of_lt); finally dim U_0 <= dim V."}
