@@ -1,4 +1,6 @@
-import SigabaNeoStd
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Combinatorics.Colex
+import Mathlib.Tactic.Push
 
 open Finset Polynomial
 
