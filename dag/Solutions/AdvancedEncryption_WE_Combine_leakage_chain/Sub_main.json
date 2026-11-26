@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Combine.leakage_chain", "proof_type": "prove", "explanation": "Induction on t <= T of f 0 <= K^t f t + eps sum_{i<t} K^i; the step multiplies the hop bound by K^t >= 0 and uses pow_succ and sum_range_succ; nlinarith closes."}

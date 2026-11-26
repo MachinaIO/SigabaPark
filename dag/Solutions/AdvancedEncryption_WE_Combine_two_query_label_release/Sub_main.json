@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Combine.two_query_label_release", "proof_type": "prove", "explanation": "Take w the constant function b; the hypothesis at that w gives the label, and the constant function is one of the two listed inputs."}
