@@ -351,7 +351,7 @@ def cover(k,table,want):
         result.append(pat);todo-=cells
     return result
 
-def frontend(n,gates,cap):
+def network(n,gates,cap):
     assert 2<=cap<=5
     functions={0:((),1)}
     for z,(a,b) in enumerate(gates,n+1):
@@ -366,12 +366,17 @@ def frontend(n,gates,cap):
                 opts.append(((mask.bit_count(),len(value[0]),mask),value))
         functions[z]=min(opts)[1]
     top=n+len(gates) if gates else 0
-    needed=set();stack=[top];clauses=[];order=[];seen=set()
+    needed=set();stack=[top]
     while stack:
         z=stack.pop()
         if z in needed:continue
         needed.add(z)
         stack.extend(v for v in functions[z][0] if v>n)
+    return functions,needed,top
+
+def frontend(n,gates,cap):
+    functions,needed,top=network(n,gates,cap)
+    clauses=[];order=[];seen=set()
     for z in sorted(needed):
         ports,t=functions[z]
         for v in ports:
@@ -431,5 +436,159 @@ def audit(front,cut,mixed):
                 out=front['eval_program'](program,[vals[v] for v in order])
                 assert (out[1]==0)==bool(vals[-1]) and out[2]==1
             print(name,cap,'clauses/levels/width/interior coefficient',len(cs),H,w,max(0,H-2)*w*w)
+if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
+~~~
+
+
+### Projecting affine wires out of a nonlinear circuit
+
+A Boolean table can certify an affine relation over F2 directly. Take its value at zero as offset and each unit-input difference as a coefficient, then compare the proposed form with all its entries. For an affine internal wire z, place the equation z+sum(input coefficients)=offset in a binary linear system. For an affine output substitute the required output value one. Keep the cube clauses of the preceding section for all other tables.
+
+Let B be the wires mentioned by the nonlinear clauses; optionally also preserve some primary inputs. Sweep the linear equations, pivoting on wires outside B first and eliminating a pivot from subsequent rows by XOR. Rows without outside wires give constraints on B. Remove linear dependencies among these remaining rows, detecting a constant contradiction. For any assignment on B, the residual equations hold exactly when the removed wires admit a completion: set nonpivot outside variables arbitrarily and solve the outside pivot rows in reverse *variable* order (the listing uses the smallest outside wire as pivot). The nonlinear clauses are unchanged by that completion. Thus the new satisfying assignments are exactly the projection of the accepting traces. In particular, NO statements remain false even if primary input wires are eliminated. A valid original witness gives its projected assignment by ordinary gate evaluation. On YES statements a rejecting input can project to a string with another accepting completion; the WE interface only promises correct recovery for valid witnesses. These quantifiers are important when assessing elimination of original input bits.
+
+Encode each nontrivial residual parity by two matrix coordinates holding the even/odd states, opening at its first variable, toggling on a selected one at each participating variable and entering the failure counter exactly when it closes with the wrong parity. Intervening variables carry its state by identity. Different parities whose crossing cuts are disjoint reuse the same pair of coordinates. These pairs are distinct from the prefix/suffix clause pool. Empty and singleton constraints are folded into the clause compiler, including its duplicate removal. Each additional active state has at most one successor for a branch and each parity opens once. The integer subproduct bound therefore increases by at most a polynomial in the number of equations. The full failure counter counts canonical clause failures plus violated nontrivial parities; take the underlying prime greater than their combined number as in the original backend. All steps including binary elimination and the emission of sparse matrices are polynomial at fixed table arity. Dense residual equations can increase width: include the original table layout among the candidates. No new encryption assumption is introduced by this public relation transformation.
+
+A 128-input control computes a long parity v, w=v XOR b, and then the conjunction of three nonlinear taps NAND(v,x), NAND(w,y), NAND(b,z). The published listing builds these entirely from NAND gates. At table cap two the previous layout used 510 clauses, 256 levels and width 9. Keeping all used primary inputs after affine elimination gives 14 clauses, two parities, 134 levels and width 13. Projecting onto the nonlinear ports gives 14 clauses, one parity, 10 levels and width 11. Across all 1024 projected bit strings, the matrix program accepts exactly the 14 distinct projections of accepting traces in this control. With m proportional to width at equal scale, the interior payload and selected one-row Dec multiply-add coefficients decrease from 254*9²=20574 to 8*11²=968, a factor of 21.25; the interior one-dimensional preimage Gaussian draw count has the same ratio. The input-preserving coefficient is 132*13²=22308, illustrating the need to price width as well as length. Endpoints, preprocessing and the cost of reading and evaluating the original witness must still be charged. The control measures circuit compilation, not hardness.
+
+Save the fourth listing as affine.py and run python affine.py lut.py cut.py mixed.py frontend.py. In addition to the control it checks all retained words against the exact projection of all accepting input traces in 1958 small path/message tests.
+
+~~~python
+"""Project affine table equations onto nonlinear ports, then encode residual parities."""
+from itertools import product
+from random import Random
+import runpy,sys
+
+def affine(ports,tab):
+    offset=tab&1
+    coeff=[j for j in range(len(ports)) if ((tab>>(1<<j))&1)^offset]
+    for x in range(1<<len(ports)):
+        if ((tab>>x)&1)!=(offset^(sum(x>>j&1 for j in coeff)%2)):return None
+    return {ports[j] for j in coeff},offset
+
+def project(eqs,keep):
+    pivots={};remaining=[]
+    for variables,rhs in eqs:
+        row=set(variables)
+        while row-keep:
+            p=min(row-keep)
+            if p not in pivots:
+                pivots[p]=(row,rhs);break
+            other,b=pivots[p];row^=other;rhs^=b
+        else:remaining.append((row,rhs))
+    # Drop dependent rows; return an explicit contradiction if present.
+    basis={}
+    for row,rhs in remaining:
+        while row:
+            p=min(row)
+            if p not in basis:basis[p]=(row,rhs);break
+            other,b=basis[p];row^=other;rhs^=b
+        else:
+            if rhs:return [(set(),1)]
+    return list(basis.values())
+
+def relation(n,gates,cap,lut,keep_inputs=False):
+    functions,needed,top=lut['network'](n,gates,cap)
+    clauses=[];eqs=[]
+    for z in sorted(needed):
+        ports,t=functions[z]
+        linear=affine(ports,t)
+        if linear is not None:
+            row,rhs=linear
+            if z==top:rhs^=1
+            else:row.add(z)
+            eqs.append((row,rhs))
+        else:
+            for b in ([0] if z==top else [0,1]):
+                for cube in lut['cover'](len(ports),t,b):
+                    clause=[p if val==0 else -p for p,val in zip(ports,cube) if val>=0]
+                    if z!=top:clause.append(z if b else -z)
+                    clauses.append(tuple(clause))
+    keep={abs(x) for c in clauses for x in c}
+    if keep_inputs:keep.update(v for row,_ in eqs for v in row if v<=n)
+    parities=[]
+    for row,rhs in project(eqs,keep):
+        if len(row)>1:parities.append((row,rhs))
+        elif row:
+            v,=row;clauses.append((v if rhs else -v,))
+        elif rhs:return [()],[],[]
+    used={abs(x) for c in clauses for x in c}|{v for row,b in parities for v in row}
+    return clauses,parities,sorted(used)
+
+def compile_relation(cs,eqs,order,bit,cut,mixed):
+    cs=cut['canonical'](cs)
+    paths=mixed['cuts'](cs,order)
+    u,layers=mixed['compile_mixed'](cs,order,bit,paths,mixed['choose'](paths,len(order)))
+    pos={v:i for i,v in enumerate(order)}
+    ranges=sorted((min(pos[v] for v in row),max(pos[v] for v in row),j) for j,(row,b) in enumerate(eqs))
+    ends=[];base=len(u)
+    for start,end,j in ranges:
+        slot=next((i for i,last in enumerate(ends) if last<=start),len(ends))
+        if slot==len(ends):ends.append(end);u.extend([0,0])
+        else:ends[slot]=end
+        row,rhs=eqs[j];zero=base+2*slot
+        for i in range(start,end+1):
+            for b,branch in enumerate(layers[i]):
+                step=b if order[i] in row else 0
+                if i==start:branch.add((0,zero+step))
+                elif i==end:branch.add((zero+(1^rhs^step),1))
+                else:
+                    for state in (0,1):branch.add((zero+state,zero+(state^step)))
+    return u,layers
+
+def audit(lut,cut,mixed,front):
+    rng=Random(62603);checks=0
+    for n in range(1,5):
+        for _ in range(45):
+            gates=[(rng.randrange(-1,n+i+1),rng.randrange(-1,n+i+1)) for i in range(rng.randrange(9))]
+            inputs=list(product((0,1),repeat=n))
+            accepted=[lut['trace'](n,gates,x) for x in inputs if not gates or lut['trace'](n,gates,x)[-1]]
+            for keep in (False,True):
+                cs,eqs,order=relation(n,gates,2,lut,keep);rng.shuffle(order)
+                image={tuple(vals[v] for v in order) for vals in accepted}
+                for bit in (0,1):
+                    pr=compile_relation(cs,eqs,order,bit,cut,mixed)
+                    for word in product((0,1),repeat=len(order)):
+                        vals=dict(zip(order,word))
+                        errors=sum(not any(vals[abs(v)]==(v>0) for v in c) for c in cut['canonical'](cs))
+                        errors+=sum(sum(vals[v] for v in row)%2!=rhs for row,rhs in eqs)
+                        out=front['eval_program'](pr,word)
+                        assert out[1]==errors and out[2]==bit and (errors==0)==(word in image)
+                        checks+=1
+    print('complete projection/path checks',checks)
+    # Two parity signals with a common prefix, tested jointly with their last input.
+    n=128;gates=[]
+    def nand(a,b):
+        gates.append((a,b));return n+len(gates)
+    def xor(a,b):
+        t=nand(a,b);return nand(nand(a,t),nand(b,t))
+    v=1
+    for i in range(2,n-3):v=xor(v,i)
+    b=n-3;w=xor(v,b)
+    tap1=nand(v,n-2);tap2=nand(w,n-1);tap3=nand(b,n)
+    t=nand(tap1,tap2);t=nand(t,t);t=nand(t,tap3);nand(t,t)
+    for name,keep in [('all LUT variables',None),('keep inputs',True),('project',False)]:
+        if keep is None:cs,order=lut['frontend'](n,gates,2);eqs=[]
+        else:cs,eqs,order=relation(n,gates,2,lut,keep)
+        pr=compile_relation(cs,eqs,order,1,cut,mixed)
+        print(name,'clauses/parities/layers/width',len(cs),len(eqs),len(pr[1]),len(pr[0]))
+        if keep is False:
+            # Row elimination is audited by independent enumeration of the
+            # retained relation using all distinct early-prefix parity patterns.
+            # The early-input cone computes a single parity for the taps.
+            # Zero and each single-bit prefix together realize both values.
+            image=set()
+            for tail in product((0,1),repeat=4):
+                for j in range(n-3):
+                    prefix=[int(i==j) for i in range(1,n-3)]
+                    tr=lut['trace'](n,gates,prefix+list(tail))
+                    if tr[-1]:image.add(tuple(tr[z] for z in order))
+            observed={w for w in product((0,1),repeat=len(order)) if front['eval_program'](pr,w)[1]==0}
+            assert observed==image
+            print('projected words in witness image / all words:',len(image),1<<len(order))
+        for _ in range(100):
+            trace=lut['trace'](n,gates,[rng.randrange(2) for i in range(n)])
+            if keep is not False:
+                assert (front['eval_program'](pr,[trace[v] for v in order])[1]==0)==bool(trace[-1])
+            if trace[-1]:assert front['eval_program'](pr,[trace[v] for v in order])[1]==0
 if __name__=='__main__':audit(*map(runpy.run_path,sys.argv[1:]))
 ~~~
