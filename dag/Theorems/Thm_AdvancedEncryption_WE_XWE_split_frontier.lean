@@ -1,4 +1,4 @@
-import Mathlib
+import SigabaNeoStd
 
 theorem AdvancedEncryption.WE.XWE.split_frontier (n e d h : ℕ) :
     (∃ a b c : ℕ, a + b + c = n ∧ max (a + c) b ≤ e ∧ max (max a b) c ≤ d ∧ b ≤ h) ↔
