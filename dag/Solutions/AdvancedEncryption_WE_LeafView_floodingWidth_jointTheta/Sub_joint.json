@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.floodingWidth_jointTheta", "proof_type": "prove", "explanation": "Use the radius condition to majorize the quadratic displacement and apply the width budget after multiplying through by the positive squared width."}

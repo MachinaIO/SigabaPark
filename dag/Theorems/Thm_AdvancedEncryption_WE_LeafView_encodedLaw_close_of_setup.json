@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.encodedLaw_close_of_setup", "title": "Transport a succinct-LWE setup bound to the encoded instance", "statement": "For any setup distribution close to the challenge setup and any B-dependent second-component law, completing and encoding the instance preserves the same distance bound."}
