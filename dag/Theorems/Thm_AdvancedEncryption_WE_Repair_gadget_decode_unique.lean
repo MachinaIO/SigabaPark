@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Abs
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Positivity
+import Mathlib.Algebra.Order.Group.Unbundled.Abs
+import Mathlib.Algebra.Group.Int.Defs
+import Mathlib.Tactic.Common
+import Mathlib.Algebra.Order.Ring.Int
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Linarith
 
 /-- Noisy gadget encodings of one value are uniquely decodable. If `d = x - x'` is the difference
 of two values whose encodings `y_b = 2^b x + e_b (mod 2^k)`, `b < k`, coincide up to errors whose

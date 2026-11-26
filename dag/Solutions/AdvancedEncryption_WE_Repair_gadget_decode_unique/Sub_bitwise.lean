@@ -1,4 +1,13 @@
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Abs
+import Mathlib.Tactic.Push
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Positivity
+import Mathlib.Algebra.Order.Group.Unbundled.Abs
+import Mathlib.Algebra.Group.Int.Defs
+import Mathlib.Tactic.Common
+import Mathlib.Algebra.Order.Ring.Int
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Linarith
 
 theorem solution (k : ℕ) (d : ℤ)
     (h : ∀ b < k, ∃ r : ℤ, |r| < 2 ^ (k - 1) ∧ (2 : ℤ) ^ k ∣ 2 ^ b * d - r) :
