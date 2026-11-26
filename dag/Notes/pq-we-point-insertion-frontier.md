@@ -1,5 +1,5 @@
 ---
-title: WE - point insertion for APG′ splits into one dead-chain lengthening and G+1 clause-frontier flips; every proved move keeps an alive-prefix invariant that PI breaks
+title: WE - point insertion for APG′-direct splits into one dead-chain lengthening and G+1 clause-frontier flips; every proved move keeps an alive-prefix invariant that PI breaks
 refs: [definition:WE_CircuitSAT, definition:WE_MaskedGGH15, definition:GGH15, note:pq-we-native-hop-designs, note:pq-we-zero-entry-crossing, note:pq-we-plr-hop-rank-and-erase, note:pq-we-ggh15-vocabulary-open-lemmas, note:pq-we-witness-prf-masked-evaluator, note:pq-we-hybrid-count-barrier, theorem:AdvancedEncryption.WE.NativeHop.lex_prefix_cubes, theorem:AdvancedEncryption.WE.ZeroCross.departure_first_difference, theorem:AdvancedEncryption.WE.PointInsert.cover_flip_keeps_allowed, theorem:AdvancedEncryption.WE.PointInsert.dead_reset_keeps_allowed, theorem:AdvancedEncryption.WE.PointInsert.copy_keeps_allowed, theorem:AdvancedEncryption.WE.PointInsert.no_first_level_cover, theorem:AdvancedEncryption.WE.PointInsert.pad_reuse_span]
 tags: [witness-encryption, ggh15, barrier, open-problem]
 ---
@@ -10,6 +10,21 @@ all pad slots sharing their secrets (one γ⊗ pad block), as introduced in open
 dead-slot moves and the final hybrid, and leaves one step open, the **point insertion PI**. This
 note attacks PI. Open PRs are cited by number only; "CC", "L4.4-S" and "dead reset" refer to
 #111 §2–§4.
+
+**Scheme: APG′-direct (project-owner decision).** WE is built directly, not through a witness
+PRF. The CPRF block and the two left vectors `u_O`, `u_C` are dropped. The single published left
+vector is the exposed row `R = P·A_0`: mask rows, clause-block rows (weights `−j_κ`) and the
+shared pad-block rows, with unit start weights. Decryption is `R·D_w = mask − C_Ψ(w) + noise`, and
+the ciphertext adds `⌊mask⌉ + μ`.
+
+* In #111 the view after CVW18's leaf-first removal of the CPRF block is exactly this view
+  (`u_O A_0` uniform and independent, `u_C A_0 = u_O A_0 − R`). So every step of #111 carries
+  over, and the CPRF-removal hop disappears.
+* All of this note is stated for APG′-direct. Nothing below used the CPRF block. §6 explains
+  where it might have mattered:
+  * hiding `R` (it never did: `R` is exposed in both schemes);
+  * the final mask step (#111 §5 uses a pad row of `R` as a one-time pad, not the CPRF);
+  * covers (the CPRF block was never in the exposed reading).
 
 The five `PointInsert.*` theorems have complete Lean proofs (Mathlib only). Everything else is an
 informal argument checked step by step by the submitting agent.
@@ -50,7 +65,8 @@ informal argument checked step by step by the submitting agent.
 
 ## 1. The statement
 
-**Setting.** This is APG′ of #111 §3. Masked γ⊗-GGH15 for the Tseitin CNF `Ψ` of `φ`
+**Setting.** This is APG′-direct: APG′ of #111 §3 without the CPRF block, with `R` as the only
+left vector. It is a masked γ⊗-GGH15 for the Tseitin CNF `Ψ` of `φ`
 (`Def_WE_MaskedGGH15`; `pq-we-witness-prf-masked-evaluator` §5):
 
 * Levels read `w` (128 levels), then the gate values in topological order, with the output gate
@@ -279,12 +295,28 @@ region is the comparator/class partition of the positional design, whose class s
 is ERASE without a separate class" stands: the shared pad block does not supply the class.
 
 The mask block cannot serve as a cover either. It is alive everywhere, but its top rows are the
-challenge `mask`, so leaf-first on it is the WE statement itself. The CPRF block cancels in
-`u_O − u_C`, so it is not in the exposed reading that a cover must absorb.
+challenge `mask`, so leaf-first on it is the WE statement itself.
+
+**Where the CPRF block of APG′ was (not) needed.**
+
+* **Hiding `R`.** Not needed. `R` is public in APG′-direct, and in APG′ it equals
+  `u_O A_0 − u_C A_0`, so it is public there too. The CPRF block only made `u_O A_0` and `u_C A_0`
+  individually uniform. After its leaf-first removal, `u_O A_0` is an independent uniform, which
+  carries no information.
+* **Root-level L4.4-S.** Not needed. The hypothesis is that `A_0` enters the view only through
+  `R` and the level-1 preimages, and APG′-direct satisfies it by construction.
+* **Final mask step** (#111 §5). Not needed. The one-time pad for `R` is the full-cube slot's row
+  `a_0^{(c*)}`, and `mask = r_0 R_* A_h^{mask}` uses only mask rows.
+* **Covers and PI.** Not needed. The CPRF block cancels in `u_O − u_C`, so it never entered the
+  exposed reading a cover must absorb. The obstructions of §3–§5 are unchanged.
+* **Security.** APG′-direct is at least as secure as APG′, up to the one CVW18 leaf-first hop
+  (any distinguisher for APG′-direct gives one for APG′). It is also cheaper: the CPRF block's
+  width `n' ≈ 2^{22.5}` leaves `N` (#111 §6), a small reduction of `m` that does not change the
+  `≈ 2^{108}`–`2^{110}`-bit estimate by more than a constant factor.
 
 ## 7. What a proof of PI must contain; accounting
 
-**Open atoms** (APG′, uniformly over `Ψ`):
+**Open atoms** (APG′-direct, uniformly over `Ψ`):
 
 * **`LEN`:** turn a free slot with prefix `k_{<j}`, dead at `j`, into one with prefix
   `k g*_{<out}`, dead at `out`.
