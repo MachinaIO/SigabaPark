@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedLeaf.hop_reveal_of_span", "proof_type": "prove", "explanation": "sum beta_z (c_z A) = (sum beta_z c_z) A = c_t A by Matrix.sum_vecMul and smul_vecMul; distribute and abel."}

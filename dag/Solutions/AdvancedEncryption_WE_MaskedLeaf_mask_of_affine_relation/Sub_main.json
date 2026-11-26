@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedLeaf.mask_of_affine_relation", "proof_type": "prove", "explanation": "Distribute the sum; the c-part is (sum alpha_z c_z) A = 0 by Matrix.sum_vecMul and smul_vecMul, the m-part is (sum alpha_z) m = m."}
