@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.IPE.cover_dot_zero_iff", "title": "Rectangle cover compatibility as a Boolean inner-product zero test", "statement": "For any finite rectangle cover of a bipartite incompatibility relation, the modular inner product of the two Boolean hit vectors is zero exactly when no incompatible pair is active, provided the modulus exceeds the cover size."}
