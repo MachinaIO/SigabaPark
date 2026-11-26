@@ -466,3 +466,34 @@ for k in (1, 2):
                 assert no == 0
 print("254 residual-set/row-count cases: both bounds and exact moments")
 ~~~
+
+## Projective hashing at the leaves with a cut that tolerates undecided words
+
+A local backend can generate its own shared key. For each distinct label j sample an independent secret hash key, publish its projection key, and derive L_j by secretly hashing the public word. An authorized witness derives the same value via projected hashing. Feed L_j directly into the occurrence-pad expansion above. This eliminates the bit-by-bit encryption of an independently chosen L_j. It uses one projection key per distinct label if one hash yields a full-length seed with the required hiding. Include all setup and framing in the size bound; one projection can itself exceed the old k ciphertexts. If the hash instead gives conditional average min-entropy h on a certified false word given the public view, apply a fresh public two-universal hash seed for that label, on both evaluation paths. The leftover hash bound for k extracted bits is at most (1/2)*2^((k-h)/2) in statistical distance for classical side information. A computationally pseudorandom full-length hash needs no entropy claim. Short outputs require independent repetitions or another justified conversion.
+
+There are two graphs. For a fixed word and admissible setup, classify each label as witness-projective YES, smooth NO, or unresolved. In the permissive graph enable an edge unless at least one required label is smooth NO. On an original NO require that this graph have no source-to-terminal path. On an original YES the honest trace must use only projective labels with available witnesses. The distinction avoids demanding smoothness for every false occurrence. Take the source-reachable set in the permissive graph. Every outgoing cut edge has a smooth label, possibly shared with other edges. Replace the joint (projection, seed) for each distinct selected label by (projection, independent uniform seed), with loss at most the sum of the individual distances or quantum distinguishing bounds. The reduction computes all other label pairs, and computes even the selected label's edge pads from the challenge seed. Then the fixed PRG expansion and vertex hybrids from the directed construction apply. This requires independent hash coins and a joint simulation compatible with any common public parameters. Instance-wise security for arbitrary hardwired public keys does not follow from average security over generated keys. For randomized compilation, add the probability of a permissive path on an original NO and charge any setup exceptions explicitly. On YES sum projection disagreement probabilities along the chosen path, once per label for a full-length hash. If there is a permissive path, replacing all unresolved labels by publicly known matching keys shows that these local guarantees alone cannot justify a cut proof.
+
+For a code-based candidate, the RQC hash proof system of [Bettaieb et al., section 3](https://eprint.iacr.org/2021/026.pdf) uses the language of valid encryptions of a specified message and restricts its ambient domain to valid ciphertexts of some message. The construction's domain restriction matters here. An arbitrary projected syndrome or a malformed ciphertext cannot be classified as smooth merely because no target-message opening exists. To use this paper one must supply a witness-preserving map to actual RQC words, the joint setup and quantum security reduction, and a proof that every spurious path crosses an in-domain smooth word. A validity proof mentioned by that work is not a witness-free method to turn an arbitrary instance into a valid word. This gives an explicit interface and a weaker necessary coverage obligation for this proof route; the general CircuitSAT embedding remains open.
+
+~~~python
+from itertools import product
+# Two directed two-hop routes; a shared label is required on two edges.
+edges = [(0,1,(0,)), (1,3,(1,2)), (0,2,(1,)), (2,3,(2,3))]
+for classes in product("YS?", repeat=4):
+    def reaches(enabled):
+        seen = {0}
+        for u,v,req in edges:
+            if u in seen and all(enabled(j) for j in req):
+                seen.add(v)
+        return seen
+    possible = reaches(lambda j: classes[j] != "S")
+    cut = [req for u,v,req in edges if u in possible and v not in possible]
+    assert all(any(classes[j] == "S" for j in req) for req in cut)
+    unknown = [i for i,c in enumerate(classes) if c == "?"]
+    completions = []
+    for bits in product((0,1), repeat=len(unknown)):
+        available = dict(zip(unknown,bits))
+        completions.append(3 in reaches(lambda j: classes[j]=="Y" or available.get(j,0)))
+    assert (3 in possible) == any(completions)
+print("81 three-way classifications; all permissive cuts and completions agree")
+~~~
