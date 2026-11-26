@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.lossy_kernel_approx_trapdoor", "proof_type": "prove", "explanation": "Distribute, reassociate B (C K), and use C K = 0."}

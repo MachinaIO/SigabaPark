@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ZeroCross.copy_state_zero_child", "title": "Two rows whose children share a target give a difference row with a zero child", "statement": "Over a commutative ring, if ac D = T + E1 and am D = T + E2 then (ac - am) D = E1 - E2."}

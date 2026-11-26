@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ZeroCross.copy_state_zero_child", "proof_type": "prove", "explanation": "Distribute the difference over D, substitute both hypotheses, and cancel T with abel."}
