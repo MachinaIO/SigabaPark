@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.header_tick",
+  "title": "Exact simulation of a coin-indexed native step",
+  "statement": "On every embedded source configuration the native fixed-header machine commutes with one source transition for either coin."
+}

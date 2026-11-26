@@ -1,6 +1,6 @@
 ---
 title: Witness encryption under public relation compilation and certified port projection
-refs: [definition:WE, theorem:AdvancedEncryption.WE.Compiler.transport, theorem:AdvancedEncryption.WE.Compiler.affine_port_image, theorem:AdvancedEncryption.WE.Compiler.checked_section, definition:FixedHeaderMachine, theorem:AdvancedEncryption.WE.Compiler.fixed_header_cost, theorem:AdvancedEncryption.WE.Compiler.header_head_step]
+refs: [definition:WE, theorem:AdvancedEncryption.WE.Compiler.transport, theorem:AdvancedEncryption.WE.Compiler.affine_port_image, theorem:AdvancedEncryption.WE.Compiler.checked_section, definition:FixedHeaderMachine, theorem:AdvancedEncryption.WE.Compiler.fixed_header_cost, theorem:AdvancedEncryption.WE.Compiler.header_head_step, theorem:AdvancedEncryption.WE.Compiler.header_input_symbol, definition:FixedHeaderTrace, theorem:AdvancedEncryption.WE.Compiler.header_tick]
 tags: [witness-encryption, correctness, reduction, compilation]
 ---
 
@@ -181,4 +181,39 @@ private def compareRuns : Nat × Bool := Id.run do
               count := count+1
   return (count,true)
 #eval compareRuns
+~~~
+
+**Native transition.** The input symbol agrees at every represented position, including both end markers. Once the adapter is in the embedded configuration, each native transition on a given coin reproduces the entire source configuration under the embedding. This theorem covers arbitrary work tapes and early halt. Its statement starts after setup. The initial seek and the complete fixed-clock PMF law are separate obligations.
+
+**Reducing encryption arithmetic.** In the [VWW tensor encoder](https://eprint.iacr.org/2022/1140.pdf), consider a binary transition matrix M of width w, a factor S of shape n by n, and the nw by m public matrix A. Split A into w consecutive n by m row blocks. For each nonzero column k of M, compute B[k] = S A[k] once. For each row h, output the sum of B[k] over the indices with M[h,k] = 1. Distributivity gives exactly block h of (M tensor S)A over the chosen modulus, even for a zero row or for composite q. This changes neither the sampled preimage target nor any encrypted bits for common sampler coins. Given sparse row lists, u used columns and e nonzero entries, forming one target takes at most u n²m modular multiplications and O(u n²m + (e+w)nm) modular additions and stores. Dense materialization would require O(w²n²m) scalar multiply-adds. This accounting covers target formation only. The encoder still pays trapdoor and column sampling costs. Different branch factors require separate products.
+
+For the full two-branch tensor encoding with H levels the transmitted payload before public framing is bounded by (2nm + 2(H-1)m²) ceil(log2 q) bits. Decryption with a witness evaluates one selected matrix per level using O(Hnm²) modular multiply-adds, in addition to trace construction, scanning and the final test. These are per-message-bit bounds. In the published parameter regime with fixed hardness exponent, H, w, n, m and log q are polynomial in the statement length and unary security parameter. This gives conditional polynomial honest costs. Quantum security for the registered problem and a bounded implementation of the samplers remain open. The following reference check compares the target with the direct indexed formula in 9540 cases across three moduli.
+
+~~~python
+from itertools import product
+
+def factored(M,S,A,q):
+    w,n,m=len(M),len(S),len(A[0])
+    blocks=[[[sum(S[i][j]*A[k*n+j][t] for j in range(n))%q
+              for t in range(m)] for i in range(n)] for k in range(w)]
+    return [[sum(blocks[k][i][t] for k in range(w) if M[h][k])%q
+             for t in range(m)] for h in range(w) for i in range(n)]
+
+def dense(M,S,A,q):
+    w,n,m=len(M),len(S),len(A[0])
+    return [[sum(M[h][k]*S[i][j]*A[k*n+j][t] for k in range(w)
+                 for j in range(n))%q for t in range(m)]
+            for h in range(w) for i in range(n)]
+
+def check():
+    total=0
+    for w,n,m,q in product((1,2,3),(1,2,3),(1,3),(2,9,17)):
+        for entries in product(range(2),repeat=w*w):
+            M=[entries[i*w:(i+1)*w] for i in range(w)]
+            S=[[(3+7*i-2*j)%q for j in range(n)] for i in range(n)]
+            A=[[(2+5*i+3*t)%q for t in range(m)] for i in range(w*n)]
+            assert factored(M,S,A,q)==dense(M,S,A,q)
+            total+=1
+    return total
+print(check())
 ~~~

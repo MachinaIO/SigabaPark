@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.header_input_symbol",
+  "title": "Virtual header reads agree on every source input cell",
+  "statement": "The target head parked at the suffix boundary or displaced along the shared suffix supplies exactly the native source input symbol, including both blanks."
+}

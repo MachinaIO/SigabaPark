@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.header_tick",
+  "proof_type": "prove",
+  "explanation": "On every embedded source configuration the native fixed-header machine commutes with one source transition for either coin."
+}
