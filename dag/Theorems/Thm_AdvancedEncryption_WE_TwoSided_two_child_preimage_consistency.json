@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.TwoSided.two_child_preimage_consistency", "title": "Square invertible preimages of two targets under one matrix exist iff Y0 D0⁻¹ = Y1 D1⁻¹", "statement": "Over a field, for targets Y0 Y1 and invertible square D0 D1, there is a matrix A with A D0 = Y0 and A D1 = Y1 iff Y0 D0⁻¹ = Y1 D1⁻¹."}

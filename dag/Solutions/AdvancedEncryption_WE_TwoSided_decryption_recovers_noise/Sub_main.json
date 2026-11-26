@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TwoSided.decryption_recovers_noise", "proof_type": "prove", "explanation": "Rewrite b j - l j to the cast of z j and apply ZMod.valMinAbs_spec; the interval condition follows from -|z| <= z <= |z| and 2|z| < q by linarith."}
