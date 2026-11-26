@@ -118,3 +118,83 @@ def span_fold(levels,initial,mm,cap=8,lift_cap=128):
         i=end
     return groups
 ~~~
+
+Run this check from the DAG repository root after saving the first listing as spanfold.py and the earlier binary-interval listing as binary_fold.py.
+
+~~~~python
+from itertools import product
+from random import Random
+from pathlib import Path
+import runpy
+f=runpy.run_path('binary_fold.py')
+sf=runpy.run_path('spanfold.py')['span_fold']
+front={}
+s=Path('dag/Notes/pq-we-live-clause-matrix-product.md').read_text()
+exec(s.split('~~~python\n')[1].split('def run_tests')[0],front)
+def test(u,lev,groups):
+    seen=set()
+    for bits in product((0,1),repeat=len(lev)):
+        z=tuple(f['project'](bits,groups));seen.add(z)
+        for mu in (0,1):
+            row=(tuple(u[mu]),);other=row
+            for i,b in enumerate(bits):row=f['mm'](row,lev[i][mu][b])
+            for (pair,_),b in zip(groups,z):other=f['mm'](other,pair[b][mu])
+            assert row==other
+    for z in product((0,1),repeat=len(groups)):
+        assert tuple(0 if p[0]==p[1] else b for b,(p,_) in zip(z,groups)) in seen
+rng=Random(712)
+before=after=improved=0
+for i in range(60):
+    cs=front['nand_cnf'](4,[(rng.randrange(5+j),rng.randrange(5+j)) for j in range(5)])
+    u=[];layers=[]
+    for mu in (0,1):
+        start,edges=front['compile_program'](cs,9,mu);w=len(start)
+        u.append(start)
+        layers.append([tuple(tuple(tuple(int((i,j) in E) for j in range(w)) for i in range(w)) for E in pair) for pair in edges])
+    lev=list(zip(*layers))
+    old=f['fold'](lev,w);new=sf(lev,u,f['mm'])
+    assert len(new)<=len(old)
+    before+=len(old);after+=len(new);improved+=len(old)>len(new)
+    if i<6:test(u,lev,new)
+print(before,after,improved)
+for i in range(60):
+    H=i%6+1;w=i%3+2
+    def mat():return tuple(tuple(rng.randrange(2) for _ in range(w)) for _ in range(w))
+    lev=[[(mat(),mat()),(mat(),mat())] for _ in range(H)]
+    u=[[rng.randrange(2) for _ in range(w)] for _ in range(2)]
+    test(u,lev,sf(lev,u,f['mm']))
+def transition(indices):
+    return tuple(tuple(int(k==j) for k in range(3)) for j in indices)
+def shared(a,b):return ((a,b),(a,b))
+pair=[shared(transition([2,1,1]),transition([0,1,0])),
+      shared(transition([0,1,1]),transition([0,1,0]))]
+rng=Random(117)
+def mat():return tuple(tuple(rng.randrange(2) for _ in range(3)) for _ in range(3))
+suffix=[((mat(),mat()),(mat(),mat())) for _ in range(4)]
+for k in (2,4,8,16):
+    l=pair*k+suffix
+    u=[(1,0,0)]*2
+    basic=f['fold'](l,3)
+    new=sf(l,u,f['mm'])
+    if k<=2:test(u,l,new)
+    print(len(l),len(basic),len(new),[len(route) for _,route in new])
+rng=Random(712);tot=[0]*4;count=0
+for i in range(60):
+    cs=front['nand_cnf'](4,[(rng.randrange(5+j),rng.randrange(5+j)) for j in range(5)])
+    opts=[]
+    for order in [list(range(1,10)),list(range(9,0,-1)),sorted(range(1,10),key=lambda x:sum(x in map(abs,c) for c in cs))]:
+        rank={v:k+1 for k,v in enumerate(order)}
+        cc=[tuple(rank[abs(v)]*(1 if v>0 else -1) for v in c) for c in cs]
+        u=[];layers=[]
+        for mu in (0,1):
+            start,edges=front['compile_program'](cc,9,mu);w=len(start)
+            u.append(start)
+            layers.append([tuple(tuple(tuple(int((i,j) in E) for j in range(w)) for i in range(w)) for E in pair) for pair in edges])
+        lev=list(zip(*layers))
+        if not opts or w<=opts[0][0]:
+            opts.append((w,len(f['fold'](lev,w)),len(sf(lev,u,f['mm']))))
+    vals=[opts[0][1],opts[0][2],min(x[1] for x in opts), min(x[2] for x in opts)]
+    tot=[a+b for a,b in zip(tot,vals)]
+    count+=vals[3]<vals[2]
+print(tot,count)
+~~~~
