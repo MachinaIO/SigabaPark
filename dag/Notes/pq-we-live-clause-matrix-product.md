@@ -22,6 +22,14 @@ On that 128-input control the circuit-to-trace reduction has 4224 levels. The or
 
 An exact decision shortcut uses the same compiled edges with message zero. Keep the set of reachable live-slot masks and prune transitions entering the failure counter, since its value never decreases. Bitwise OR computes the supports of nonnegative integer row updates. Two equal retained masks have identical possible continuations. After the last projection, the zero mask is reachable exactly on YES instances. With a polynomial cap B, stop before storing more than B+1 masks; a timeout gives no verdict. A completed run encrypts a bit as its AND with the decision, with constant decryption work and identical ciphertext distributions on NO. The cap makes the attempt polynomial even on failure, e.g. O(H B w²) edge visits plus polynomial bitset and dictionary costs (a sorted deterministic dictionary suffices). In the 4096-gate ordered control the cap H completed at peak four masks and 25,022 attempted transitions. This shortcut covers a certified subclass unconditionally. The count backend keeps the honest algorithms polynomial on all other instances, conditionally on its cryptographic security assumptions. The shortcut uses no encrypted matrix sampler.
 
+**One root row and a short final block.** There is a further backend change independent of the clause layout. Encrypt the same program, retaining only row 1 of each of the two root blocks and the first t columns of each final block. When H=1 apply both restrictions to the root. For H>=2 this transmits 2m+2(H-2)m²+2mt residues, and for H=1 it transmits 2t. Dec multiplies one row through the chosen blocks and tests its t centered entries, outputting zero if all are short. For H>=2 its dense arithmetic is O((H-2)m²+mt), plus reading the statement, deriving the trace and accessing the selected blocks. The computational message-security reduction is deterministic ciphertext postprocessing on both distributions. The correctness of this particular shorter test requires a separate argument.
+
+Write B for the bound on the absolute centered evaluation error from VWW Lemma 4.3; choose parameters with q>=16(B+1). Use q=p^k as above, let rho<1 upper-bound the largest atom modulo p of one entry of the iid tensor factors S_i,b, and let eta be the total variation of the final trapdoor public matrix from uniform. For a fixed valid witness path and message one, its logical message coordinate is one. Start with the first standard row and multiply by the selected S matrices modulo p. Given a surviving row, each coordinate of its next product vanishes with probability at most rho: condition on all entries of that column except one having nonzero row coefficient. Columns are independent. Thus the chance of losing the row in any of the H factors is at most H rho^n. A fixed nondegenerate constant-width discrete Gaussian has positive constant masses at both zero and one, distinct modulo p, so a uniform rho<1 exists. Condition on the tensor factors. On survival the ideal terminal coefficient row has a unit modulo p^k. The final A_H is independent of these factors, and after its eta switch to uniform each of its first t columns gives an independent uniform ideal output. If the observed entry has centered size <=B and its error has size <=B, the ideal entry lies in the centered interval of radius 2B. Its probability is at most (4B+1)/q. No independence from the evaluation error is needed. For message zero the valid logical row is zero, so the shortness bound suffices. With evaluation-error probability epsilon, the per-witness bit-one failure is at most
+
+    epsilon + H rho^n + eta + ((4B+1)/q)^t.
+
+Use t=ceil(lambda)+1, m>=t, and n with H rho^n negligible. For simultaneous correctness across every path, add H bits to the terminal repetition budget and set the other failure bounds with the corresponding margin; the standard per-witness claim already follows without that union bound. For H=1 the same argument uses A_1. Direct Enc only needs the selected root row and t target columns and t column-preimage draws per final branch, using independent per-column sampling with the shared trapdoor. All interior blocks remain full width. Enc can still use the original TrapGen for the final public matrix and discard its unused columns. These savings are exact dimensional and operation-count changes; no end-to-end lattice performance measurement is claimed. The second listing checks equality of the truncated and full products, the small-field row survival bound and exact uniformity for unit rows over two prime powers.
+
 ~~~python
 """Binary matrix products for a CNF in a fixed variable order."""
 from random import Random
@@ -170,4 +178,46 @@ def stream_control():
             assert (not eval_program(b,[vals[v] for v in order])[1])==(pos is None and bool(trace[-1]))
     print('4096 NANDs: levels / diagonal / original-order frontier / interleaved frontier',H,raw,len(a[0]),len(b[0]))
 if __name__=='__main__':run_tests();stream_control()
+~~~
+
+~~~python
+"""Endpoint truncation checks. Standard library, exact integer arithmetic."""
+from itertools import product
+from fractions import Fraction
+from random import Random
+from math import gcd
+
+def mul(a,b,q):
+    return [[sum(x*y for x,y in zip(r,c))%q for c in zip(*b)] for r in a]
+
+def check():
+    rng=Random(921);chains=0
+    for q in (9,25,343,65537):
+        for H in (1,2,3,5):
+            for root,m,t in ((1,3,2),(4,7,3),(3,4,4)):
+                gen=lambda n,k:[[rng.randrange(q) for _ in range(k)] for _ in range(n)]
+                ct=[[gen(root if i==0 else m,m) for b in range(2)] for i in range(H)]
+                for path in product(range(2),repeat=H):
+                    full=ct[0][path[0]]
+                    cut=[full[0]]
+                    if H==1:cut=[cut[0][:t]]
+                    for i,b in enumerate(path[1:],1):
+                        full=mul(full,ct[i][b],q)
+                        block=ct[i][b] if i+1<H else [r[:t] for r in ct[i][b]]
+                        cut=mul(cut,block,q)
+                    assert cut[0]==full[0][:t]
+                    chains+=1
+    cases=0
+    for p,q in ((3,9),(5,25)):
+        for r in product(range(p),repeat=2):
+            if r==(0,0):continue
+            zero=sum((r[0]*i+r[1]*j)%p==0 for i,j in product((-1,0,1),repeat=2))
+            assert Fraction(zero,9)<=Fraction(1,3)
+            assert Fraction(zero**2,81)<=Fraction(1,9)
+            hits=[0]*q
+            for c in product(range(q),repeat=2):hits[sum(i*j for i,j in zip(r,c))%q]+=1
+            assert hits==[q]*q
+            cases+=1
+    print(chains,'matrix paths;',cases,'prime-power row distributions')
+if __name__=='__main__':check()
 ~~~
