@@ -188,3 +188,47 @@ for t in range(1<<16):
     assert compressed_verify(128,plan,t)==(t != 65535)
 print('Shared-difference control: 32 nonlinear gates, rank 16; 65535/65536 certificates feasible.')
 ~~~
+
+## Exact bounded-rank search for dependent operands
+
+The three legal orientations at a genuine binary nonlinear gate are the three nonzero selectors in a two-dimensional binary plane P_i. To find a selector space of rank at most k on the chosen representation one can use a deterministic search costing O(3^k poly(input size)). This applies even if the operands of different gates are linearly dependent. First reduce forms modulo any *proved* affine equations on the joint trace (retaining their offsets). In quotient coordinates a constant operand or two dependent linear parts make the Boolean product affine; retain that affine gate equation in the verifier. The remaining planes have dimension two. Any original satisfying witness supplies the quotient coordinates. Substitution into the original verifier or retention of all proved affine equations prevents enlargement of the accepted relation.
+
+Start with S=0. If S meets every plane nontrivially, return its basis. If the budget is exhausted, report failure. Otherwise pick any missed plane P and branch on adding each of its three nonzero vectors to S. Each branch increases dimension by exactly one. If a solution space T containing S exists, then T contains at least one of those three vectors, so induction preserves a successful branch. Conversely every returned space supplies one legal orientation per gate and the earlier linearized verifier. At most (3^(k+1)-1)/2 nodes are visited. A branch stores an echelon basis; reducing two generators of P modulo S suffices to test whether their images lose rank. A safe pruning bound: greedily collect missed planes whose two-dimensional images in the quotient form a direct sum. If j such planes are collected, every feasible extension has at least j new independent directions. Merely checking pairwise trivial intersections does not prove the same bound for three or more planes. Recover actual selected rows in the original planes after finding S, and restore the affine offsets during decoding.
+
+Iterative deepening through k finds the minimum rank when within budget. In particular a logarithmic budget gives polynomial *discovery* time for every family with a logarithmic optimum, without assuming a good orientation is supplied or found by a heuristic. After preprocessing, enumerating 2^k linear systems decides those circuits with perfect one-bit WE on the promise family; alternatively the split backend has the counts given above. Failing at budget k rules out only this selector representation up to rank k, and the compiler may fall back to the original backend. The budget must be charged to Enc; it need not be rerun in Dec for the public decision mode. This gives no worst-case logarithmic rank bound.
+
+~~~python
+from itertools import combinations
+
+def span(vectors):
+    s = {0}
+    for v in vectors:
+        s |= {x^v for x in s}
+    return frozenset(s)
+
+def search(planes, s, budget):
+    p = next((p for p in planes if not p & s), None)
+    if p is None:
+        return s
+    if budget:
+        for v in sorted(p):
+            answer = search(planes, s | {x^v for x in s}, budget-1)
+            if answer is not None:
+                return answer
+    return None
+
+planes = sorted({frozenset((a,b,a^b)) for a,b in combinations(range(1,8),2)},
+                key=sorted)
+spaces = {span(vs) for n in range(4) for vs in combinations(range(1,8),n)}
+checked = 0
+for n in range(len(planes)+1):
+    for family in combinations(planes,n):
+        optimum = min(len(s).bit_length()-1 for s in spaces if all(s&p for p in family))
+        for k in range(4):
+            ans = search(family,frozenset({0}),k)
+            assert (ans is not None)==(optimum<=k)
+            if ans is not None:
+                assert len(ans)<=2**k and all(ans&p for p in family)
+            checked += 1
+print(checked,"families/budgets agree with exhaustive subspace enumeration")
+~~~
