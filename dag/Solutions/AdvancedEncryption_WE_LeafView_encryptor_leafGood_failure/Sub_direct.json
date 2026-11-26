@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.encryptor_leafGood_failure", "proof_type": "prove", "explanation": "Union-bound the entries of the sampled Gaussian columns, bound the actual gadget preimage shift, and integrate over the independent setup choices. The support of sampleOptList excludes none."}

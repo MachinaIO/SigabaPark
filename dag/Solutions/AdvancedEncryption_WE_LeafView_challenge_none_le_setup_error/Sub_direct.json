@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.LeafView.challenge_none_le_setup_error", "proof_type": "prove", "explanation": "Every column sampler in floodT is present, so the encryptor never returns none. Evaluate the symmetric setup-distance hypothesis on the missing-trapdoor event."}

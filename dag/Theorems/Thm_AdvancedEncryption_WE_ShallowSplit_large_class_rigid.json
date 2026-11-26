@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.ShallowSplit.large_class_rigid", "title": "Colorings with the same large monochromatic sets have the same large classes", "statement": "If for every finset T with N <= |T|, T is kappa-monochromatic iff kappa'-monochromatic, then every kappa-class of size >= N equals the kappa'-class of the same point."}

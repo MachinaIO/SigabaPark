@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MultiPass.anchored_slice_card_le", "proof_type": "prove", "explanation": "Sum the class sizes (Finset.card_eq_sum_card_fiberwise); each class has size at most b times its number of distinct prefixes (Finset.card_le_mul_card_image), which is at most D."}

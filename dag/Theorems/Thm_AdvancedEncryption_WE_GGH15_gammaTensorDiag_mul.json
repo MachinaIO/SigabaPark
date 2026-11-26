@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.GGH15.gammaTensorDiag_mul", "title": "gamma_tensor-diag is multiplicatively homomorphic (CVW18 Section 5.1)", "statement": "gammaTensorDiag M S * gammaTensorDiag M' S' = gammaTensorDiag (M M') (S S'), i.e. diag(M (x) S, S) diag(M' (x) S', S') = diag(MM' (x) SS', SS') over any commutative ring."}

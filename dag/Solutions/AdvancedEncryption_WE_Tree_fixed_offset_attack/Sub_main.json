@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Tree.fixed_offset_attack", "proof_type": "prove", "explanation": "Substitute the definitions: O - CK equals P(x) + u on rejecting pairs and P(x') on accepting pairs, so the inner difference is u and the outer one is P(x)."}

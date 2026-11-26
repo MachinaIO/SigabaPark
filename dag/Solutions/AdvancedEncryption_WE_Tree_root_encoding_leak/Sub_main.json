@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Tree.root_encoding_leak", "proof_type": "prove", "explanation": "Distribute, move the scalar c through the product, use G Ginv = c^{-1} G and c c^{-1} = 1."}

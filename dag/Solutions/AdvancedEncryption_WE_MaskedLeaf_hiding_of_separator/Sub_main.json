@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedLeaf.hiding_of_separator", "proof_type": "prove", "explanation": "Fintype.sum_equiv along the bijection A -> A + vecMulVec l (m - m'); then c_z * (A + l (m - m')) = c_z A + (c_z . l)(m - m') = c_z A + m - m' by vecMul_vecMulVec and the separator, and abel closes."}

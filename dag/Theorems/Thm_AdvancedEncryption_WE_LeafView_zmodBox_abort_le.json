@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.zmodBox_abort_le", "title": "A modular leaf box sampler aborts with probability at most two to the minus kappa", "statement": "With a pointwise bounded shift, sufficient inner radius and a boundary budget, one invocation of the actual ZMod boxSample has abort probability at most 2^(-kappa)."}

@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.MultiPass.anchored_slice_card_le", "title": "Witnesses are at most (#states) x (fiber size) x (distinct prefixes per class)", "statement": "Let cls map witnesses into a finite set of states, pref map witnesses to prefixes with all fibers of size <= b, and suppose every class has at most D distinct prefixes. Then card Wit <= #states * (b * D)."}

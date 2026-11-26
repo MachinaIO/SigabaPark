@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Tree.universal_key", "proof_type": "prove", "explanation": "Distribute vecMul over the sum, rewrite s^T Z H as s^T (Z H) and replace Z H by G X - f G using the key equation."}

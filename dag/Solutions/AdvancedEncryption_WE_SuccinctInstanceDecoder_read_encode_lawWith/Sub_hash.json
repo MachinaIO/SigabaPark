@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.SuccinctInstanceDecoder.read_encode_lawWith", "proof_type": "prove", "explanation": "Invert the public row-major and secret column-major encodings entrywise. Push postprocessing through the four sampler binds and apply pointwise recovery at the encoded tuple."}

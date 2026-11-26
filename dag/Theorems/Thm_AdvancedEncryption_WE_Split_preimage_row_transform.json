@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Split.preimage_row_transform", "title": "Invertible row transforms of the matrix and the target leave the Gaussian preimage law unchanged", "statement": "For B (n x m), an n x n matrix T over Z_q with unit determinant and P (n x k): Trapdoor.preimage (T B) (T P) tau = Trapdoor.preimage B P tau."}

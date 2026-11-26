@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.MaskedLeaf.affine_relation_of_span", "title": "If the path rows affinely span the space, they satisfy an affine relation through 0", "statement": "Over a field K with a finite index type, if for some z0 the differences c_z - c_{z0} span K^k, then there is alpha with sum alpha_z = 1 and sum alpha_z c_z = 0."}

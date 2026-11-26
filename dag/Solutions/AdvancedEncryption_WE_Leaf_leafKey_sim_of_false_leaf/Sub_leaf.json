@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Leaf.leafKey_sim_of_false_leaf", "proof_type": "prove", "explanation": "Wee's identity and sim_relation give A_phi = B R_phi (phi(w) = 0); rnorm_rowOf_evalSim_le bounds the rows of R_phi; the rows of Tm G^{-1}(A_phi) are bounded by k N E_T; coverage by add_mem_of_eq; then leafKey_real_eq_sim."}

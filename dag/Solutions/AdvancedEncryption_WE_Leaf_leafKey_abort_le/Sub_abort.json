@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Leaf.leafKey_abort_le", "proof_type": "prove", "explanation": "boxSample_none_le with the inner ball of radius 2^(Bb-1) - 1 - 2 tau (shifts by M dec(y) stay within k N rho <= tau, cnorm_mulVec_le), then abort_of_eq (famAbort_le) of SigabaNeoStd."}

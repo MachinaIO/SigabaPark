@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.LeafView.challenge_none_le_setup_error", "title": "Bound missing challenge trapdoors by the setup replacement error", "statement": "The chance that the uniform challenge returns none is bounded by the statistical distance from the flooded setup."}

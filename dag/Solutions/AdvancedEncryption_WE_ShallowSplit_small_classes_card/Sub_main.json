@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.ShallowSplit.small_classes_card", "proof_type": "prove", "explanation": "card V is the sum of the fiber sizes over S (card_eq_sum_card_fiberwise), each at most b."}

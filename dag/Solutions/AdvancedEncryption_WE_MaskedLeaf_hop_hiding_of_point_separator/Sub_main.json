@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.MaskedLeaf.hop_hiding_of_point_separator", "proof_type": "prove", "explanation": "Fintype.sum_equiv along A -> A + vecMulVec l (M t - m'); by vecMul_vecMulVec the shift adds (c_z . l)(M t - m'), which is M t - m' on path t and 0 elsewhere; case split on z = t."}
