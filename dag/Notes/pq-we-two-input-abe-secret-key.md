@@ -1031,3 +1031,30 @@ while checks<6700:
         checks+=1
 print(checks,"subcodes: all cut profiles dominated at equal residual dimension")
 ~~~
+
+## Exact cost even for nonlinear finite-state covers of the stream code
+
+Keep the binary linear stream code C, fixed order, and a cap of 2^b states at each internal cut. Consider any family of layered trellises whose *union of accepted stream languages is exactly C*. Each row of the family may be a different nonlinear nondeterministic recognizer. Reading is one symbol per layer and only its state passes to the next layer; a retained k-bit certificate can select at most 2^k such recognizers. For this interface the minimum number of recognizers is exactly 2^kstar, where kstar is the greedy interval deletion count above. The upper bound uses the cosets of the retained subcode. This equality also handles non-power-of-two family sizes.
+
+For the lower bound pick a set J of internal cuts; let hit(J) count the minimal-span basis intervals crossing at least one of them. The cuts partition the stream into disjoint consecutive segments. Let C_j be the subcode supported entirely on segment j. Its dimension equals the number of basis rows contained there, since distinct starts and ends prevent a combination from cancelling its extreme positions. Thus sum_j dim C_j = dim C - hit(J). Fix a recognizer and all its states on J. Accepted streams through these states form a Cartesian product of segment languages, since segment paths concatenate at their boundaries. For a nonempty such rectangle, fix a word in it. Vary one segment at a time: the differences from that fixed word are supported there and belong to C by linearity. The rectangle therefore has size at most 2^(sum_j dim C_j). This also holds if several accepting paths realize a word. At most 2^(b |J|) boundary tuples per recognizer are possible. Covering |C| words requires at least 2^(hit(J)-b |J|) recognizers.
+
+The strongest such multicut bound equals the achievable value. Write d=dim C and A for the cuts-by-intervals incidence matrix. Maximizing the number of retained rows is the packing LP max sum x subject to Ax<=b and 0<=x<=1. Its dual minimizes b sum y+sum z with A^T y+z>=1 and nonnegative variables. The consecutive-ones matrix A is totally unimodular, as are its transpose and identity extensions; with integer data the two optima are integral. For the consecutive-ones fact see [the interval-matrix integrality argument](https://num.math.uni-goettingen.de/bibi/preprintserie/preprints/schoebel/paper.pdf). Truncate the dual weights to zero or one and choose z to cover precisely intervals missed by J={i:y_i=1}. The dual objective becomes b |J|+d-hit(J). Subtracting the optimum from d proves kstar=max_J(hit(J)-b |J|). For two disjoint successive blocks each reading d0 independent bits twice, the two middle cuts together require 2(d0-b) selector bits for b<=d0, twice what either cut alone certifies.
+
+This lower bound concerns enforcing exactly the language of consistent private streams for every trace. A WE compiler may only need correct existential acceptance of a particular verifier, and computational hiding does not require an exact language cover. Thus the result identifies a reason to move consistency into the cryptographic proof or exploit the predicate when this multicut certificate is large; it is not a lower bound for general WE.
+
+~~~python
+from itertools import combinations
+from random import Random
+rng=Random(730)
+for trial in range(150):
+    intervals=[set(range(*sorted(rng.sample(range(9),2)))) for j in range(rng.randrange(9))]
+    d=len(intervals)
+    for b in range(4):
+        optimum=next(k for k in range(d+1) if any(
+            all(sum(i in r for j,r in enumerate(intervals) if j not in skip)<=b for i in range(8))
+            for skip in combinations(range(d),k)))
+        lower=max(sum(any(mask>>i&1 for i in r) for r in intervals)-b*mask.bit_count()
+                  for mask in range(256))
+        assert lower==optimum
+print("600 interval families/caps: every exact multicut optimum equals enumeration")
+~~~
