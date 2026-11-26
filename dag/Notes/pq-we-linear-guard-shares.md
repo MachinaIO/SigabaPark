@@ -560,7 +560,7 @@ from math import ceil,exp,pi
 from random import Random
 import numpy as np
 
-def exercise(front,wrapper,n,roots,target_product=None):
+def exercise(front,wrapper,n,roots,target_product=None,structured=True):
     rng=Random(60414);extra=Random(50718);share_rng=Random(7103)
     q=7**28;rad=256;k=ceil(q.bit_length()/8);t=2
     public_B=q//4096;bytes_per=(q.bit_length()+7)//8
@@ -588,6 +588,7 @@ def exercise(front,wrapper,n,roots,target_product=None):
         rem=q
         for j in range(k):rem,digit=divmod(rem,rad);one[j,-1]=digit
         assert rem==0
+        kernel_entries=list(zip(*np.nonzero(one)))
         block=np.kron(np.eye(d,dtype=object),one)
         lift=digits(-A0)
         basis=np.block([[S@block,I+S@lift],[block,lift]])
@@ -599,11 +600,23 @@ def exercise(front,wrapper,n,roots,target_product=None):
         def preimages(target):
             y0=digits(target);y=np.vstack((S@y0,y0))
             centers=ortho.T@np.asarray(y,float)
+            if structured:
+                coefficients=np.empty((m,target.shape[1]),dtype=object)
             for j in reversed(range(m)):
                 width=sigma/abs(tri[j,j])
                 z=[gauss(-c/tri[j,j],width) for c in centers[j]]
                 centers[:j]+=np.outer(tri[:j,j],z)
-                y+=np.outer(basis[:,j],np.array(z,dtype=object))
+                if structured:
+                    coefficients[j]=z
+                else:
+                    y+=np.outer(basis[:,j],np.array(z,dtype=object))
+            if structured:
+                # Undo the lift and shear only after the Gaussian coins are consumed.
+                head=coefficients[d*k:]
+                tail=y0+lift@head
+                for row,col in kernel_entries:
+                    tail[row::k]+=one[row,col]*coefficients[col:d*k:k]
+                y=np.vstack((head+S@tail,tail))
             assert not ((A@y-target)%q).any()
             return y
         return A,preimages
@@ -1028,4 +1041,60 @@ def replay(front,wrapper,lattice):
         print('identical leaf ciphertexts:',n,ell,len(records[0][1]))
 if __name__=='__main__' and len(sys.argv)>2:
     replay(*map(runpy.run_path,sys.argv[1:]))
+~~~
+
+
+### Reconstructing short preimages from sampled coordinates
+
+The fourth listing now uses an exact structured reconstruction in every column-preimage call by default. In randomized nearest-plane sampling the triangular centers determine the next Gaussian coordinate. Once initialized, those centers depend only on previous Gaussian coordinates and the triangular factor. The intermediate integer vector y is never read by a subsequent sampling decision. Save the sampled coordinates z=(v,h) in the original basis order and reconstruct y after the last draw.
+
+For this gadget trapdoor let K be the repeated k-by-k gadget kernel, D the digit lift, S the short a-by-dk shear, and g the digit column of the target. The initial integer preimage is (Sg,g). The basis has top blocks SK and I+SD and bottom blocks K and D. Thus the final bottom block is f=g+Kv+Dh, and the final top block is h+Sf. These are integer equalities before modular reduction. The same argument applies to multiple target columns. Iterate only over nonzeros of one gadget kernel, acting simultaneously on its d copies; the kernel has at most 3k-2 nonzeros per copy. Save only the sampled coordinate matrix (or stream its contributions to f); the diagnostic still builds the basis for QR. Existing setup, initial center computation, floating precision, Gaussian draws, triangular updates and congruence checks are unaltered.
+
+The original integer reconstruction performs m² scalar multiply-adds per sampled column for m=a+dk. The new reconstruction needs at most (2a+3)dk scalar products per column, plus vector additions, apart from common initialization. If using the original dense S multiplication this counts even its zero entries. For the diagnostic d=16,k=10,a=4 this is at most 1760 versus 26896; for d=32 it is at most 3520 versus 104976. This particular saving scales with trapdoor shape. For growing a comparable to dk the generic bound can remain quadratic. The full sampler also still performs dense triangular center updates. These figures are neither total Enc costs nor a clock certification.
+
+The eighth listing checks identical leaf ciphertext bytes under structured and dense reconstruction on all three full toy experiments, with the factored target routine enabled in both. Running python shear.py frontend.py pair.py lattice.py targets.py tests both modes on identical Gaussian coins. Run with OPENBLAS_NUM_THREADS=1 for the reference QR. The listing also times the outer encryption call for both bits together at n=8 with one root row (ten leaf encryptions, including the diagnostic residual checks). On a Ryzen 9 7950X3D, Python 3.12.12, NumPy 2.5.3, single BLAS thread, six paired repetitions after two warmup pairs with alternating execution order gave medians of 1.147 s dense and 1.056 s structured, about 7.9% less elapsed time. Both timed modes use the original dense target routine and the same seeds; the measurement isolates the change in reconstruction inside the diagnostic.
+
+~~~python
+import runpy
+import sys
+
+def compare(front,pair,lattice,targets):
+    def ideal(w,edges,S,A,q,root):
+        return targets['target'](targets['patterns'](w,edges),S,A,q,root)
+    for n,ell in [(4,1),(4,2),(8,1)]:
+        records=[]
+        for structured in (False,True):
+            leaves=[]
+            def encrypt(code,bit,coin,leaf):
+                def capture(i,msg):
+                    blob=leaf(i,msg)
+                    leaves.append(blob)
+                    return blob
+                return pair['encrypt'](code,bit,coin,capture)
+            failures=lattice['exercise'](front,{**pair,'encrypt':encrypt},n,ell,ideal,structured)
+            records.append((leaves,failures))
+        assert records[0]==records[1] and len(records[0][0])==10
+        print('exact dense/structured leaf agreement:',n,ell,len(records[0][0]))
+def timings(front,pair,lattice):
+    from contextlib import redirect_stdout
+    from io import StringIO
+    from statistics import median
+    from time import perf_counter
+    durations={False:[],True:[]}
+    for rep in range(8):
+        for mode in ([False,True] if rep%2==0 else [True,False]):
+            elapsed=[]
+            def encrypt(code,bit,coin,leaf):
+                start=perf_counter()
+                value=pair['encrypt'](code,bit,coin,leaf)
+                elapsed.append(perf_counter()-start)
+                return value
+            with redirect_stdout(StringIO()):
+                assert lattice['exercise'](front,{**pair,'encrypt':encrypt},8,1,None,mode)==0
+            if rep>=2:durations[mode].append(sum(elapsed))
+    print('median diagnostic Enc seconds for both bits, six paired repetitions:',*[median(durations[m]) for m in (False,True)])
+if __name__=='__main__':
+    modules=list(map(runpy.run_path,sys.argv[1:]))
+    compare(*modules)
+    timings(*modules[:3])
 ~~~
