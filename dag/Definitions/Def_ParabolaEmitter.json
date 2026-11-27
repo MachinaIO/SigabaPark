@@ -1,0 +1,10 @@
+{
+ "name": "ParabolaEmitter",
+ "title": "Clocked emitter for entire fixed projected-square headers",
+ "description": "The public opcode schedule processes fair operand bits into all encoded linear and squared shifted field values, splitting shares internally. At 4096 times 129 lanes the exact static machine cost is 16566555350652150247109. Includes modulo-257 fiber counts.",
+ "tags": [
+  "witness-encryption",
+  "cost",
+  "statistical-distance"
+ ]
+}

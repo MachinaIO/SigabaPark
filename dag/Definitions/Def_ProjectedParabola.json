@@ -1,0 +1,10 @@
+{
+ "name": "ProjectedParabola",
+ "title": "Full projected-square headers and exact XOR composition",
+ "description": "The complete finite header for an arbitrary public linear map has overlapping shifted laws exactly when every seed coordinate moves in its kernel, over odd finite fields larger than the source dimension. XOR tensorization is exact for arbitrary finite channels.",
+ "tags": [
+  "witness-encryption",
+  "circuit-sat",
+  "statistical-distance"
+ ]
+}

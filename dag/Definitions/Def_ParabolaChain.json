@@ -1,0 +1,10 @@
+{
+ "name": "ParabolaChain",
+ "title": "A 4096-gate obstruction to local unit-row coupling",
+ "description": "An unsatisfiable NAND chain with 4092 critical internal gates admits a globally normalized affine tableau with simultaneous Boolean NAND rows on every proper subcollection of the internal chain.",
+ "tags": [
+  "witness-encryption",
+  "circuit-sat",
+  "statistical-distance"
+ ]
+}
