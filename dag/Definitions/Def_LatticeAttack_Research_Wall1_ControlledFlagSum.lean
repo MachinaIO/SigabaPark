@@ -422,6 +422,96 @@ private def argument (i j : ℕ) : ℚ :=
   506*3.401937574248-0.693147180559+b/2-floorLog i+cum k-cum (k-j) +
     b*max 0 (logCap (k-j)-widthLog j) + 505*0.0000000001 + 26*2.302585092995
 
+-- The certificate of `charge_units`, row by row in separate declarations: the kernel checks each
+-- on its own, which bounds the memory the check needs.
+private theorem cert_0 : ∀ (i : Fin 154), 0 ≤ i.val → i.val < 3 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_1 : ∀ (i : Fin 154), 3 ≤ i.val → i.val < 6 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_2 : ∀ (i : Fin 154), 6 ≤ i.val → i.val < 10 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_3 : ∀ (i : Fin 154), 10 ≤ i.val → i.val < 14 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_4 : ∀ (i : Fin 154), 14 ≤ i.val → i.val < 18 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_5 : ∀ (i : Fin 154), 18 ≤ i.val → i.val < 22 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_6 : ∀ (i : Fin 154), 22 ≤ i.val → i.val < 26 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_7 : ∀ (i : Fin 154), 26 ≤ i.val → i.val < 30 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_8 : ∀ (i : Fin 154), 30 ≤ i.val → i.val < 34 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_9 : ∀ (i : Fin 154), 34 ≤ i.val → i.val < 39 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_10 : ∀ (i : Fin 154), 39 ≤ i.val → i.val < 44 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_11 : ∀ (i : Fin 154), 44 ≤ i.val → i.val < 49 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_12 : ∀ (i : Fin 154), 49 ≤ i.val → i.val < 54 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_13 : ∀ (i : Fin 154), 54 ≤ i.val → i.val < 60 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_14 : ∀ (i : Fin 154), 60 ≤ i.val → i.val < 66 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_15 : ∀ (i : Fin 154), 66 ≤ i.val → i.val < 72 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_16 : ∀ (i : Fin 154), 72 ≤ i.val → i.val < 79 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_17 : ∀ (i : Fin 154), 79 ≤ i.val → i.val < 87 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_18 : ∀ (i : Fin 154), 87 ≤ i.val → i.val < 96 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_19 : ∀ (i : Fin 154), 96 ≤ i.val → i.val < 107 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_20 : ∀ (i : Fin 154), 107 ≤ i.val → i.val < 121 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
+private theorem cert_21 : ∀ (i : Fin 154), 121 ≤ i.val → i.val < 154 → ∀ (j : Fin (155-i.val)),
+    let x := argument i j
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+
 private theorem charge_units (u : FlagIndex) : flagCharge u * 10^26 ≤ units u.1.val u.2.val := by
   let i := u.1.val
   let j := u.2.val
@@ -516,7 +606,52 @@ private theorem charge_units (u : FlagIndex) : flagCharge u * 10^26 ≤ units u.
     nlinarith only [h₁,h₂,h₃,h₄,quadratic,hp,logR,log₂,log₁₀,(Nat.cast_nonneg j : 0 ≤ (j:ℝ))]
   have cert : ∀ (i : Fin 154) (j : Fin (155-i.val)),
     let x := argument i j
-    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by decide +kernel
+    if x ≤ 0 then 1 ≤ units i j else x/32 ≤ 1 ∧ up (x/32)^32 ≤ (units i j:ℚ) := by
+    intro i j
+    have := i.isLt
+    by_cases h0 : i.val < 3
+    · exact cert_0 i (by omega) h0 j
+    by_cases h1 : i.val < 6
+    · exact cert_1 i (by omega) h1 j
+    by_cases h2 : i.val < 10
+    · exact cert_2 i (by omega) h2 j
+    by_cases h3 : i.val < 14
+    · exact cert_3 i (by omega) h3 j
+    by_cases h4 : i.val < 18
+    · exact cert_4 i (by omega) h4 j
+    by_cases h5 : i.val < 22
+    · exact cert_5 i (by omega) h5 j
+    by_cases h6 : i.val < 26
+    · exact cert_6 i (by omega) h6 j
+    by_cases h7 : i.val < 30
+    · exact cert_7 i (by omega) h7 j
+    by_cases h8 : i.val < 34
+    · exact cert_8 i (by omega) h8 j
+    by_cases h9 : i.val < 39
+    · exact cert_9 i (by omega) h9 j
+    by_cases h10 : i.val < 44
+    · exact cert_10 i (by omega) h10 j
+    by_cases h11 : i.val < 49
+    · exact cert_11 i (by omega) h11 j
+    by_cases h12 : i.val < 54
+    · exact cert_12 i (by omega) h12 j
+    by_cases h13 : i.val < 60
+    · exact cert_13 i (by omega) h13 j
+    by_cases h14 : i.val < 66
+    · exact cert_14 i (by omega) h14 j
+    by_cases h15 : i.val < 72
+    · exact cert_15 i (by omega) h15 j
+    by_cases h16 : i.val < 79
+    · exact cert_16 i (by omega) h16 j
+    by_cases h17 : i.val < 87
+    · exact cert_17 i (by omega) h17 j
+    by_cases h18 : i.val < 96
+    · exact cert_18 i (by omega) h18 j
+    by_cases h19 : i.val < 107
+    · exact cert_19 i (by omega) h19 j
+    by_cases h20 : i.val < 121
+    · exact cert_20 i (by omega) h20 j
+    exact cert_21 i (by omega) (by omega) j
   have hc := cert u.1 u.2
   change (if argument i j ≤ 0 then _ else _) at hc
   rw [← exp_log (mul_pos H (by positivity))]
