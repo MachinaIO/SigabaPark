@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CBDWirePad.tree_capacity",
+  "proof_type": "prove",
+  "explanation": "Leaf capacity in a forest of binary expansions forces a minimum product count."
+}
