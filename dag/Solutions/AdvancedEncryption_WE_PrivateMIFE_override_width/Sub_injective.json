@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.override_width",
+ "proof_type": "prove",
+ "explanation": "The fallback evaluator is a left inverse of the parameter encoder, hence the encoder is injective. Count Boolean words on both sides and use monotonicity of powers of two."
+}
