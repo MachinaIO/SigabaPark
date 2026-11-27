@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FEPacking.shard_capacity","proof_type":"prove","explanation":"Distribute multiplication across the sum of row counts and apply width monotonicity in each group."}

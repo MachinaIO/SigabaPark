@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FEPacking.diagonal_cover","proof_type":"prove","explanation":"Reduce each chosen coordinate by its own modulus. For the converse compare the finite cardinalities via surjectivity."}
