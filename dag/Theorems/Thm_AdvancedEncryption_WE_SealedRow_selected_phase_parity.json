@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.selected_phase_parity",
+  "title": "Rounding the sum of selected scalar LWE phases recovers the affine tape parity",
+  "statement": "For at most 129 selected components, each integer error bounded by 63 in absolute value, a single rounding of the aggregated phase modulo 32768 returns the parity of the selected bits. Arbitrary wrap multiples and dot products are allowed."
+}

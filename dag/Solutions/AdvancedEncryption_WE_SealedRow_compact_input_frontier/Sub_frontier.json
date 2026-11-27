@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.compact_input_frontier",
+  "proof_type": "prove",
+  "explanation": "Kernel evaluation checks the exact integer inequalities at all 129 splits."
+}

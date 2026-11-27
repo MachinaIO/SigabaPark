@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.fused_conversion_frontier",
+  "title": "After public aggregation the 32-bit cap allows fewer than eleven dense writes per recovered bit on average",
+  "statement": "The 15-bit scalar phase encoding has its smallest nondegenerate payload at b=1. One serial dense write per bit fails at every split; two parallel writes pass the clock subtotal through b=4. Eleven full dense writes per recovered bit exceed all remaining work-tape slots even with fourteen parallel tapes at every output-feasible split. Some split can pass framed output alone exactly when the sampler tape width h is at most 8052. A uniform allocation of three fresh bits per scalar coordinate gives a floor of 4871446529 steps at every split."
+}
