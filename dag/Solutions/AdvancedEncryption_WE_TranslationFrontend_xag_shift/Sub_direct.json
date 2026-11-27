@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TranslationFrontend.xag_shift",
+  "proof_type": "prove",
+  "explanation": "Live AND input parity equations certify a constant derivative of an XOR-AND circuit."
+}
