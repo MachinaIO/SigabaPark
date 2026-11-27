@@ -1,0 +1,5 @@
+{
+  "name": "SeparatingStaticRelease",
+  "title": "Full static-authorization separating packet machines",
+  "description": "StaticRelease182.encMachine and decMachine consume framed inputs, route fresh pads and produce the full flagged packet and decoded bit. The dense description and clock sum is strictly below two to the thirty-first power."
+}
