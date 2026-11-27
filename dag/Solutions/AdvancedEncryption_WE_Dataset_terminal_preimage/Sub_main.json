@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Dataset.terminal_preimage",
+  "proof_type": "prove",
+  "explanation": "Apply the opening equation on the indicated column and use additivity."
+}

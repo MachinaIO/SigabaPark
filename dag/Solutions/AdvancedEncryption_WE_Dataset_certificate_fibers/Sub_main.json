@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Dataset.certificate_fibers",
+  "proof_type": "prove",
+  "explanation": "The forward direction uses the same assignment on equal views. For the converse choose a representative of each nonempty fiber. This direction makes no efficiency claim."
+}

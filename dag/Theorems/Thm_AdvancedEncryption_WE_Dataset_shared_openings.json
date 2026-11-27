@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Dataset.shared_openings",
+  "title": "Two issued openings give a common gadget preimage",
+  "statement": "Two opposite bit openings for the same projection under one matrix give a preimage of any gadget image."
+}
