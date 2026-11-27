@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.BKSStar.full_view_switch",
+ "title": "Full-view simulation identity at either challenge bit for the starred child master",
+ "statement": "For any finite query shape and FE algorithm encodings, swapping independent local and child draws and reconstructing the whole ordered outer view from the child challenger replies gives the same distribution as the direct hybrid at each bit."
+}

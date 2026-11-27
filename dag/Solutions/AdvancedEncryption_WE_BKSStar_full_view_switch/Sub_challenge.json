@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.BKSStar.full_view_switch",
+ "proof_type": "prove",
+ "explanation": "Commute the two independent PMF samples. At each of the two challenge bits the committed message and key selections reduce to the exact direct fields under the same child master and coins; every outer field and all public context are definitionally preserved."
+}

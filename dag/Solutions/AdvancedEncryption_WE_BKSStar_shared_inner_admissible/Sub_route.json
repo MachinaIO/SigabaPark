@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.BKSStar.shared_inner_admissible",
+ "proof_type": "prove",
+ "explanation": "The original no-tag tuple always calls the fallback. Under the target key the new route emits its exact original table tuple; every other key rejects the distinct public row identifier and uses its unchanged fallback."
+}

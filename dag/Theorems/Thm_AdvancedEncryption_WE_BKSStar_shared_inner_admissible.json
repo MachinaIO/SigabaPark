@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.BKSStar.shared_inner_admissible",
+ "title": "Cartesian admissibility of public first-row identifiers and shared overrides",
+ "statement": "For any nonempty suffix and every tuple of queried rows, replacing the target aggregator by a dummy fallback and attaching its precomputed ciphertexts to every selected row preserves all aggregate outputs under each issued key."
+}
