@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FETree.exact_issuer_queries","proof_type":"prove","explanation":"If an address were unqueried, change only its oracle value. Transcript locality gives the same static emitter in both worlds, contradicting exactness there."}

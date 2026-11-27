@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FETree.collision_capacity","title":"Finite ciphertext capacity from recovery and repeat collisions","statement":"A weighted mean recovery of at least three quarters and mean collision of at most one in 512 force at least 256 ciphertext symbols per message symbol."}

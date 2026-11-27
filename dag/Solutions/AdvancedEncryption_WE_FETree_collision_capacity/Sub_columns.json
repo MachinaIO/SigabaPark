@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FETree.collision_capacity","proof_type":"prove","explanation":"Bound each decoded column by its squared mass and one constant using a square, sum over ciphertext columns and setups, then combine the two hypotheses."}
