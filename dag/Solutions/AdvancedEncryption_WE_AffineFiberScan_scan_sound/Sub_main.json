@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.AffineFiberScan.scan_sound",
+  "proof_type": "prove",
+  "explanation": "Relate wire histories pointwise by List.Forall\u2082. Identify getD on in-range and forward reads, append the sound transfer, and induct over the concrete fold."
+}
