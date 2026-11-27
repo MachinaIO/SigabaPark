@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.decoder_write_budget",
+  "proof_type": "prove",
+  "explanation": "The initial state ensures at least one state. At fifteen work tapes the description floor 6 times 3^15 times 64 already exceeds the cap. Charge the remaining clocks to the same aggregate."
+}

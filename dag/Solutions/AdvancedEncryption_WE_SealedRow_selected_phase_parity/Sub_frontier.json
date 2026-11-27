@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.selected_phase_parity",
+  "proof_type": "prove",
+  "explanation": "Cancel the summed dot products and bound the accumulated error by summing its coordinate bounds, then use integer division."
+}

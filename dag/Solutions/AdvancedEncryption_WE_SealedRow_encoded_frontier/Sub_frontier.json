@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.encoded_frontier",
+  "proof_type": "prove",
+  "explanation": "Exhaust the 129 splits at each first failing expansion. Monotonicity extends the result to all W, and explicit witnesses attain both thresholds."
+}

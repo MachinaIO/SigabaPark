@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.fused_conversion_frontier",
+  "proof_type": "prove",
+  "explanation": "Evaluate the 129 possible right address widths using exact natural arithmetic."
+}

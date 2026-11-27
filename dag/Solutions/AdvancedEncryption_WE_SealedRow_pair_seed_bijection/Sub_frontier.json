@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.pair_seed_bijection",
+  "proof_type": "prove",
+  "explanation": "Subtract the two evaluations to recover the slope uniquely, then solve for the intercept."
+}

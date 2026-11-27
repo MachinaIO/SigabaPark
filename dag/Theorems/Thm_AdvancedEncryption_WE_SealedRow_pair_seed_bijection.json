@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.pair_seed_bijection",
+  "title": "An affine field seed gives exactly one seed for each pair of row tapes",
+  "statement": "For two distinct field addresses the map sending a slope and intercept to its two evaluations is bijective. Uniform slope and intercept therefore realize exact pairwise independent uniform field-valued tapes."
+}

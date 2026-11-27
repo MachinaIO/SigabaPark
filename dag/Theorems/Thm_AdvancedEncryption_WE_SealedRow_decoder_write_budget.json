@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.decoder_write_budget",
+  "title": "Work-tape bandwidth under the aggregate 32-bit clock and description cap",
+  "statement": "Any WE implementation of cost at most 2^32 has at most fourteen decryptor work tapes. Its number of work-tape write slots is bounded by fourteen times the cap minus the encryption clock, with the subtraction made before multiplying."
+}

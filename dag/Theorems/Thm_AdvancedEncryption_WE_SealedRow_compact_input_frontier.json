@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.compact_input_frontier",
+  "title": "Compact scalar input encoding fits six right bits but full dense decoding exceeds the write budget",
+  "statement": "For 1032 bits per scalar ciphertext, plus 128 encrypted inner key bits, the least output subtotal over nonempty right halves occurs at one right bit. At every split within the cap there are more dense recovered seed bits to materialize than the remaining decoder work-tape slots."
+}
