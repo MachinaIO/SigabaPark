@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.StreamRouter.packet_budget",
+  "proof_type": "prove",
+  "explanation": "Six-tape local encoder and route decoder cost envelope including both transition descriptions"
+}

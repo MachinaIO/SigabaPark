@@ -1,0 +1,5 @@
+{
+  "name": "StreamedRouterBlock",
+  "title": "A five-tape fixed-nonce ChaCha20 block machine with an explicit schedule",
+  "description": "Two concrete deterministic SigabaNeo.Machine implementations on 256 input bits, with a table-encoded double round and a second machine using physical three-bit return addresses to share one quarter-round routine."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.StreamRouter.block_cost",
+  "proof_type": "prove",
+  "explanation": "Exact clock field, description length and determinism of the concrete block machine"
+}

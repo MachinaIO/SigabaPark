@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.StreamRouter.packet_budget",
+  "title": "Six-tape local encoder and route decoder cost envelope including both transition descriptions",
+  "statement": "The explicit six-tape clock and table-size envelopes sum below 2^85 for triple dispatch, below 2^55 for row-local comparisons, and below 2^97 for the variant testing all visited keys."
+}
