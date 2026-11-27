@@ -1,0 +1,10 @@
+{
+ "name": "MixedOrderMask",
+ "title": "Finite-support range summaries for mixed-order circuit decision",
+ "description": "A forward pass classifies cofactored wires by an unknown flag, a constant, or a support on which both values are attainable. Every accepted result is an exact satisfiability decision. Includes the registered statement-length bound.",
+ "tags": [
+  "witness-encryption",
+  "circuit-sat",
+  "cost"
+ ]
+}
