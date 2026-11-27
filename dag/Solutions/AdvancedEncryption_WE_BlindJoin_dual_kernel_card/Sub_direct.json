@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BlindJoin.dual_kernel_card",
+  "proof_type": "prove",
+  "explanation": "The linear error operator and its dual have equally many kernel elements."
+}

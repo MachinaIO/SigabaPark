@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BlindJoin.missing_root_count",
+  "proof_type": "prove",
+  "explanation": "An omitted degree bounds all roots of the projected error polynomial."
+}
