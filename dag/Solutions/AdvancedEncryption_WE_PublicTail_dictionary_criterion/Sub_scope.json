@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PublicTail.dictionary_criterion",
+ "proof_type": "prove",
+ "explanation": "For a covering raw parser, replacing a fallback by a private override tuple and a tail dictionary preserves its exact public output if and only if the fallback equals that split pair on every private tuple and every tail."
+}

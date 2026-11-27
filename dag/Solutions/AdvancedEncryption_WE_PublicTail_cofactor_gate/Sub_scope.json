@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PublicTail.cofactor_gate",
+ "proof_type": "prove",
+ "explanation": "Testing the public relation on a chosen tail and releasing the private existential cofactor times the payload gives the correct gated answer on every front and raw tail."
+}
