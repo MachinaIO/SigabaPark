@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LiftedProduct.signed_decoding",
+  "proof_type": "prove",
+  "explanation": "Exact signed halving at lifted precision and centered decoding at the Fermat prime."
+}
