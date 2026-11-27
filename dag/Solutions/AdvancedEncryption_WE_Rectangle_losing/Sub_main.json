@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Rectangle.losing",
+  "proof_type": "prove",
+  "explanation": "A static losing union has one whole off-index source role hidden at each opened join"
+}

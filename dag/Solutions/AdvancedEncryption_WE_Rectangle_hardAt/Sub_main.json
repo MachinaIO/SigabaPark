@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Rectangle.hardAt",
+  "proof_type": "prove",
+  "explanation": "Typed single-block HardAt transfer for the router laws under the stated simulator advantage and cost bounds"
+}
