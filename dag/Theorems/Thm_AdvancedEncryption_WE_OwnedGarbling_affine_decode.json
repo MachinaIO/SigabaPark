@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.OwnedGarbling.affine_decode",
+ "title": "One correction bit per slot-row-output recovers exactly the authorized affine output",
+ "statement": "The public baseline equals the authorized affine output plus the inner product of visible masked parameters and masked slopes and the visible secret-key correction bit."
+}

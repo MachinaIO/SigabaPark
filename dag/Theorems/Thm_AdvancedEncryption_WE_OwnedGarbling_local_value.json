@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.OwnedGarbling.local_value",
+ "title": "Absorbed gates and allocated fresh nodes implement the same NAND",
+ "statement": "At a node joining two distinct bases, give the newly allocated node the NAND of the two input values. Then for every alias/null/distinct combination the compiled wire evaluates to the uncompiled gate value."
+}

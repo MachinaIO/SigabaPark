@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.OwnedGarbling.joint_affine_setup",
+ "title": "Exact joint law for all sparse affine slots, rows and outputs",
+ "statement": "A triangular bijection maps all independent secret setup fields into uniform independent masked parameters, masked slopes and key corrections over the whole bounded transcript."
+}

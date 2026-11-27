@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.OwnedGarbling.joint_affine_setup",
+ "proof_type": "prove",
+ "explanation": "A triangular bijection maps all independent secret setup fields into uniform independent masked parameters, masked slopes and key corrections over the whole bounded transcript."
+}

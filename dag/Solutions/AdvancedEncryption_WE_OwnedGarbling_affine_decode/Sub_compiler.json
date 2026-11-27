@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.OwnedGarbling.affine_decode",
+ "proof_type": "prove",
+ "explanation": "The public baseline equals the authorized affine output plus the inner product of visible masked parameters and masked slopes and the visible secret-key correction bit."
+}
