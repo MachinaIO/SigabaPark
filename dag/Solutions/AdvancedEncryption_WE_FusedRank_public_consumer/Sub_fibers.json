@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FusedRank.public_consumer","proof_type":"prove","explanation":"One direction applies congruence. For the converse select a representative per nonempty fiber and use fiber constancy."}

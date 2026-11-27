@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FusedRank.row_reindex","proof_type":"prove","explanation":"Choose the row preimage first and then a preimage under its column map. The row and column selectors may share witness inputs."}

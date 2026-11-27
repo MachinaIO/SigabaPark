@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FusedRank.one_key_frame_fibers","proof_type":"prove","explanation":"Multiply the row tape on the left by the inverse transporter and the column tape on the right by the conjugated transporter. The two central factors cancel exactly in the disclosed function key."}

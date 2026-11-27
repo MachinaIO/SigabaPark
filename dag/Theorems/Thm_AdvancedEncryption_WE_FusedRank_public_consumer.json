@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FusedRank.public_consumer","title":"Exact criterion for a fixed consumer of one producer output","statement":"An output can be obtained by postcomposing a single producer with a fixed set-theoretic consumer exactly when it is constant on every fiber of the producer. The reverse implication supplies no efficiency or secret-key-hiding guarantee."}
