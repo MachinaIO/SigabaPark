@@ -1,0 +1,44 @@
+{
+  "curriculum": {
+    "exploration_fraction": "0.10",
+    "hi": "0.60",
+    "lo": "0.20",
+    "min_samples": 20,
+    "stale_after_days": 30,
+    "target": "0.40"
+  },
+  "epoch": {
+    "core_revision": "cccccccccccccccccccccccccccccccccccccccc",
+    "dag_snapshot": "dddddddddddddddddddddddddddddddddddddddd",
+    "environment_id": "env-synthetic",
+    "id": "epoch-0001",
+    "strength_digest": "sha256:4496d55b21e61ea5a115b50b87035fc81da315b5f1b89f53c85b055432a01b98"
+  },
+  "families": [
+    {
+      "entropy_bits": 16,
+      "family_id": "avoid-word",
+      "role": "design"
+    },
+    {
+      "entropy_bits": 20,
+      "family_id": "sum-fam",
+      "role": "design"
+    },
+    {
+      "entropy_bits": 24,
+      "family_id": "lin-attack",
+      "role": "cryptanalysis"
+    }
+  ],
+  "notebooks": {
+    "max_bytes": 32768,
+    "max_tokens": 4096,
+    "tokenizer": {
+      "kind": "proxy-bytes-div-3",
+      "version": "1"
+    }
+  },
+  "policy_id": "policy-synthetic",
+  "schema": "sigaba.learning.policy.v1"
+}

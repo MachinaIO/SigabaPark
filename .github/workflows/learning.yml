@@ -1,0 +1,484 @@
+# The learning check (README.md, "Learning"; ci/learning/RECORDS.md): certified problem
+# generators and role notebooks. It always runs the base branch's copy of this file and of
+# `ci/learning/` (`pull_request_target`), and never runs pull request code outside the sandbox.
+# A pull request that changes `ci/`, `.github/`, `meta/` or `env/` fails both `gate` and this
+# check, so only an administrator's bypass merges such a change.
+#
+#   route     reads the pull request's files through the API, as data: who wrote it (the gate's
+#             `collaborators` policy), what it is (math / generator / notebook / rejected), its
+#             schema, scope and limits. A math pull request passes here (the gate checks it).
+#   certify   generator: replays the universal Lean certificate of the family's exact predicates
+#             and smoke-samples seeds, in the environment image without network, token or secret.
+#   evaluate  notebook: the trusted evaluator (paired screen, then an independent confirmation
+#             against the active notebook). Only when `meta/learning.json` enables an authorized
+#             evaluator; otherwise the pull request is `awaiting_evaluator`. It runs in the
+#             `learning-evaluator` Environment, which maintainers protect and give the provider
+#             configuration; pull request code never sees it.
+#   decide    runs no pull request code; the check `learning / decide` (require it with
+#             `gate / decide`). Learning pull requests are never merged automatically: a passing
+#             check is not permission to merge, a maintainer merges.
+#   report    comments the decision and sets the `learning:*` labels.
+#   post-merge  on `main`: records the certification of a merged generator, the activation of a
+#             merged notebook (compare-and-swap on the active notebook), and publishes the report.
+#
+# Drafts are not checked (the core's docs/RESEARCH_PROTOCOL.md, D1). Records go to the protected
+# branch `learning-records`, the report to `learning-report`; only this workflow's trusted jobs
+# and maintainers write them.
+name: learning
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "calibrate | anchor | report"
+        required: true
+        default: report
+      role:
+        description: "design | cryptanalysis"
+        required: false
+        default: design
+      epoch:
+        description: "anchor epoch id (anchor only)"
+        required: false
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: learning-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
+
+jobs:
+  route:
+    if: >-
+      github.event_name == 'merge_group' ||
+      (github.event_name == 'pull_request_target' &&
+       github.event.action != 'converted_to_draft' && !github.event.pull_request.draft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      route: ${{ steps.route.outputs.route }}
+      env_id: ${{ steps.env.outputs.env_id }}
+      image: ${{ steps.env.outputs.image }}
+      pr: ${{ steps.who.outputs.pr }}
+      author: ${{ steps.who.outputs.author }}
+    steps:
+      - name: Check out the base branch (never the pull request)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the DAG's verification records (source references)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: records
+          path: records
+          persist-credentials: false
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("base/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          assert re.fullmatch(r"[\w./:-]+@sha256:[0-9a-f]{64}", e["image"]), "pin the image by digest"
+          assert re.fullmatch(r"[\w.-]+", e["id"])
+          print(f"env_id={e['id']}\nimage={e['image']}")
+          PY
+      - name: The author
+        id: who
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.merge_group.head_ref }}
+        run: |
+          if [ -n "$PR_NUMBER" ]; then
+            echo "author=$PR_AUTHOR" >> "$GITHUB_OUTPUT"
+            echo "pr=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          else
+            n=$(printf '%s' "$HEAD_REF" | sed -nE 's#^.*/pr-([0-9]+)-[0-9a-f]+$#\1#p')
+            [ -n "$n" ] || { echo "cannot read the pull request of $HEAD_REF"; exit 1; }
+            author=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n" --jq .user.login)
+            echo "author=$author" >> "$GITHUB_OUTPUT"
+            echo "pr=$n" >> "$GITHUB_OUTPUT"
+          fi
+      - name: The author's permission on the repository
+        id: perm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTHOR: ${{ steps.who.outputs.author }}
+        run: |
+          if out=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR/permission" --jq .permission 2>err.txt); then
+            echo "permission=$out" >> "$GITHUB_OUTPUT"
+          elif grep -q "HTTP 404" err.txt; then
+            echo "permission=none" >> "$GITHUB_OUTPUT"
+          else
+            cat err.txt; exit 1
+          fi
+      - name: Fetch the changed files (as data)
+        working-directory: base
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: |
+          python3 -m ci.learning.cli fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
+            --head "$HEAD_SHA" --out ../fetched
+      - name: Route
+        id: route
+        working-directory: base
+        env:
+          AUTHOR: ${{ steps.who.outputs.author }}
+          PERMISSION: ${{ steps.perm.outputs.permission }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ steps.who.outputs.pr }}
+        run: |
+          python3 -m ci.learning.cli route --base . --fetched ../fetched --author "$AUTHOR" \
+            --permission "$PERMISSION" --draft false --event "$EVENT" --pr "$PR" \
+            --records ../records --out ../fetched/route.json
+          python3 -c 'import json; print("route=" + json.load(open("../fetched/route.json"))["route"])' >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: learning-fetched
+          path: fetched
+          retention-days: 14
+
+  certify:
+    needs: route
+    if: needs.route.outputs.route == 'generator'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: learning-fetched
+          path: fetched
+      - name: Certify in the sandbox
+        env:
+          IMAGE: ${{ needs.route.outputs.image }}
+          ENV_ID: ${{ needs.route.outputs.env_id }}
+        # The certifier is the base branch's ci/learning, run with the image's Python; Lean runs
+        # as uid 1000 apart from it, without network, token or secret.
+        run: |
+          mkdir -p out fetched/files
+          docker pull "$IMAGE"
+          set +e
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
+            --memory 14g --cpus 4 --pids-limit 4096 \
+            --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
+            -v "$PWD/base:/base:ro" -v "$PWD/fetched/files:/new:ro" \
+            -v "$PWD/fetched/route.json:/route.json:ro" \
+            -w /base --entrypoint python3 "$IMAGE" -m ci.learning.cli certify \
+              --route /route.json --files /new --core /core --workdir /work/ws --env "$ENV_ID" \
+              --smoke-seeds 2 --timeout 1800 --out - > out/certify.json 2> out/log.txt
+          echo $? > out/exit
+          tail -c 20000 out/log.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: learning-certify
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 90
+
+  evaluate:
+    needs: route
+    if: needs.route.outputs.route == 'notebook'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    # Maintainers protect this Environment (required reviewers, `main` only) and put the
+    # authorized provider configuration in it. Without it, or with `evaluator.enabled = false`
+    # in meta/learning.json, the evaluator answers `awaiting_evaluator` and runs nothing.
+    environment: learning-evaluator
+    permissions:
+      contents: write   # appends to `learning-records` only
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the learning records
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: learning-records
+          path: learning-records
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: learning-fetched
+          path: fetched
+      - name: Evaluate the candidate against the active notebook
+        working-directory: base
+        run: |
+          python3 -m ci.learning.cli evaluate --route ../fetched/route.json --fetched ../fetched \
+            --base . --records ../learning-records --publish --out ../eval.json
+      - name: Publish the records
+        working-directory: learning-records
+        run: |
+          git config user.name "sigaba-learning"
+          git config user.email "learning@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || { git commit -q -m "Evaluation records" && git push -q; }
+
+  decide:
+    needs: [route, certify, evaluate]
+    if: always() && needs.route.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the learning records
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: learning-records
+          path: learning-records
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: learning-fetched
+          path: fetched
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: learning-certify
+          path: out
+      - name: Decide
+        working-directory: base
+        env:
+          ENV_ID: ${{ needs.route.outputs.env_id }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          mkdir -p ../fetched ../out ../learning-records
+          [ -f ../fetched/route.json ] || echo '{"route": "rejected", "ok": false, "accepted": false, "problems": ["the route did not finish"]}' > ../fetched/route.json
+          args=(--route ../fetched/route.json --base . --env "$ENV_ID" --records ../learning-records --base-sha "$BASE_SHA")
+          [ -f ../out/certify.json ] && args+=(--certify ../out/certify.json --exit-code ../out/exit)
+          python3 -m ci.learning.cli decide "${args[@]}" --out ../decision.json || true
+          python3 - <<'PY'
+          import json
+          d = json.load(open("../decision.json"))
+          open("../comment.md", "w").write(d.get("comment", "")[:60000])
+          open("../labels.txt", "w").write("".join(f"{l}\n" for l in d.get("labels", [])))
+          open("../flags.txt", "w").write(f"{d['conclusion']} {int(bool(d.get('quiet')))}\n")
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: learning-decision
+          path: |
+            decision.json
+            comment.md
+            labels.txt
+            flags.txt
+          retention-days: 14
+      - name: Conclusion
+        run: |
+          read -r conclusion quiet < flags.txt
+          [ "$conclusion" = success ]
+
+  report:
+    needs: [route, decide]
+    if: >-
+      always() && github.event_name == 'pull_request_target' &&
+      needs.route.result != 'skipped' && needs.route.outputs.pr != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: learning-decision
+          path: .
+      - name: Report on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ needs.route.outputs.pr }}
+        run: |
+          read -r conclusion quiet < flags.txt
+          [ "$quiet" = 1 ] || gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file comment.md
+          current=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]')
+          (cd base && python3 -m ci.learning.cli labels --decision ../decision.json --current "$current") > label-ops.txt
+          while read -r op label; do
+            if [ "$op" = add ]; then
+              gh label create "$label" -R "$GITHUB_REPOSITORY" --force >/dev/null
+              gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --add-label "$label"
+            elif [ "$op" = remove ]; then
+              gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --remove-label "$label"
+            fi
+          done < label-ops.txt
+
+  # On `main`: what was merged becomes a record. A generator version is certified again in the
+  # sandbox at the merge commit (its record is about exactly what is on main); a changed notebook
+  # is activated only against a passing confirmation for its exact bytes and the notebook it
+  # replaced (compare-and-swap), or recorded as an authorized rollback/bootstrap. Then the report.
+  post-merge:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write   # learning-records and learning-report only
+      pull-requests: read
+    steps:
+      - name: Check out main at this commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          path: base
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Check out the learning records
+        id: lr
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        continue-on-error: true
+        with:
+          ref: learning-records
+          path: learning-records
+      - name: What changed
+        id: changed
+        if: github.event_name == 'push'
+        working-directory: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --quiet --depth=1 origin "${{ github.event.before }}"
+          git diff --name-only "${{ github.event.before }}" "$GITHUB_SHA" > ../changed.txt
+          grep -q '^generators/' ../changed.txt && echo "generator=true" >> "$GITHUB_OUTPUT" || true
+          grep -q '^notebooks/' ../changed.txt && echo "notebook=true" >> "$GITHUB_OUTPUT" || true
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          if [ -n "$pr" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '"head=\(.head.sha)\nactor=\(.merged_by.login)"' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Read the default environment
+        id: env
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re
+          e = next(e for e in json.load(open("base/env/environments.json"))["environments"]
+                   if e["state"] == "default")
+          assert re.fullmatch(r"[\w./:-]+@sha256:[0-9a-f]{64}", e["image"])
+          print(f"env_id={e['id']}\nimage={e['image']}")
+          PY
+      - name: Certify the merged generator in the sandbox
+        if: steps.changed.outputs.generator == 'true' && steps.lr.outcome == 'success'
+        env:
+          IMAGE: ${{ steps.env.outputs.image }}
+          ENV_ID: ${{ steps.env.outputs.env_id }}
+          BEFORE: ${{ github.event.before }}
+          PR: ${{ steps.changed.outputs.pr }}
+        run: |
+          mkdir -p merged/files out
+          # The merged version's files, as the certifier reads them from a pull request, routed
+          # against main before the merge (the version must be new there). The pull request was
+          # admitted and merged under the repository's rules, so the route is run as a writer.
+          git -C base worktree add --quiet --detach ../before "$BEFORE"
+          (cd base && python3 -m ci.learning.cli fetch-local --base "$BEFORE" --head "$GITHUB_SHA" --out ../merged)
+          (cd base && python3 -m ci.learning.cli route --base ../before --fetched ../merged --author "${{ steps.changed.outputs.actor }}" \
+             --permission write --draft false --event push --pr "${PR:-0}" --out ../merged/route.json)
+          docker pull "$IMAGE"
+          set +e
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
+            --memory 14g --cpus 4 --pids-limit 4096 \
+            --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
+            -v "$PWD/base:/base:ro" -v "$PWD/merged/files:/new:ro" -v "$PWD/merged/route.json:/route.json:ro" \
+            -w /base --entrypoint python3 "$IMAGE" -m ci.learning.cli certify \
+              --route /route.json --files /new --core /core --workdir /work/ws --env "$ENV_ID" \
+              --smoke-seeds 2 --timeout 1800 --out - > out/certify.json 2> out/log.txt
+          echo $? > out/exit
+          set -e
+          cd base
+          python3 -m ci.learning.cli decide --route ../merged/route.json --base . --env "$ENV_ID" \
+            --certify ../out/certify.json --exit-code ../out/exit --records ../learning-records \
+            --out ../decision.json || true
+          python3 -m ci.learning.cli publish --records ../learning-records ../decision.json
+      - name: Activate the merged notebook
+        if: steps.changed.outputs.notebook == 'true' && steps.lr.outcome == 'success'
+        working-directory: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.changed.outputs.pr }}
+          HEAD: ${{ steps.changed.outputs.head }}
+          ACTOR: ${{ steps.changed.outputs.actor }}
+        run: |
+          perm=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq .permission || echo none)
+          python3 -m ci.learning.cli activate --role auto --base . --records ../learning-records \
+            --merge-commit "$GITHUB_SHA" --pr "${PR:-0}" --head "${HEAD:-$GITHUB_SHA}" --actor "$ACTOR" \
+            --permission "$perm" --publish --out ../activation.json
+      - name: Calibrate or assess (manual, maintainers)
+        if: github.event_name == 'workflow_dispatch' && inputs.action != 'report' && steps.lr.outcome == 'success'
+        working-directory: base
+        env:
+          ACTION: ${{ inputs.action }}
+          ROLE: ${{ inputs.role }}
+          EPOCH: ${{ inputs.epoch }}
+        run: |
+          case "$ACTION" in
+            calibrate) python3 -m ci.learning.cli calibrate --role "$ROLE" --base . --records ../learning-records --publish ;;
+            anchor) python3 -m ci.learning.cli anchor --role "$ROLE" --epoch "$EPOCH" --base . --records ../learning-records --publish ;;
+            *) echo "unknown action $ACTION"; exit 2 ;;
+          esac
+      - name: Publish the records
+        if: steps.lr.outcome == 'success'
+        working-directory: learning-records
+        run: |
+          git config user.name "sigaba-learning"
+          git config user.email "learning@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || { git commit -q -m "Learning records for ${GITHUB_SHA}" && git push -q; }
+      - name: Build the report
+        working-directory: base
+        run: |
+          mkdir -p ../learning-records
+          python3 -m ci.learning.cli report --records ../learning-records --out ../report \
+            --policy meta/learning.json
+      - name: Publish the report to learning-report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd report
+          git init -q -b learning-report
+          git config user.name "sigaba-learning"
+          git config user.email "learning@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Learning report for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:learning-report

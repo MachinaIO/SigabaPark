@@ -1,0 +1,430 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "A frozen evaluation contract",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "record_id",
+  "created_at",
+  "core_revision",
+  "dag_snapshot",
+  "environment_id",
+  "contract_id",
+  "stage",
+  "role",
+  "scope",
+  "provisional",
+  "arms",
+  "mixture",
+  "excluded_families",
+  "trials_planned",
+  "profile",
+  "policy_id",
+  "policy_sha256",
+  "epoch_id",
+  "calibration_snapshot",
+  "rng",
+  "seed_commitment_scheme",
+  "verifier",
+  "score_rule",
+  "statistics"
+ ],
+ "properties": {
+  "schema": {
+   "const": "sigaba.learning.contract.v1"
+  },
+  "record_id": {
+   "$ref": "#/$defs/sha256"
+  },
+  "created_at": {
+   "$ref": "#/$defs/time"
+  },
+  "core_revision": {
+   "$ref": "#/$defs/git_sha"
+  },
+  "dag_snapshot": {
+   "$ref": "#/$defs/git_sha"
+  },
+  "environment_id": {
+   "$ref": "#/$defs/env_id"
+  },
+  "contract_id": {
+   "$ref": "#/$defs/sha256"
+  },
+  "stage": {
+   "enum": [
+    "calibration",
+    "screen",
+    "confirm",
+    "anchor",
+    "transfer"
+   ]
+  },
+  "role": {
+   "$ref": "#/$defs/role"
+  },
+  "scope": {
+   "enum": [
+    "fresh_seed",
+    "family_disjoint",
+    "future_family"
+   ]
+  },
+  "provisional": {
+   "type": "boolean"
+  },
+  "arms": {
+   "type": "array",
+   "minItems": 1,
+   "maxItems": 2,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "arm",
+     "notebook_sha256",
+     "notebook_bytes",
+     "notebook_tokens",
+     "pr",
+     "head"
+    ],
+    "properties": {
+     "arm": {
+      "enum": [
+       "incumbent",
+       "candidate",
+       "reference",
+       "anchor_baseline"
+      ]
+     },
+     "notebook_sha256": {
+      "$ref": "#/$defs/sha256"
+     },
+     "notebook_bytes": {
+      "$ref": "#/$defs/count"
+     },
+     "notebook_tokens": {
+      "$ref": "#/$defs/count_or_null"
+     },
+     "pr": {
+      "$ref": "#/$defs/pr"
+     },
+     "head": {
+      "$ref": "#/$defs/git_sha_or_null"
+     }
+    }
+   }
+  },
+  "mixture": {
+   "type": "array",
+   "minItems": 1,
+   "maxItems": 4096,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "family_id",
+     "generator_id",
+     "version",
+     "level",
+     "weight"
+    ],
+    "properties": {
+     "family_id": {
+      "$ref": "#/$defs/ident"
+     },
+     "generator_id": {
+      "$ref": "#/$defs/ident"
+     },
+     "version": {
+      "$ref": "#/$defs/version"
+     },
+     "level": {
+      "$ref": "#/$defs/level"
+     },
+     "weight": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000000000
+      }
+     }
+    }
+   }
+  },
+  "excluded_families": {
+   "type": "array",
+   "maxItems": 256,
+   "uniqueItems": true,
+   "items": {
+    "$ref": "#/$defs/ident"
+   }
+  },
+  "trials_planned": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 1000000
+  },
+  "profile": {
+   "$ref": "#/$defs/profile"
+  },
+  "policy_id": {
+   "type": "string",
+   "pattern": "policy-[0-9]{4,8}"
+  },
+  "policy_sha256": {
+   "$ref": "#/$defs/sha256"
+  },
+  "epoch_id": {
+   "type": "string",
+   "pattern": "epoch-[0-9]{4,8}"
+  },
+  "calibration_snapshot": {
+   "type": "array",
+   "maxItems": 100000,
+   "items": {
+    "$ref": "#/$defs/sha256"
+   }
+  },
+  "rng": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "source",
+    "algorithm"
+   ],
+   "properties": {
+    "source": {
+     "const": "os.urandom"
+    },
+    "algorithm": {
+     "const": "sigaba-learning-sample-v1"
+    }
+   }
+  },
+  "seed_commitment_scheme": {
+   "const": "sha256(domain || salt || seed)"
+  },
+  "verifier": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "core_revision",
+    "environment_id"
+   ],
+   "properties": {
+    "core_revision": {
+     "$ref": "#/$defs/git_sha"
+    },
+    "environment_id": {
+     "$ref": "#/$defs/env_id"
+    }
+   }
+  },
+  "score_rule": {
+   "const": "binary-v1"
+  },
+  "statistics": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "method",
+    "alpha",
+    "delta_ni"
+   ],
+   "properties": {
+    "method": {
+     "const": "cp-union-v1"
+    },
+    "alpha": {
+     "$ref": "#/$defs/prob"
+    },
+    "delta_ni": {
+     "$ref": "#/$defs/prob"
+    }
+   }
+  }
+ },
+ "$defs": {
+  "count": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 1000000000
+  },
+  "count_or_null": {
+   "anyOf": [
+    {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 1000000000000
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "env_id": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+  },
+  "git_sha": {
+   "type": "string",
+   "pattern": "[0-9a-f]{40}"
+  },
+  "git_sha_or_null": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "[0-9a-f]{40}"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "ident": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9-]{0,62}"
+  },
+  "level": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 63
+  },
+  "pr": {
+   "anyOf": [
+    {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100000000
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "prob": {
+   "anyOf": [
+    {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    {
+     "type": "string",
+     "pattern": "(0(\\.[0-9]{1,12})?|1(\\.0{1,12})?|0?\\.[0-9]{1,12})"
+    }
+   ]
+  },
+  "profile": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "profile_id",
+    "role",
+    "provider",
+    "model",
+    "settings",
+    "budget"
+   ],
+   "properties": {
+    "profile_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "role": {
+     "$ref": "#/$defs/role"
+    },
+    "provider": {
+     "type": "string",
+     "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+    },
+    "model": {
+     "type": "string",
+     "pattern": "[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}"
+    },
+    "settings": {
+     "type": "object",
+     "maxProperties": 32,
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 256
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "budget": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "max_model_calls",
+      "max_input_tokens",
+      "max_output_tokens",
+      "wall_seconds",
+      "lean_seconds"
+     ],
+     "properties": {
+      "max_model_calls": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "max_input_tokens": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "max_output_tokens": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "wall_seconds": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "lean_seconds": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      }
+     }
+    }
+   }
+  },
+  "role": {
+   "enum": [
+    "design",
+    "cryptanalysis"
+   ]
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "sha256:[0-9a-f]{64}"
+  },
+  "time": {
+   "type": "string",
+   "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z"
+  },
+  "version": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 9999
+  }
+ }
+}
