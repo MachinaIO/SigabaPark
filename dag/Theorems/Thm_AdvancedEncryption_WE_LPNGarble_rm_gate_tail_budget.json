@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.LPNGarble.rm_gate_tail_budget","title":"Finite block error budget for 4096 garbled gates","statement":"At any rational error rate at most one sixth, the union of the indicated binary Bhattacharyya bounds for both decryptions at all gates is at most two to the minus 180."}

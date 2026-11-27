@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.LPNGarble.affine_oracle_row","title":"Affine transformation for one fresh LIN RK-KDM oracle response","statement":"A shifted public matrix, a related key and a linearly key-dependent codeword cancel in the simulated response over any commutative ring. In characteristic two matrix subtraction equals addition."}
