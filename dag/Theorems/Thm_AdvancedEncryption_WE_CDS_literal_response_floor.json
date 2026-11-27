@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.CDS.literal_response_floor","title":"One literal positive-noise LWE LOT response exceeds the strict output budget","statement":"The Figure 6 compression and modulus inequalities at security parameter 128 imply that the fixed-width residue fields in Figure 7 for one bit exceed 2^32 bits."}

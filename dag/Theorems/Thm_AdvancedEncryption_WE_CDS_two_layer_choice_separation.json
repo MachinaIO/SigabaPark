@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.CDS.two_layer_choice_separation","title":"More distinct databases than published headers force a bit-choice conflict","statement":"For an injective family of bit databases assigned to fewer headers, two databases share a header and differ either in a root bit or in a database bit under the same root."}
