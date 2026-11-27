@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SealedRow.output_cost",
+  "proof_type": "prove",
+  "explanation": "A nonempty decoded output must come from a valid singleton frame. Recover a supported raw output configuration and apply the machine output growth lemma and the exact singleton frame length."
+}

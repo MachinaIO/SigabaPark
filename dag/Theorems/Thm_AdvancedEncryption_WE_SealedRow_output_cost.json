@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.output_cost",
+  "title": "Canonical framing charges two steps per ciphertext bit plus one",
+  "statement": "Every supported nonempty ciphertext at the registered WE encryption entry point costs at least twice its length plus one in the encryption clock."
+}

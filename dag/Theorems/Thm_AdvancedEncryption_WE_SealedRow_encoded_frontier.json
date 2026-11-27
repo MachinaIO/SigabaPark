@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SealedRow.encoded_frontier",
+  "title": "Exact split frontier for dense and pairwise row seeds",
+  "statement": "At the stated scalar BGG serialization floors, characterize when some split fits the table and private seed payload at cost W output bits per seed bit. At W=1065024 the dense subtotal has its global minimum at eight right bits."
+}
