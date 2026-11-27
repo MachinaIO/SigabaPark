@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BlindJoin.trace_kernel_equation",
+  "proof_type": "prove",
+  "explanation": "The trace adjoint of the framed error tests the missing-degree polynomial."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BlindJoin.affine_double_count",
+  "proof_type": "prove",
+  "explanation": "An affine-fiber upper bound transfers through a dual incidence table."
+}

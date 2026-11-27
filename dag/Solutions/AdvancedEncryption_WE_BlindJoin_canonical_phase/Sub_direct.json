@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BlindJoin.canonical_phase",
+  "proof_type": "prove",
+  "explanation": "Every accepted opening has an explicitly computable affine phase after secret-error correction."
+}
