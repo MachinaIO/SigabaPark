@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceEmitter.load_registered","proof_type":"prove","explanation":"Compose three frame scans, an exact rewind of the spool and an independent rewind of the marked history tape. The equality specifies every tape, every head, state and output."}

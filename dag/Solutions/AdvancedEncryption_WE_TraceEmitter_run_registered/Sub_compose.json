@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceEmitter.run_registered","proof_type":"prove","explanation":"Compose the exact loader and gate replay bounds, prove by induction that every gate appends the same bit as estep and emits its frame payload, halt with the terminator and bound the total before applying run_ofTM."}
