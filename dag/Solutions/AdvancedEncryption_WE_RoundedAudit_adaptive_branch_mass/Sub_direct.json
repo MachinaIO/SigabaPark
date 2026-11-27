@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.RoundedAudit.adaptive_branch_mass","proof_type":"prove","explanation":"Induct on the remaining depth and factor the previous power out of the finite sum."}

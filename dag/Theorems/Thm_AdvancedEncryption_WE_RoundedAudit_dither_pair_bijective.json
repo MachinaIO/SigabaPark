@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.RoundedAudit.dither_pair_bijective","title":"A public dither and a nonzero projection pivot give a uniform pair","statement":"For different pivot coefficients in any field, the two pre-rounded residues are a bijective affine function of the pivot and the dither after all other projection coefficients are fixed."}
