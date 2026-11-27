@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CBDWirePad.window_price",
+  "proof_type": "prove",
+  "explanation": "Every positive full-dictionary width in the 512-coefficient fixed-pass implementation costs at least 4923756544."
+}

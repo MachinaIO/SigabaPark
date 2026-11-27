@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CBDWirePad.transport",
+  "proof_type": "prove",
+  "explanation": "The packed challenge is the pushforward of the actual framed registry sample for every pair law."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CBDWirePad.coefficient",
+  "proof_type": "prove",
+  "explanation": "Two fair bits have exactly the registered CBD(1) coefficient law."
+}
