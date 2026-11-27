@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OrderedIdeal.full_fold",
+  "proof_type": "prove",
+  "explanation": "Default lookup agrees with the true constant, NAND is symmetric, and each one-gate state equality lifts through the fold by induction."
+}

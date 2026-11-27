@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.OrderedIdeal.issued_valid",
+  "title": "Every issued ordered row preserves the final registered wire values",
+  "statement": "Every issued ordered row preserves the final registered wire values."
+}

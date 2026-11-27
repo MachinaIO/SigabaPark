@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OrderedIdeal.issued_valid",
+  "proof_type": "prove",
+  "explanation": "Every issued ordered row preserves the final registered wire values. Apply the proved dependency theorems and the registered estep semantics."
+}
