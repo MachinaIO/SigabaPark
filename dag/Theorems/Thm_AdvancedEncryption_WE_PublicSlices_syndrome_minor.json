@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.PublicSlices.syndrome_minor","title":"Common syndrome values give an identity minor in every cut","statement":"Whenever a set of distinct syndromes has representatives on both sides of a split, the GF(2) rank of their equality predicate is at least the number of those syndromes."}

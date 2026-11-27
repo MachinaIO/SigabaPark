@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.PublicSlices.syndrome_minor","proof_type":"prove","explanation":"Pick strings realizing each syndrome; their comparison minor is identity and submatrix rank is monotone."}

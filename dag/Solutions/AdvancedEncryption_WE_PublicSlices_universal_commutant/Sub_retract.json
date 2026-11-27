@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.PublicSlices.universal_commutant","proof_type":"prove","explanation":"Take the smallest admissible target for necessity. Fixing the generators forces a commutant element to fix their whole action closure. For sufficiency retract onto that closure."}
