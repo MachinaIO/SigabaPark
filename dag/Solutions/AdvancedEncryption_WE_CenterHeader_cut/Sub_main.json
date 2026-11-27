@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CenterHeader.cut",
+  "proof_type": "prove",
+  "explanation": "An endpoint-changing translation preserves every public edge and is bijective"
+}
