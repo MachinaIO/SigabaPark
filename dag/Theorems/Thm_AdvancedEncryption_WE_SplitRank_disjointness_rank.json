@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SplitRank.disjointness_rank",
+  "title": "Full rank of paired-bit disjointness at a fixed split",
+  "statement": "For every h the GF(2) disjointness matrix on subsets of Fin h is invertible and has rank 2^h. Every finite matrix product containing it as a submatrix has inner dimension at least 2^h."
+}
