@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.BKSStar.fixed_bit_normalization",
+ "title": "A fixed outer bit makes the averaged A.11 transition difference exactly the child guessing bias",
+ "statement": "When both experiments have the same output-one probability at outer bit one, the absolute difference of their averaged guessing probabilities is exactly the fixed-zero child guessing bias and half the fixed-zero ordinary gap."
+}

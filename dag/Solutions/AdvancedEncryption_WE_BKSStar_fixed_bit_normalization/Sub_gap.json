@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.BKSStar.fixed_bit_normalization",
+ "proof_type": "prove",
+ "explanation": "The common conditional probability cancels. Both differences equal half the same signed ordinary output gap before taking absolute values."
+}
