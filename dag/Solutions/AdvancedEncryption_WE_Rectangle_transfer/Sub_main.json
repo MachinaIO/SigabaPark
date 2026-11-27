@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Rectangle.transfer",
+  "proof_type": "prove",
+  "explanation": "Squared-advantage transfer including hybrid count and simulator cost"
+}

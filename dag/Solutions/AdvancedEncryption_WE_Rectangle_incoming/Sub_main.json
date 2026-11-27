@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Rectangle.incoming",
+  "proof_type": "prove",
+  "explanation": "For every fixed seed and incoming record tuple there is exactly one tuple of one-use incoming pads"
+}

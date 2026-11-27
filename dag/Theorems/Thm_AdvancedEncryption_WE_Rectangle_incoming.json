@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Rectangle.incoming",
+  "title": "For every fixed seed and incoming record tuple there is exactly one tuple of one-use incoming pads",
+  "statement": "For every fixed seed and incoming record tuple there is exactly one tuple of one-use incoming pads"
+}
