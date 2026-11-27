@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PublicTail.marker_capacity",
+ "title": "Fixed public exact table reproduction requires enough token bits",
+ "statement": "If one fixed public decoding context and k-bit tokens can reproduce every table of h-bit markers on b-bit inputs, then k is at least h times 2^b."
+}

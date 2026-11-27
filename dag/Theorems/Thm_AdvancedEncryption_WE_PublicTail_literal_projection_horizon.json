@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PublicTail.literal_projection_horizon",
+ "title": "Finite horizon for a separately emitted four-row garbling of all unrolled suffix tests",
+ "statement": "At 4096 NAND gates per cofactor, three per binary OR and two for payload gating, a single literal four-row 129-bit-output garbling fits below 2^32 bits only if at most ten tail bits are eliminated."
+}
