@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BitGC.nand_mixed_unit",
+  "proof_type": "prove",
+  "explanation": "Check the four possible input-mask pairs."
+}
