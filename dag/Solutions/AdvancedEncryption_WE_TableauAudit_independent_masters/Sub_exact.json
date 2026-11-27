@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TableauAudit.independent_masters","proof_type":"prove","explanation":"Every output history has exactly one preimage for arbitrary acyclic shifts of independent group baselines"}
