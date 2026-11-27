@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SymbolicBucket.step","proof_type":"prove","explanation":"Use induction on the bucket fold to interpret a two-NAND conjunction, then distribute unchanged factors and split the Boolean witness."}
