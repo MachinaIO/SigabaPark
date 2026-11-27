@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Broadcast.pinSplit",
+  "proof_type": "prove",
+  "explanation": "A first reset separates all intermediate column pins into input constraints or constant-row constraints"
+}

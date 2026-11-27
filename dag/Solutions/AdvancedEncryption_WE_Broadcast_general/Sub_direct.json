@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Broadcast.general",
+  "proof_type": "prove",
+  "explanation": "A streamed pair of unary maps emits every literal broadcast row exactly"
+}

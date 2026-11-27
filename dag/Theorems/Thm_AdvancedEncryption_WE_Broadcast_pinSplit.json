@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Broadcast.pinSplit",
+  "title": "A first reset separates all intermediate column pins into input constraints or constant-row constraints",
+  "statement": "A first reset separates all intermediate column pins into input constraints or constant-row constraints"
+}
