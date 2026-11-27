@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NoiseHandle.affine_face_gap", "proof_type": "prove", "explanation": "d = (d + c1) + (d + c2) - (d + c1 + c2), then the triangle inequality twice."}

@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.NoiseHandle.floor_sub_carry", "proof_type": "prove", "explanation": "Compare the defining inequalities floor(x) <= x < floor(x) + 1 for a, b and a - b, cast to the reals, and use Int.lt_add_one_iff twice."}
