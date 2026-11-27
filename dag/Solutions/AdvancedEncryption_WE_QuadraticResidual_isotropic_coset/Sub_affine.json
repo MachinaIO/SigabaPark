@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.QuadraticResidual.isotropic_coset","proof_type":"prove","explanation":"Subtract the constant Q(0), add the directional polar term B(t,w), and use vanishing on W times W to prove additivity. This supports exact complementary branching even with no common radical."}
