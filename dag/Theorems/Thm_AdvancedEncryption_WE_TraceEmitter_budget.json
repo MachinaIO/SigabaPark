@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TraceEmitter.budget","title":"Exact clock and canonical table cost of the three-tape emitter","statement":"The explicit deterministic machine has 26 states, the stated fixed clock, a canonical 88452-bit table, and component cost below 2^32. Successful completion is a separate semantic property."}

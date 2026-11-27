@@ -1,0 +1,1 @@
+{"name":"WE_TraceEmitterStep","title":"Exact small-step rule for the trace emitter","description":"Single physical transitions of the three-tape machine on append-only configurations, including origin and output tracks.","tags":["machine","witness-encryption"]}

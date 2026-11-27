@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceEmitter.gate_replay","proof_type":"prove","explanation":"Compose the two unary address walks and their marker rewinds, then scan the history, append the computed bit, emit both framing symbols and rewind."}
