@@ -1,0 +1,1 @@
+{"name":"WE_UnaryTraceBlocks","title":"Exact tape configurations and read-only blocks of the NAND verifier","description":"A block specification records every head position, both tapes, the successor state, input consumed, output and exact ticks on an arbitrary suffix.","tags":["machine","verification"]}

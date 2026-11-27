@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.UnaryTraceWalk.run_spec",
+  "proof_type": "prove",
+  "explanation": "Establish the 8452-step setup, compose exact per-gate lookup and commitment with the physical rewind or final halt, bound the whole fold, and identify its result with the registered full trace and satisfaction bit. The two imported block theorems have companion proofs."
+}

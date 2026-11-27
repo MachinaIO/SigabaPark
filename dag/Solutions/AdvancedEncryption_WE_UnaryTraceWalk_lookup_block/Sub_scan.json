@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.UnaryTraceWalk.lookup_block", "proof_type": "prove", "explanation": "Compose single-symbol transitions for the two framed unary operands with exact left-sentinel rewinds."}

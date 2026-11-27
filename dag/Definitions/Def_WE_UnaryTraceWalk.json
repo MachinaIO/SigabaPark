@@ -1,0 +1,10 @@
+{
+  "name": "WE_UnaryTraceWalk",
+  "title": "Two-tape framed unary NAND trace walk",
+  "description": "Explicit clocked deterministic Machine for a raw assignment and a claimed trace followed by encGates. The two heads follow each unary address in lockstep.",
+  "tags": [
+    "machine",
+    "verification",
+    "witness-encryption"
+  ]
+}

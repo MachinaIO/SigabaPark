@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.UnaryTraceWalk.lookup_block", "title": "Two unary wire lookups in exact machine ticks", "statement": "Reading one registered gate frame and rewinding both heads before commitment takes exactly 5a + 3b + 5 TM ticks and computes NAND with the true default."}
