@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TagBank.tag_degree",
+  "proof_type": "prove",
+  "explanation": "The missing degree detects precisely opposite tags of a single variable."
+}
