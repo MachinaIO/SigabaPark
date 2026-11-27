@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.LockHeader.yes_fixture_simulator_floor",
+ "title": "A public satisfying fixture bounds the error of a common payload simulator",
+ "statement": "For an observer with acceptance probability at most err on real payload zero and at least 1\u2212err on real payload one, at least one of its acceptance gaps from any common simulator is at least 1/2\u2212err."
+}
