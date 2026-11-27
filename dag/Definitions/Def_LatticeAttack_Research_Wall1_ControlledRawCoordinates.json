@@ -1,1 +1,0 @@
-{"name": "LatticeAttack_Research_Wall1_ControlledRawCoordinates", "title": "Read a short vector of the initial retained state back as an integer witness", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.ControlledRawCoordinates on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

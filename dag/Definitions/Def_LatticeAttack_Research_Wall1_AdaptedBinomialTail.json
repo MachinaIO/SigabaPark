@@ -1,1 +1,0 @@
-{"name": "LatticeAttack_Research_Wall1_AdaptedBinomialTail", "title": "Finite-law binomial domination by conditioning on the count before each draw.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.AdaptedBinomialTail on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}
