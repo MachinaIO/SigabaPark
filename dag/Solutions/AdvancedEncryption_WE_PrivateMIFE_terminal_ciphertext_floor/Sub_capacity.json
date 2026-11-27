@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.terminal_ciphertext_floor",
+ "proof_type": "prove",
+ "explanation": "Every table width and the prefix width are at most 31, forcing d at least three; exponentiation gives the threshold."
+}

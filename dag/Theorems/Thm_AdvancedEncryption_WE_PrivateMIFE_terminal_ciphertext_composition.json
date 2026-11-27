@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.terminal_ciphertext_composition",
+ "title": "Serialization grows by composition along terminal ciphertext overrides",
+ "statement": "A family of terminal-width lower bounds that expands its base message by w and composes with itself at each successor depth expands s by at least w^(2^depth)."
+}

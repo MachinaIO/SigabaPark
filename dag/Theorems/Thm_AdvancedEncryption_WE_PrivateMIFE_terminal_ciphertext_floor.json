@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.terminal_ciphertext_floor",
+ "title": "Strict 32-bit coverage forces at least three terminal wrapping levels",
+ "statement": "For 128 witness bits covered by a prefix and d+1 positive or zero-width suffix tables each smaller than 2^32, the number 16^(2^d) reaches 2^32."
+}
