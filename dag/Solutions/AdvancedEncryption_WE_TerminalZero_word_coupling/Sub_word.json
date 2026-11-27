@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.TerminalZero.word_coupling", "proof_type": "prove", "explanation": "An involutive word translation couples the entire real and reconstructed pairs; Boolean case analysis proves the decoder."}
