@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.AffineAgg.masked_joint_frame","proof_type":"prove","explanation":"Translate the entire pad array by the change in the first private contribution, and use agreement of every sum for the second contribution."}

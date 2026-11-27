@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.AffineAgg.point_orientation","proof_type":"prove","explanation":"Expand the three literal slope bits (1,0,0), masks and baseline, then separate the orientation."}
