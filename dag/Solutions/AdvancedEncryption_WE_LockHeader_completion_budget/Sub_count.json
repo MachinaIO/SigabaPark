@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.LockHeader.completion_budget",
+ "proof_type": "prove",
+ "explanation": "Under s at least 32, substitute the lower bound 2^32 for the number of completions and the upper bound 2^32\u22121 for the number tested. The two numerical inequalities contradict each other."
+}

@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.LockHeader.completion_budget",
+ "title": "Maximum number of missing lock bits under the serial completion budget",
+ "statement": "If the serial number of completion tests is below 2^32 and their number satisfies the necessary inequality for payload error at most 2^-128, the number of missing uniform bits is at most 31."
+}
