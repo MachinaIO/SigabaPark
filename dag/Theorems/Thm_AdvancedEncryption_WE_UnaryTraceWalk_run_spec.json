@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.UnaryTraceWalk.run_spec",
+  "title": "Run spec",
+  "statement": "On every typed circuit, assignment and proposed trace the clocked machine returns the singleton truth value of trace equality and circuit satisfaction."
+}

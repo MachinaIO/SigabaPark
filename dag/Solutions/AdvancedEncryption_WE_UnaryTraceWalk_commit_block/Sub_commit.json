@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.UnaryTraceWalk.commit_block", "proof_type": "prove", "explanation": "Induction on the physical scan distance, followed by the transition at the first blank history cell."}

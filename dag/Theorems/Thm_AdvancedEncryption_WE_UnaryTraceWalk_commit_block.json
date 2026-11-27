@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.UnaryTraceWalk.commit_block", "title": "Verified history update or rejection at the trace frontier", "statement": "In exactly history length plus one ticks the gate commitment compares the certificate at the frontier and either appends the verified bit or halts with false."}

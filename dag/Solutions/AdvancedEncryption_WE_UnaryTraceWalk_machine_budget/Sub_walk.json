@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.UnaryTraceWalk.machine_budget",
+  "proof_type": "prove",
+  "explanation": "The explicit deterministic two-tape machine has clock 173064452 and canonical description length 5728050."
+}
