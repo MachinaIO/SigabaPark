@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.OwnedGarbling.one_cell_complement",
+ "title": "One-cell unary row reduction preserves the full opening law at physical row one",
+ "statement": "With row one opened, the alternate label with opposite color and a fresh suffix is uniformly distributed just like the programmed row-zero pad. The transmitted masked cell can be any deterministic function of the opened label."
+}

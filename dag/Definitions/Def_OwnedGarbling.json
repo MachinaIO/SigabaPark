@@ -1,0 +1,5 @@
+{
+ "name": "OwnedGarbling",
+ "title": "Local unary wire descriptors and a public topological compiler",
+ "description": "Null, aliased and independent source identifiers determine the public gate layout. Truth maps are private to the garbler."
+}

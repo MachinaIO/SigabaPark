@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.OwnedGarbling.whole_graph",
+ "proof_type": "prove",
+ "explanation": "Projection of the full compiler state to public base-wire identifiers commutes with any list of topologically processed gate updates, independently of all local truth maps."
+}
