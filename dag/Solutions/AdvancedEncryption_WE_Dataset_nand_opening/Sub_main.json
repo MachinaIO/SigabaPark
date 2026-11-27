@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Dataset.nand_opening", "proof_type": "prove", "explanation": "Use the parent equations on the two operands and check the four Boolean cases by additive cancellation."}

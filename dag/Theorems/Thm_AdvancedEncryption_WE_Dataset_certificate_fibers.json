@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Dataset.certificate_fibers",
+  "title": "Publicly derived certificates and exact terminal recovery",
+  "statement": "On a fixed statement, an exact decoder of a bit from a view, accepting assignment and publicly generated certificate exists precisely when the bit is constant on view fibers whenever an accepting assignment exists."
+}

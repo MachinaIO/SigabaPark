@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.Dataset.selector_cost_row", "proof_type": "prove", "explanation": "Substitute the two canonical table sizes, evaluate the fixed integer products and use the encryption write bound."}

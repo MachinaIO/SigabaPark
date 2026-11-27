@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Dataset.shared_openings",
+  "proof_type": "prove",
+  "explanation": "Subtract the two equations at the chosen gadget input."
+}

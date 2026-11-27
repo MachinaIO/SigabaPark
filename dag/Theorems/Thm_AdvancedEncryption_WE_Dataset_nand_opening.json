@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Dataset.nand_opening", "title": "NAND on rectangular bit openings", "statement": "For two bit openings under a shared additive map, signed gadget decomposition gives the NAND opening, pointwise on every operand."}

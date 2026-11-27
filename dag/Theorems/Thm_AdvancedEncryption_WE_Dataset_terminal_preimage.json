@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Dataset.terminal_preimage",
+  "title": "Terminal preimages for the two evaluated bits",
+  "statement": "At value one a gadget decomposition gives an explicit block preimage. At value zero every block preimage folds into a preimage under the left matrix."
+}

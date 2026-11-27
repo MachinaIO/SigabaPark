@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Dataset.cross_header_pad",
+  "title": "Correlated dual samples on opposite public inputs",
+  "statement": "Two noisy dual samples at opposite choices of one selector reveal the gadget mask with the difference of their errors."
+}

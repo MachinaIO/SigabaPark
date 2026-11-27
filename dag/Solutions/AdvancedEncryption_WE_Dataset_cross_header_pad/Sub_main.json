@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Dataset.cross_header_pad",
+  "proof_type": "prove",
+  "explanation": "Cancel the common term in the additive group."
+}
