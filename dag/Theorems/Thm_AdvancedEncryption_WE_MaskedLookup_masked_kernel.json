@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.MaskedLookup.masked_kernel",
+ "title": "Masked public constraints preserve an arbitrary joint ideal-view test",
+ "statement": "For uniformly chosen finite Boolean masks and any real test kernel depending only on the oriented public address vector, its summed acceptance is independent of the fixed hidden parameter vector."
+}

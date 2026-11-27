@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.MaskedLookup.masked_kernel",
+ "proof_type": "prove",
+ "explanation": "For uniformly chosen finite Boolean masks and any real test kernel depending only on the oriented public address vector, its summed acceptance is independent of the fixed hidden parameter vector."
+}
