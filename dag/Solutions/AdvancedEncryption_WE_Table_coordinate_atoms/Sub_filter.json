@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.Table.coordinate_atoms","proof_type":"prove","explanation":"Subtract the positive mask for a zero coordinate. Restrict along all coordinates and normalize the surviving value."}
