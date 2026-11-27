@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IndexedIssuer.anchored_chart",
+  "proof_type": "prove",
+  "explanation": "Address functions of the form a(i,j) plus b(j,k) have unique anchored coordinates."
+}
