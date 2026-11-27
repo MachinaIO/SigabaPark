@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.StreamRouter.block_cost",
+  "title": "Exact clock fields, description lengths and determinism of both five-tape block machines",
+  "statement": "The fixed double-round and shared-quarter implementations have clocks 51380 and 51941, description lengths 426065508 and 168276528, and ignore the randomness bit in every transition."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.StreamRouter.hidden_terminal",
+  "proof_type": "prove",
+  "explanation": "Flipping the hidden terminal bit and one dedicated parent pad preserves the row and masked message"
+}

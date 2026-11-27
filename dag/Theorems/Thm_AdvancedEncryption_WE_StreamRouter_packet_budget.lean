@@ -1,0 +1,12 @@
+import Mathlib
+
+theorem AdvancedEncryption.WE.StreamRouter.packet_budget : let encStates := 4531547360
+    let decStates := 91168333601767032832
+    let desc := fun s : Nat => 6*s*3^6*(4+4*6+Nat.size s)
+    2265773616 + 605128904 + desc encStates + desc decStates = 37883177662751338300894520 ∧
+      37883177662751338300894520 < (2:Nat)^85 ∧
+    2265773616 + 637626568 + desc encStates + desc 66422046720 = 19803005251321144 ∧
+      19803005251321144 < (2:Nat)^55 ∧
+    4019263356 + 1134618468312 + desc (2*4019263356+128) +
+      desc (2^40+4224*(4224-1)^2*(2*1134618468312+128)) = 79255709907645631010975352420 ∧
+      79255709907645631010975352420 < (2:Nat)^97 := by sorry
