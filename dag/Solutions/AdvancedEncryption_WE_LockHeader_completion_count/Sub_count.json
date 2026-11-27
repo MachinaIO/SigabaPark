@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.LockHeader.completion_count",
+ "proof_type": "prove",
+ "explanation": "The two success sets intersect only within the queried set. Bound their union by the whole completion space and apply inclusion-exclusion."
+}

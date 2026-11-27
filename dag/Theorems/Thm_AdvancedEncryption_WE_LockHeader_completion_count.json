@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.LockHeader.completion_count",
+ "title": "Payload recovery from equality-only lock completion queries",
+ "statement": "For q tested completions and N equally likely lock completions, the total number of successes across the two possible payload bits is at most N+q if an unqueried lock cannot be correct for both payloads."
+}

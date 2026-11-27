@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.LockHeader.yes_fixture_simulator_floor",
+ "proof_type": "prove",
+ "explanation": "Bound each signed displacement through the simulator by the larger absolute difference, then use both real acceptance bounds."
+}
