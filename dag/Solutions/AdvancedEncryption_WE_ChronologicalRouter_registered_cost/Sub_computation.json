@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ChronologicalRouter.registered_cost",
+  "proof_type": "prove",
+  "explanation": "Reduce the clock fields and registered dense table sizes, then decide the strict finite inequality."
+}
