@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.backsolve_length",
+  "proof_type": "prove",
+  "explanation": "Induct on the source columns while generalizing the initial linear map."
+}
