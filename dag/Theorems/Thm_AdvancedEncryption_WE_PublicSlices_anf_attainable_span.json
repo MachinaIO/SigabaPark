@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.PublicSlices.anf_attainable_span","title":"Attainable values and squarefree polynomial coefficients have the same span","statement":"For a vector-valued squarefree multilinear polynomial, its evaluations on Boolean supports all lie in a subspace if and only if all coefficients do."}

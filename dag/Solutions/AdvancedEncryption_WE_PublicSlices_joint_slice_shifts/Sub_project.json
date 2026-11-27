@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.PublicSlices.joint_slice_shifts","proof_type":"prove","explanation":"Project onto the span of the columns, then postcompose that single projection separately with each basis slice. Necessity evaluates the two shift identities on each pair."}

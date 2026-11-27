@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.PublicSlices.even_no_cases","proof_type":"prove","explanation":"A nonempty intersection is universal, giving a universal endpoint on each side. Pairing those endpoints with arbitrary others forces each to be empty or universal."}
