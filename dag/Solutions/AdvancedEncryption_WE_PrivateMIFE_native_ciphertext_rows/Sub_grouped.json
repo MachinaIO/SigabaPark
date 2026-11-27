@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.native_ciphertext_rows",
+ "proof_type": "prove",
+ "explanation": "At exponent eight the affine lower bound 256e - 1792 touches 2^e. Induction above eight and finite cases below prove the bound for all natural exponents. Summation and the group bound give at least 4096 rows."
+}

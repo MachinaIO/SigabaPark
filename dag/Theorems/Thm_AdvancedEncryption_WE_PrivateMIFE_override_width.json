@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.override_width",
+ "title": "Exact override recovery bounds private parameter width",
+ "statement": "A fixed public decoder that returns every child-bit override from a seed of fixed width requires at least as many seed bits as child bits."
+}

@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.native_ciphertext_rows",
+ "title": "Native-output ciphertext floor for sixteen prefix and slot groups",
+ "statement": "Any at most sixteen grouped widths totaling 128 bits need at least 4096 total exponential rows. At 2 N width field bits per row with N width field at least 2^19 the required serialization reaches 2^32."
+}
