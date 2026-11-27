@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.CommonMask.three_address_leak","title":"Three mixed-address reads disclose the bit in the unextended local family","statement":"For local masks depending on x alone and y alone, three endpoint evaluations plus the authorized edge data at those points deterministically reconstruct the bit."}

@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CommonMask.first_failed_shift","proof_type":"prove","explanation":"The adjacent difference between two prefix-failure indicators vanishes on every passing check, and the final prefix-failure indicator is one on a rejection."}

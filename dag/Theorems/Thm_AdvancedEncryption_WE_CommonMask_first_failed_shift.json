@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.CommonMask.first_failed_shift","title":"The first failed predicate supplies exactly one unit of message shift","statement":"The adjacent difference between two prefix-failure indicators vanishes on every passing check, and the final prefix-failure indicator is one on a rejection."}
