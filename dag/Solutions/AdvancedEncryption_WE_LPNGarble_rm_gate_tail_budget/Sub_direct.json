@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.LPNGarble.rm_gate_tail_budget","proof_type":"prove","explanation":"Bound the squared single-coordinate overlap by nine sixteenths, lift to the 256th power and verify the exact rational budget."}

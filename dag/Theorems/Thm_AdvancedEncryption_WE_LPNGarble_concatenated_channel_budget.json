@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.LPNGarble.concatenated_channel_budget","title":"Finite concatenated-code budget for garbled gate decryptions","statement":"The geometric binomial bound on one RM(1,6) inner decoding error is below 1/4000 at crossover 7159/50000. The 21-block union bound for 32768 noisy basic decryptions at outer length 114 is below two to the minus 161."}
