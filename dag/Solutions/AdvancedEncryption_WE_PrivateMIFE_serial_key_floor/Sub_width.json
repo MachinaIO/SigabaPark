@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PrivateMIFE.serial_key_floor",
+  "proof_type": "prove",
+  "explanation": "Each suffix width is at most 31. Summing gives 128 <= p+31r, which on naturals implies 32 <= p+7r. Exponentiate base 2."
+}

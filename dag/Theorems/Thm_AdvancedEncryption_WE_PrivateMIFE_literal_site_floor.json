@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.literal_site_floor",
+ "title": "Sharp 31744 combined object-and-decryption floor for all direct BKS chunk partitions",
+ "statement": "For k adjusted chunk widths with sum 127+k, the sum of their powers of two plus 2^k is at least 31,744. This equals the direct one-key BKS public object count plus recursive base decryption count for 128 witness bits. The bound is attainable at k=13 and k=14."
+}

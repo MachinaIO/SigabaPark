@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.literal_dec_calls",
+ "title": "Exact single-input decryption count for the literal BKS selective recurrence",
+ "statement": "With one base decryption at arity one and two lower-arity decryptions plus one single-input operation per higher-arity call, an arity j+1 decryption invokes exactly 2^(j+1)\u22121 single-input decryptions."
+}

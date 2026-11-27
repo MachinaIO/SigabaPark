@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.PrivateMIFE.full_table_admissibility",
+ "title": "Full-table admissibility for a single payload-dependent private MIFE key",
+ "statement": "If the table tuples decode onto the witness space, the outputs for the zero-payload function key and one-payload function key agree on every table tuple exactly when the witness predicate is false everywhere."
+}
