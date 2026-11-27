@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TerminalTokens.parity_three","title":"The fourth masked terminal return cell is determined by the other three","statement":"The XOR of the four controlled normal/override return cells with independent row and column masks is always one. Hence a missing cell is reconstructed exactly from the other three."}

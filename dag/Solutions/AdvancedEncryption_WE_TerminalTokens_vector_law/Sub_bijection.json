@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TerminalTokens.vector_law","proof_type":"prove","explanation":"Map the hidden mask vector bijectively to the point vector; the low token follows from the active token and active physical control."}

@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TerminalTokens.two_bit_decode","title":"Exact two-bit terminal decryption and opposite wire colors","statement":"For arbitrary real control pad bits and either normal control color, the companion token, output point and active pad decode the prescribed normal or override bit. Flipping the normal input flips the point."}

@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TerminalTokens.word_decode","proof_type":"prove","explanation":"Expand all Boolean selections; the per-wire column offset, common slope mask, and control pad cancel."}
