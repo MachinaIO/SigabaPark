@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.MaskedLookup.terminal_law",
+ "proof_type": "prove",
+ "explanation": "For a full finite table and arbitrary joint observation, independently padded inactive rows give the same ideal view as uniform inactive rows; all active entries are kept intact."
+}

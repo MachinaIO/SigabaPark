@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.MaskedLookup.table_budget",
+ "proof_type": "prove",
+ "explanation": "If every table including the prefix fits below 2^32 with 64-bit entries, every width is at most 25; the remaining terminal table and its nested output width already reach the cap."
+}

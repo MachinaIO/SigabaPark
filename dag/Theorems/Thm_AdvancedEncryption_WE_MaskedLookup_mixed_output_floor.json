@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.MaskedLookup.mixed_output_floor",
+ "title": "Output width under nested explicit four-bit terminal return tables",
+ "statement": "If an aggregator leaf costs at least four bits per output and an ordinary leaf at least one, and higher ranks compose the two roles, an ordinary depth-d terminal costs at least 4^(2^d-1) times the output width."
+}

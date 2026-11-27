@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.MaskedLookup.terminal_law",
+ "title": "Terminal bit-table simulation for arbitrarily many masked inactive rows",
+ "statement": "For a full finite table and arbitrary joint observation, independently padded inactive rows give the same ideal view as uniform inactive rows; all active entries are kept intact."
+}
