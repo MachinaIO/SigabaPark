@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FusedRank.triangular_frame","proof_type":"prove","explanation":"Shift the middle register between the two column maps and compensate the top register by the change of row outputs. Swapping worlds gives the inverse. The equality of composites is used on the embedded columns."}

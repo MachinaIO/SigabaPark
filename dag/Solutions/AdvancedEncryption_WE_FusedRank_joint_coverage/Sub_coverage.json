@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FusedRank.joint_coverage","proof_type":"prove","explanation":"Pull rejection back along a preimage. For necessity use the singleton predicate at a missing table address. This covers repeated selection of any published key/ciphertext pair."}
