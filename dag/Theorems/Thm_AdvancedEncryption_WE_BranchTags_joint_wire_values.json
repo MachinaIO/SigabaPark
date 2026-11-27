@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.joint_wire_values",
+  "title": "Compatibility on the intersection characterizes jointly attainable wire values",
+  "statement": "For wire functions supported on sets S and T, a pair of output values is attained on one assignment exactly when separate attaining assignments agree on the shared support."
+}

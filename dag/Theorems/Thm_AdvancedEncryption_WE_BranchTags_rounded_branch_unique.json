@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.rounded_branch_unique",
+  "title": "Unique recovery from a modular difference of rounded branch images",
+  "statement": "Two scaled approximate integer decodings in an interval of diameter less than the plaintext modulus must agree when the observed differences agree modulo the ciphertext modulus and twice the scaled error is below that modulus."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.dense_gate_write_floor",
+  "proof_type": "prove",
+  "explanation": "Multiply the dimension and width lower bounds and apply the output-step premise."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.calbo_key_write_floor",
+  "title": "One dense cumulative-lossiness evaluation key exceeds the strict budget",
+  "statement": "The two matrices per tag position in the stated dimensions require at least 15032385536 bit writes."
+}
