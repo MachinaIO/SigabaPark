@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.AffineFiberScan.pivot_patch",
+  "proof_type": "prove",
+  "explanation": "Compute the matrix product of the sparse pivot correction by transposing the two finite sums. Apply the identity and zero column hypotheses."
+}

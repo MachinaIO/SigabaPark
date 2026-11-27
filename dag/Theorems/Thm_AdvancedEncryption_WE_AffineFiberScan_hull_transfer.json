@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.AffineFiberScan.hull_transfer",
+  "title": "Hull of the two rejection fibers and intersection of the acceptance fibers are sound for NAND",
+  "statement": "For an operator containing the union, the two-fiber NAND predicate contains the Boolean NAND of all admitted operand values."
+}

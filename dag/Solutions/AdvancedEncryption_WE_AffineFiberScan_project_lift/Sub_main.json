@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.AffineFiberScan.project_lift",
+  "proof_type": "prove",
+  "explanation": "Apply factorization in each direction, using the right inverse to lift accepted feature vectors. Negate the two existential implications."
+}

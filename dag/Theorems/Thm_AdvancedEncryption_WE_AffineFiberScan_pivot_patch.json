@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.AffineFiberScan.pivot_patch",
+  "title": "Binary affine pivot repair sets the required syndrome without changing protected features",
+  "statement": "If the pivot columns form an identity in A and are zero in B, changing only these columns by the syndrome error sets A to target and leaves B unchanged."
+}
