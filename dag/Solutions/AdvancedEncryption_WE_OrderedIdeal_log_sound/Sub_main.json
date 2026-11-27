@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OrderedIdeal.log_sound",
+  "proof_type": "prove",
+  "explanation": "Every assignment extending a logged support validates its derived wire"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.OrderedIdeal.full_fold",
+  "title": "Sorted physical gates preserve the entire registered evaluation fold",
+  "statement": "For every input prefix, initial result flag and list of gates, replacing a forward reference by zero and sorting both ports preserves every value in the final registered evaluator state."
+}

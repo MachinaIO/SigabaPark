@@ -1,0 +1,5 @@
+{
+  "name": "OrderedNand",
+  "title": "Ordered NAND row membership and chronological sensitive-label derivations",
+  "description": "A physical two-parent NAND row grammar including the duplicate-wire dummy, input-tag assignments, and a positive derivation relation that preserves supports under union and optional widening."
+}

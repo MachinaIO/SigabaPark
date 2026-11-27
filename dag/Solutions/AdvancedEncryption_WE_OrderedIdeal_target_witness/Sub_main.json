@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OrderedIdeal.target_witness",
+  "proof_type": "prove",
+  "explanation": "A clean accepting derivation yields an assignment satisfying the registered evaluator. Apply the proved dependency theorems and the registered estep semantics."
+}

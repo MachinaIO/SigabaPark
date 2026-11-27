@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OrderedIdeal.clean_extends",
+  "proof_type": "prove",
+  "explanation": "Every nonconflicting input-tag support has a total Boolean extension"
+}
