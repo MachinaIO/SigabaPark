@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.backsolve_length",
+  "title": "Back-substitution assigns one scalar to every source column",
+  "statement": "Back-substitution outputs a list of exactly the source column count on all inputs and initial maps."
+}

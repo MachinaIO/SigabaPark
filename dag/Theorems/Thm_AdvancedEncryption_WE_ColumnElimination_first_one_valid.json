@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.first_one_valid",
+  "title": "The first-one binary coordinate functional normalizes all nonzero columns",
+  "statement": "The least nonzero row evaluates a nonzero binary column to one; zero columns satisfy the other disjunct."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.first_one_valid",
+  "proof_type": "prove",
+  "explanation": "Take the least point of the filtered finite index set and use that one is the only nonzero residue modulo two."
+}
