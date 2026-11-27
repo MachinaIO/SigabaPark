@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SourcePads.centered_counts",
+  "title": "Centered occupancy energy from collision counts",
+  "statement": "For each public seed, subtract the constant average bucket mass. The sum of squared deviations is the sum of squared occupied masses minus its exact uniform baseline."
+}
