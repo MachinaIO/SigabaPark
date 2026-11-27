@@ -1,0 +1,9 @@
+{
+  "name": "WE_GKW_Trace",
+  "title": "Local trace checks for registered NAND wires",
+  "description": "A supplied bit at each gate must equal the NAND of the two addressed wires in the preceding trace prefix, with missing wires defaulting to true.",
+  "tags": [
+    "witness-encryption",
+    "circuits"
+  ]
+}

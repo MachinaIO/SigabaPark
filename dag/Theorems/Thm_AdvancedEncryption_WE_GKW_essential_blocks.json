@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.GKW.essential_blocks",
+  "title": "Essential input blocks force shared-selector length",
+  "statement": "Any deterministic function computed from a fixed trace of block reads needs at least one read per essential block, even if a read returns the entire block."
+}

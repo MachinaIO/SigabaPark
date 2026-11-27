@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.GKW.trace_unique",
+  "proof_type": "prove",
+  "explanation": "Follow the forced NAND bit at each gate. Induction gives both uniqueness and the exact final state of the original evaluator."
+}

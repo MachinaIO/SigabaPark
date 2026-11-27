@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.GKW.base_field_floor",
+  "proof_type": "prove",
+  "explanation": "Multiply the dimension and width floors twice, once for the number of output tracks and once for their base block size. Evaluate at the three integer thresholds."
+}
