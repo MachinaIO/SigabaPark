@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.ICALedger.adaptive_fiber","proof_type":"prove","explanation":"The count of history/vector pairs matching a history-dependent target equals the number of histories, and the full product has the independent-vector cardinality."}

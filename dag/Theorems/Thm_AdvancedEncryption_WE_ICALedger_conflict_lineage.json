@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.ICALedger.conflict_lineage","title":"A conflicting tag pair persists through every descendant","statement":"When a tag set contains a forbidden pair, every monotone subsequent tagged computation contains the same pair. The result applies to overlapping inputs and repeated ancestors."}

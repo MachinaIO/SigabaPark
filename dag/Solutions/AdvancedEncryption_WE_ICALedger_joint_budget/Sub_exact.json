@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.ICALedger.joint_budget","proof_type":"prove","explanation":"Given a single finite distribution of random tapes and a per-target upper bound on bad tapes, their union costs at most the number of targets times that bound."}
