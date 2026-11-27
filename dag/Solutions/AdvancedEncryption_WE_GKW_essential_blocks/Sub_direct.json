@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.GKW.essential_blocks",
+  "proof_type": "prove",
+  "explanation": "An omitted block would make two distinguishing inputs identical on every read. The selector must be surjective."
+}

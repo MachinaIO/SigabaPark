@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.GKW.base_field_floor",
+  "title": "Base-field bit floor for the GKW width-five layout",
+  "statement": "The weakened integer parameter inequalities for a length-L component chain give at least 25 (12L)^10 published base bits, with explicit strict-clock, capped-cost and 256-level consequences."
+}

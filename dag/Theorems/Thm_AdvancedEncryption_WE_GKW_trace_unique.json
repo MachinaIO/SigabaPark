@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.GKW.trace_unique",
+  "title": "Unique NAND trace and exact output",
+  "statement": "For every gate list and initial wires there is exactly one locally consistent trace. The registered fold appends it and returns its last bit with the original default."
+}
