@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FEPacking.diagonal_cover","title":"Optimal simultaneous coordinate coverage for separable FE aggregation","statement":"For any coordinatewise aggregate and finite nonempty coordinate lists, cyclic queries recover every typed output using the maximum list length, and every coordinate-surjective schedule needs at least that many queries."}

@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FEPacking.second_contraction","title":"Typed two-stage BKS contraction on the local correctness event","statement":"Under pointwise correctness of both aggregation stages and the key issuer, decrypting the original typed hierarchy equals reading directly generated row keys and coordinate tables at the second cut."}

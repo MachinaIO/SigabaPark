@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.FEPacking.second_contraction","proof_type":"prove","explanation":"Rewrite the first joint aggregate, its key and aggregate components, and the lower aggregate output. All arrays have row- and coordinate-dependent types."}

@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FEPacking.shard_capacity","title":"A collusion-weighted ciphertext charge invariant under unequal sharding","statement":"For any partition of rows and any per-group multiplier above a uniform minimum, summing a charge linear in that group’s first-slot row count retains the full adjacent-slot product."}
