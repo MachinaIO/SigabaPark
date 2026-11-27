@@ -1,0 +1,10 @@
+{
+ "name": "MixedOrderCircuit",
+ "title": "Structure-checked mixed-order multilinear extension from encoded NAND circuits",
+ "description": "Decodes registered gate words, cofactors every public address and checks bounded read-once expression trees. The resulting interpolation agrees with the circuit and is affine in every coordinate. Recognized YES and NO have exact one-bit issuance laws.",
+ "tags": [
+  "witness-encryption",
+  "circuit-sat",
+  "cost"
+ ]
+}
