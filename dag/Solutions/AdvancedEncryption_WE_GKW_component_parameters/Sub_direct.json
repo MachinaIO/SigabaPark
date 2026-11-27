@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.GKW.component_parameters",
+  "proof_type": "prove",
+  "explanation": "Use sqrt(m) at least two to bound the error multiplier below by eight. Taking base-two logarithms of correctness and of the modulus ceiling gives both conclusions."
+}

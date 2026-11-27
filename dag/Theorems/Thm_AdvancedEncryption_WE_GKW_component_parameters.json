@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.GKW.component_parameters",
+  "title": "Finite GKW parameter consequences",
+  "statement": "Surjective-width and nonzero-shortness bounds, the weakened fourth-power correctness inequality and the relaxed square-root modulus ceiling imply a 12L-bit modulus floor and a (12L)^2 dimension floor."
+}
