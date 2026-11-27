@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.nand_rectangle_quotient",
+  "proof_type": "prove",
+  "explanation": "Take the first column to fix the row shift and normalize the column shift at false. The only remaining corner equation is the rectangle identity."
+}

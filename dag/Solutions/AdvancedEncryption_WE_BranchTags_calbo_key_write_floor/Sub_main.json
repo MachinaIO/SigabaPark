@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.calbo_key_write_floor",
+  "proof_type": "prove",
+  "explanation": "Multiply the four lower bounds and use the premise charging a step for each fixed-width output bit."
+}
