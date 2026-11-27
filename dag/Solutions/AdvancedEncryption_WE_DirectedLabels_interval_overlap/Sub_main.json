@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.interval_overlap",
+  "proof_type": "prove",
+  "explanation": "Identify their intersection with a single integer interval and evaluate its cardinality."
+}

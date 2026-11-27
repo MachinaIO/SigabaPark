@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.additive_view",
+  "title": "Complete additive records force an anchored componentwise terminal shift",
+  "statement": "Two tapes give equal anchor, edge and terminal records precisely when their difference vanishes at the anchor, is constant across every edge and matches the prescribed terminal values."
+}

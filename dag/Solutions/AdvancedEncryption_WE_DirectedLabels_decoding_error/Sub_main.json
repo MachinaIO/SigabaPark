@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.decoding_error",
+  "proof_type": "prove",
+  "explanation": "Apply the triangle inequality and absolute-value multiplication to the finite weighted sum."
+}

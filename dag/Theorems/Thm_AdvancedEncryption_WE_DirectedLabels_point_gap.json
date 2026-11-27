@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.point_gap",
+  "title": "Known-witness correctness bounds the simulated two-world separation",
+  "statement": "If honest bit acceptance is low in one world and high in the other, two approximate simulators give a separation of at least one minus both correctness errors, both simulation errors and the exceptional hit probability."
+}

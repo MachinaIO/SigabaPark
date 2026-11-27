@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.decoding_error",
+  "title": "Flooded dictionary decoding loses at most the coefficient norm times the noise radius",
+  "statement": "The residual integer error is bounded by the shift-evaluation error plus the sum of the absolute integer reconstruction coefficients times the per-column noise radius."
+}
