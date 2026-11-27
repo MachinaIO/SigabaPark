@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SplitRank.disjointness_rank",
+  "proof_type": "prove",
+  "explanation": "Order subsets by colex and complement the column supports to obtain the upper unitriangular inclusion matrix. Transfer invertibility by reindexing, then apply the submatrix and product rank inequalities."
+}
