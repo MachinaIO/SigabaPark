@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.SymbolicBucket.step","title":"One symbolic NAND bucket computes exact existential elimination","statement":"For an arbitrary NAND evaluator on front assignments, the OR of the two conjunction slices represents existential quantification of the selected Boolean variable, retaining all factors independent of that variable."}
