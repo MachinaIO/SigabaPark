@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.ordered_pairs",
+  "proof_type": "prove",
+  "explanation": "A one-pass horizontal accumulator produces the ordered quadratic cross terms."
+}
