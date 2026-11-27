@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BitGC.mixed_shift",
+  "proof_type": "prove",
+  "explanation": "Expand both mixed differences in the commutative ring."
+}

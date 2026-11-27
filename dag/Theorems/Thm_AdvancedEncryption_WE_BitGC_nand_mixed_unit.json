@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BitGC.nand_mixed_unit",
+  "title": "The masked NAND mixed table coefficient is always a signed unit",
+  "statement": "For two Boolean wire masks the square of the NAND second difference is one."
+}

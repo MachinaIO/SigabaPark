@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BitGC.seed_bank_floor",
+  "proof_type": "prove",
+  "explanation": "Monotonicity and integer arithmetic."
+}
