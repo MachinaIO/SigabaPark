@@ -1,0 +1,594 @@
+---
+title: "Composing witness encryption across circuit separators with one-bit edge ciphertexts (extended)"
+refs: [definition:WE_CircuitSAT, theorem:AdvancedEncryption.WE.Separator.cut_flip, theorem:AdvancedEncryption.WE.Separator.functional_sink]
+tags: [witness-encryption, circuit-sat, composition, complexity]
+supersedes: pq-we-separator-paths
+---
+
+**Goal.** Replace encryption to a large verification circuit by encryption to smaller circuits, while allowing the same boundary value to be used by two adjacent pieces. This avoids listing all joint boundary assignments. The ciphertext is classical, has no setup, and the original witness determines the decryption path. Three composition rules trade local one-bit encryptions against each other. The first two inherit the local WE assumption. The third also uses a quantum-secure classical pseudorandom generator (PRG). The graph-difference sharing primitive is the familiar linear secret-sharing scheme for undirected connectivity. The use here concerns the directed witness-consistency interface, its certified cases, the choice of expression, and the explicit leaf reductions. For context on the distinction for general graphs see [Beimel and Pitassi, On Linear Secret Sharing for Connectivity in Directed Graphs](https://www.cs.bgu.ac.il/~beimel/Papers/BP.pdf).
+
+**Circuit interface.** Partition the gate list of a NAND circuit into H nonempty consecutive bags. Boundaries and choices of algorithm depend on the public statement and parameters only. For each wire take the interval from the first bag defining or using it to the last bag using or defining it. Ignore constant-true reads, including reads of unavailable gates at their use site. The separator at a cut contains precisely the wires whose intervals cross that cut. In particular a variable shared by two distant bags travels across every intermediate cut. The exterior boundaries have one state each. Handle a circuit with no gates directly as true. At bag i and endpoint assignments a,b, form a local statement: the incoming boundary has value a, any wire in both boundaries agrees, newly occurring primary inputs on the outgoing boundary have the values in b, and computing the gates produces the required outgoing values. The last bag additionally requires the original output to be true. Its local witness consists of the other primary inputs used in the bag. Convert the check to NAND gates, hardwiring endpoints, comparing wires and taking the conjunction; size is polynomial in the bag and boundary descriptions. Stable numbering and bit packing are public. Witness evaluation of the original program produces a path and a local witness for every edge. Conversely, a path of satisfiable edges supplies a single consistent value for each shared variable by the interval property. Gluing its private local inputs and inducting over the gates yields an accepting original witness.
+
+Let D_i denote the size of separator i, D_0=D_H=1. There are E=sum_i D_i D_(i+1) candidate transitions. An edge is live if its local statement admits a witness. The live graph has a directed s-to-t path exactly on YES. Enc never needs its live flags for cryptographic modes. Impose a polynomial public bound before allocating any D_i states. A boundary exceeding the budget can be omitted by merging bags. One bag always suffices with a general leaf backend. Count the time to parse and select cuts and build all requested statements. A bounded public decision pass may enumerate the private inputs when cheap, propagate reachable boundary states, and stop on budget exhaustion. A completed decision pass can output the bit masked by the YES flag and Dec can return the ciphertext bit. This gives an unconditional public shortcut for those instances.
+
+**One-bit potentials.** For an undirected two-terminal network of leaf statements, choose independent uniform vertex bits p. Publish p_s, b xor p_t, and an independent WE encryption under each edge statement of the difference p_u xor p_v. Along a witness path Dec adds the differences and the two public bits. On a NO with s and t disconnected in the live undirected graph, fix any cut that separates them without crossing a live edge. Flipping all vertex bits on the target side is an involution on the encryption coins. It preserves both public bits when the message changes, and all edge plaintexts outside the cut. This is the first formal theorem. Hybridize only the crossing edges, each false, using one one-bit challenge per hybrid. If the simulated difference requires reversing the challenge orientation, complement the adversary output in that branch. The sum of the absolute leaf advantages bounds the composed advantage. For a fixed false statement the cut may be nonuniform advice; include its encoding, the simulator and all auxiliary encryption work in concrete costs. Correctness along a path of H edges costs at most H times the maximum single-leaf decryption error. Edge labels may repeat as statements; encrypt each occurrence with fresh randomness.
+
+*Functional transitions.* The original layered graph can itself be used if the true transition relation has at most one successor per vertex. The target is a sink. Directed reachability of that sink is invariant across every live edge: a path beginning at a nontarget vertex with an outgoing edge must use its unique successor. The invariant also holds in reverse across the edge. Thus undirected connectivity to t implies directed reachability, as proved by the second formal theorem. Reversing the graph gives the corresponding predecessor rule at a source. Functionality is a statement about all local witnesses at the same incoming state. A syntactic sufficient certificate computes every outgoing bit from incoming wires and constants through the defining NANDs of the bag. Extra conditions on private inputs can still make an edge false. A bounded, checked refutation of two simultaneous valid transitions with the same incoming and different outgoing values also suffices. When using this mode require evidence independent of the secret live flags; a failed certification leaves the other modes available. There are E independent one-bit ciphertexts and H leaf decryptions. On unrestricted graphs the rule is unsound: among all 4096 subgraphs at widths (1,2,2,2,1), undirected connectivity falsely accepts 80. It agrees on all 972 forward-functional subgraphs.
+
+*Arbitrary transitions by a formula.* For endpoints a,b of an interval [i,j], split at k. Put the D_k alternatives in parallel. Alternative d is the series composition of independent copies of the networks for (i,k,a,d) and (k,j,d,b), meeting at a fresh vertex. Distinct parallel alternatives share only their two terminals. An undirected simple path through this network chooses one alternative and traverses both of its series components. Induction proves equivalence to the original directed path condition for every assignment of leaf truth values. Repeated subproblems need distinct internal vertices in different occurrences. A true witness selects its known midpoint states recursively, using one leaf per bag, so Dec does not try every alternative.
+
+For unit leaf costs, a subproblem spanning one bag costs 1. For larger intervals choose k minimizing D_k times the sum of its two subinterval costs. This dynamic program uses O(H³) arithmetic operations and O(H²) entries; saturate all costs at budget+1 before expanding the selected expression. For endpoint-specific positive costs use the corresponding sum over d with endpoint-specific subcosts. When D_i<=W for fixed W, balanced splitting gives at most (2W)^ceil(log2 H) leaves, polynomial in H. Growing W requires a size guard. At H=64 with all internal widths two, the cost is 4096 leaf encryptions versus 2^63 entire boundary strings. With one width 32 at cut 32 and width two elsewhere, balanced splitting takes 65536 calls; cost-based splitting takes 5344. At periodic widths 16 on multiples of 8, 1 on remaining multiples of 5, and 2 elsewhere, these counts are 1441792 and 1024. The program independently exhausts binary split trees on 81 small profiles to check the optimizer and saturation.
+
+**Arbitrary directed transitions with one label per state.** To avoid formula blowup when E is moderate, choose an independent k-bit key K_v per state. Publicly release K_s. Expand K_u into one distinct k-bit pad per outgoing edge, using fresh slots of a secure length-expanding PRG. For each e=(u,v) publish a local WE encryption of K_v xor pad_e, bitwise with independent randomness if the backend accepts only bits. Publish the message xor one fresh output bit expanded from K_t. A recipient with an accepting witness follows the directed path, derives its current pad, decrypts the local payload and obtains the next key. This binds honest continuation to the selected boundary state. Security on a false statement follows from the next hybrid argument.
+
+Fix the set R of reachable states. For each edge from R to its complement, replace its k encrypted payload bits by encryptions of zero; the edge statement is false. Now visit unreachable states in topological order, replacing each state's full expansion by independent uniform pad bits. For the switch at u, incoming ciphertexts from R no longer involve K_u. Incoming edges from earlier unreachable states already had independent random pads in their own slots. Reparametrize their masked plaintexts as independent uniform words; their joint distribution is independent of K_u, including correlations with every other published item because none of those pad slots is reused. The challenger can therefore supply a single generator challenge word for the outgoing expansion without revealing its seed. At the target the message mask becomes a fresh independent bit. Across both message experiments the security loss is at most twice the sum of the k times crossing-edge leaf advantages and the one-sample generator advantages over unreachable states. Advice and auxiliary work must again be counted. Classical challenge samples suffice for the hybrids with quantum distinguishers if both primitives are secure for that adversary model. The test's SHAKE implementation is only an executable interface example. A length-doubling generator can fill a binary tree truncated to a public power-of-two output capacity, with linear hybrid loss in the number of internal expansions. A path recipient can derive a single slot in logarithmic depth. No quantum oracle interface is required.
+
+The directed mode uses kE independent one-bit leaf encryptions, kH selected decryptions and k+1 clear header bits before framing; correctness costs at most kH times the leaf error. At H=64, uniform width eight, k=128, it uses 509952 leaf encryptions versus 16777216 from midpoint expansion. The functional mode would take 3984 but requires its certificate. With constant or polynomial caps on E, emitted formula size, partition search, and private decision work, ciphertext length, Enc time, and Dec time are all polynomial in the statement length and security parameter whenever the leaf backend has those three bounds. For example, for the directed mode add k times the sum of single-edge ciphertext lengths, k times the sum of their encryption costs, and k times the sum of the selected leaf decryption costs to the respective framing, label generation and traversal budgets. Sequential access can scan the full ciphertext in polynomial time. Set leaf accuracy using the number of decryptions on one path, and security using the actual reductions. If measured costs favor a single monolithic invocation, the compiler can choose it from the outset. These counts quantify how many *smaller* problems are encrypted. They do not imply a byte or time speedup without leaf parameters. The general polynomial benchmark of [PR 99](https://github.com/MachinaIO/SigabaPark/pull/99) still relies on the VWW assumptions. An arbitrary NP leaf with polynomial costs and a quantum proof under the submitted registry remains open.
+
+**Controls and reproduction.** The first Python listing checks all 4096 transition patterns, checks equality of the entire ciphertext histograms on 29 small NO instances, and runs both payload bits through 28 formula-path and 250 directed-label decryptions counting individual decryptions. The toy leaf evaluates its small witness set directly. The second listing verifies the NAND reduction on 1308 original witness traces, including forward reads. Two 128-input/4096-gate controls have 64 bags with at most one boundary wire and two private primary bits per bag. The public decision pass completes after 630 and 319 local evaluations respectively. The NO control forces the first bag output false and propagates conjunction to the required true final output. Each bag has some local satisfying entry; the boundary consistency matters. These controls should use the public decision shortcut. Their runtime does not measure full lattice encryption. The third listing reproduces the profile counts.
+
+~~~python
+"""Witness-table composition. Full edge truth is used only in tests and the toy leaf WE."""
+from itertools import product
+from collections import Counter
+from random import Random
+
+def edges(sizes):
+    return [(i,a,b) for i,(l,r) in enumerate(zip(sizes,sizes[1:]))
+            for a in range(l) for b in range(r)]
+
+def direct(sizes):
+    return [((i,a),(i+1,b),(i,a,b)) for i,a,b in edges(sizes)],(0,0),(len(sizes)-1,0)
+
+def expand(sizes,split=None):
+    # Independent occurrence of every recursive subproblem. Series components
+    # share a single junction; parallel components share just their two terminals.
+    wires=[];fresh=2
+    def build(i,j,a,b,s,t):
+        nonlocal fresh
+        if j==i+1:
+            wires.append((s,t,(i,a,b)))
+            return
+        k=split[i,j] if split is not None else (i+j)//2
+        for d in range(sizes[k]):
+            v=fresh;fresh+=1
+            build(i,k,a,d,s,v);build(k,j,d,b,v,t)
+    build(0,len(sizes)-1,0,0,0,1)
+    return wires,0,1
+
+def reachable(graph,truth,undirected):
+    es,s,t=graph;seen={s}
+    while True:
+        old=len(seen)
+        for u,v,key in es:
+            if key not in truth:continue
+            if u in seen:seen.add(v)
+            if undirected and v in seen:seen.add(u)
+        if len(seen)==old:return t in seen
+
+def witness_path(graph,states):
+    es,s,t=graph;verts={s:[]}
+    # Edge ordering is topological on directed s-t paths for both compilers.
+    for j,(u,v,(i,a,b)) in enumerate(es):
+        if u in verts and (a,b)==tuple(states[i:i+2]):verts[v]=verts[u]+[j]
+    return verts.get(t)
+
+def toy_encrypt(graph,atoms,msg,p):
+    es,s,t=graph
+    # atoms[key] contains its local witnesses. Its emptiness is decidable by the toy leaf.
+    return (p[s],p[t]^msg,tuple((p[u]^p[v]) if atoms[key] else 0 for u,v,key in es))
+
+def decrypt(graph,ct,states,local,atoms):
+    path=witness_path(graph,states)
+    if path is None:return None
+    bit=ct[0]^ct[1]
+    for j in path:
+        key=graph[0][j][2];i=key[0]
+        if local[i] not in atoms[key]:return None
+        bit^=ct[2][j]
+    return bit
+
+def test():
+    sizes=(1,2,2,2,1);es=edges(sizes);naive=direct(sizes);safe=expand(sizes)
+    invalid=0;functional=0;checks=0
+    for mask in range(1<<len(es)):
+        truth={e for j,e in enumerate(es) if mask>>j&1}
+        yes=reachable(naive,truth,False)
+        assert reachable(safe,truth,True)==yes
+        und=reachable(naive,truth,True)
+        invalid+=und and not yes
+        if len({(i,a) for i,a,b in truth})==len(truth):
+            assert und==yes;functional+=1
+        checks+=1
+    print('subgraphs, unsafe false positives, functional subgraphs:',checks,invalid,functional)
+
+    sizes=(1,2,2,1);es=edges(sizes);graph=expand(sizes)
+    vertices=sorted({v for s,t,e in graph[0] for v in (s,t)})
+    rng=Random(650);histchecks=0;dec=0
+    for _ in range(40):
+        atoms={e:{i for i in range(3) if rng.randrange(5)==0} for e in es}
+        truth={k for k,v in atoms.items() if v}
+        p={v:rng.randrange(2) for v in vertices}
+        if reachable(graph,truth,True):
+            for a,b in product(range(2),repeat=2):
+                states=(0,a,b,0);keys=[(i,*states[i:i+2]) for i in range(3)]
+                if all(atoms[k] for k in keys):
+                    wit=[min(atoms[k]) for k in keys]
+                    for bit in (0,1):
+                        assert decrypt(graph,toy_encrypt(graph,atoms,bit,p),states,wit,atoms)==bit;dec+=1
+        else:
+            bins=[Counter(),Counter()]
+            for vals in product((0,1),repeat=len(vertices)):
+                p=dict(zip(vertices,vals))
+                for bit in (0,1):bins[bit][toy_encrypt(graph,atoms,bit,p)]+=1
+            assert bins[0]==bins[1];histchecks+=1
+    print('identical full NO histograms, valid decryptions:',histchecks,dec)
+    for h in (8,16,64):
+        sizes=(1,)+(2,)*(h-1)+(1,)
+        print('bags / all boundary strings / formula edge calls / functional edge calls:',
+              h,2**(h-1),len(expand(sizes)[0]),len(edges(sizes)))
+if __name__=='__main__':test()
+
+def directed_toy(sizes,atoms,bit,length,rng,states=None,local=None):
+    from hashlib import shake_256
+    # Distinct slots of a single publicly evaluable expander per source.
+    def expandkey(k,d):
+        s=shake_256(b'path-test'+k).digest(length*d)
+        return [int.from_bytes(s[i*length:(i+1)*length],'big') for i in range(d)]
+    keys={(i,a):rng.randbytes(length) for i,d in enumerate(sizes) for a in range(d)}
+    table={}
+    for i,d in enumerate(sizes[1:]):
+        for a in range(sizes[i]):
+            pads=expandkey(keys[i,a],d)
+            for b in range(d):
+                e=(i,a,b);payload=int.from_bytes(keys[i+1,b],'big')^pads[b]
+                table[e]=payload if atoms[e] else 0
+    last=len(sizes)-1
+    masked=bit^(expandkey(keys[last,0],1)[0]&1)
+    ct=(keys[0,0],table,masked)
+    if states is None:return ct
+    k=ct[0]
+    for i,(a,b) in enumerate(zip(states,states[1:])):
+        e=(i,a,b)
+        if local[i] not in atoms[e]:return None
+        k=(ct[1][e]^expandkey(k,sizes[i+1])[b]).to_bytes(length,'big')
+    return ct[2]^(expandkey(k,1)[0]&1)
+
+def directed_test():
+    rng=Random(177);count=0
+    for sizes in [(1,2,2,2,1),(1,3,2,4,1)]:
+        for _ in range(24):
+            atoms={e:{j for j in range(4) if rng.randrange(4)==0} for e in edges(sizes)}
+            for states in product(*(range(d) for d in sizes)):
+                path=[(i,a,b) for i,(a,b) in enumerate(zip(states,states[1:]))]
+                if all(atoms[e] for e in path):
+                    local=list(map(lambda e:min(atoms[e]),path))
+                    for bit in (0,1):
+                        assert directed_toy(sizes,atoms,bit,16,rng,states,local)==bit;count+=1
+    print('directed label passing, valid decryptions:',count)
+if __name__=='__main__':directed_test()
+~~~
+
+~~~python
+from itertools import product
+from random import Random
+
+def schedule(n,gates,cuts):
+    assert cuts[0]==0 and cuts[-1]==len(gates) and all(i<j for i,j in zip(cuts,cuts[1:]))
+    norm=[tuple(a if 0<a<n+i+1 else 0 for a in g) for i,g in enumerate(gates)]
+    terms=[];first={};last={}
+    for i,(lo,hi) in enumerate(zip(cuts,cuts[1:])):
+        scope=set()
+        for j in range(lo,hi):
+            scope.update(norm[j]);scope.add(n+j+1)
+        scope.discard(0);terms.append(scope)
+        for x in scope:first.setdefault(x,i);last[x]=i
+    bd=[tuple(sorted(x for x in first if first[x]<i<=last[x])) for i in range(len(terms)+1)]
+    priv=[tuple(sorted(x for x in scope if x<=n and x not in bd[i] and x not in bd[i+1])) for i,scope in enumerate(terms)]
+    return norm,cuts,bd,priv
+
+def value(plan,n,i,a,b,local):
+    norm,cuts,bd,priv=plan
+    d={0:1}
+    for x,k in zip(bd[i],range(len(bd[i]))):d[x]=a>>k&1
+    desired={x:b>>j&1 for j,x in enumerate(bd[i+1])}
+    if any(x in d and d[x]!=y for x,y in desired.items()):return False
+    for x,y in desired.items():
+        if x<=n:d[x]=y
+    for j,x in enumerate(priv[i]):d[x]=local>>j&1
+    for j in range(cuts[i],cuts[i+1]):
+        u,v=norm[j];d[n+j+1]=1-d[u]*d[v]
+    return all(d[x]==y for x,y in desired.items()) and (
+        i+2<len(cuts) or not norm or bool(d[n+len(norm)]))
+
+def table(n,plan):
+    norm,cuts,bd,priv=plan;state={0};calls=0
+    for i in range(len(priv)):
+        nxt=set()
+        for a in state:
+            for b in range(1<<len(bd[i+1])):
+                for local in range(1<<len(priv[i])):
+                    calls+=1
+                    if value(plan,n,i,a,b,local):nxt.add(b);break
+        state=nxt
+    return 0 in state,calls
+
+def run():
+    rng=Random(712);checked=0
+    for _ in range(100):
+        n=rng.randint(1,5);g=[tuple(rng.randrange(n+j+3) for _ in range(2)) for j in range(6)]
+        p=schedule(n,g,[0,2,4,6]);ok=False
+        for bits in product((0,1),repeat=n):
+            d=[1,*bits]
+            for a,b in p[0]:d.append(1-d[a]*d[b])
+            w=lambda vs:sum(d[x]<<j for j,x in enumerate(vs))
+            chain=all(value(p,n,i,w(p[2][i]),w(p[2][i+1]),w(priv)) for i,priv in enumerate(p[3]))
+            assert chain==bool(d[-1]);ok|=chain;checked+=1
+        assert table(n,p)[0]==ok
+    for no in [False,True]:
+        n=128;g=[];prev=0
+        def nand(a,b):
+            g.append((a,b));return n+len(g)
+        for i in range(64):
+            a,b=2*i+1,2*i+2
+            # local = NAND(a,b); maintain conjunction with the preceding bag
+            v=nand(a,b)
+            if no and i==0:
+                nv=nand(v,v);taut=nand(v,nv);v=nand(taut,taut)
+            t=nand(prev,v);prev=nand(t,t)
+            # End exactly at the bag output; a dead padding gate fixes parity.
+            remaining=(i+1)*64-len(g)
+            if remaining%2:nand(0,0)
+            for _ in range(remaining//2):
+                v=nand(prev,prev);prev=nand(v,v)
+        p=schedule(n,g,list(range(0,4097,64)))
+        ans,calls=table(n,p)
+        assert ans!=no
+        print('4096 gate control','NO' if no else 'YES','max boundary, max private primaries, local evaluations',
+              max(map(len,p[2])),max(map(len,p[3])),calls)
+    print('original witness traces cross-checked',checked)
+if __name__=='__main__':run()
+~~~
+
+~~~python
+"""Uniform per-leaf cost; dimensions already capped by the caller."""
+from functools import cache
+
+def plan(D, budget):
+    H=len(D)-1
+    if H<1 or not all(1<=x<=budget for x in D):
+        raise ValueError('invalid or oversized layout')
+    cost={};split={}
+    for h in range(1,H+1):
+        for i in range(H+1-h):
+            j=i+h
+            if h==1:cost[i,j]=1;continue
+            best,k=min((min(budget+1,D[k]*(cost[i,k]+cost[k,j])),k) for k in range(i+1,j))
+            cost[i,j]=best;split[i,j]=k
+    @cache
+    def midpoint(i,j):
+        if i+1==j:return 1
+        k=(i+j)//2
+        return D[k]*(midpoint(i,k)+midpoint(k,j))
+    return cost[0,H],split,midpoint(0,H)
+
+def test():
+    for name,d in [('uniform',[1]+[2]*63+[1]),
+                   ('uniform width eight',[1]+[8]*63+[1]),('alternating',[1]+[8 if i%2 else 2 for i in range(1,65)]+[1]),
+                   ('wide midpoint',[1]+[32 if i==32 else 2 for i in range(1,64)]+[1]),
+                   ('periodic',[1]+[16 if i%8==0 else (1 if i%5==0 else 2) for i in range(1,64)]+[1])]:
+        best,sp,base=plan(d,1<<25)
+        g=sum(x*y for x,y in zip(d,d[1:]))
+        print(name,'bags, midpoint, planned, functional, 128-bit directed calls:',len(d)-1,base,best,g,128*g)
+        assert best<=base
+def audit():
+    from itertools import product
+    for inner in product((1,2,3),repeat=4):
+        d=(1,)+inner+(1,)
+        @cache
+        def every(i,j):
+            if i+1==j:return (1,)
+            return tuple(d[k]*(a+b) for k in range(i+1,j)
+                         for a in every(i,k) for b in every(k,j))
+        expected=min(every(0,len(d)-1))
+        assert plan(d,10000)[0]==expected
+        for budget in (3,7,16):
+            assert plan(d,budget)[0]==min(expected,budget+1)
+    print('all binary split trees checked on 81 profiles')
+if __name__=='__main__':test();audit()
+~~~
+
+**Matrix-backend crossover.** The final listing feeds the YES control and its pinned local clauses to the read-once matrix compiler of [PR 99 at 58036ab](https://github.com/MachinaIO/SigabaPark/blob/58036abbee86216e6e0bf18a4a8234c6d55d82cb/dag/Notes/pq-we-live-clause-matrix-product.md). Assign variables in first-use order. Write m=alpha*w, where w is the compiled width. With a shortened root and final block, the interior alone has 2(h-2) alpha² w² residues at h>=2. The unsplit shape is (h,w)=(4224,9), with coefficient 683964 on alpha². Composing all 64 bags by the one-bit formula gives 4096 local encryptions, shapes (65 or 66, 7 or 8), and coefficient 29227136. At equal scale this costs 42.73 times as many interior residues. If all the local encryptions share a smaller scale, the monolithic-to-local alpha ratio must exceed 6.537 before the interior-residue comparison favors this split. Grouping into 2, 4, 8, 16 and 32 bags gives break-even ratios of 1.414, 1.998, 2.821, 3.979 and 5.594 respectively (rounded). When moduli change, multiply each residue count by its actual serialization width. Endpoint blocks, framing, parameter-dependent correctness/security margins, leaf sampling and traversal clocks are additional. These are measured program dimensions and derived size thresholds, not cryptographic parameter recommendations. The real dispatcher can use the cheap exact decision on this control. For a hard leaf backend, compare fully calibrated local and monolithic costs before committing to any split.
+
+An asymptotic interpretation uses the explicit schedule of [VWW Remark 5.1](https://eprint.iacr.org/2022/1140.pdf). Suppose a family gives B equal-size bags (B a power of two), each of matrix-program length Theta(h/B), comparable compiled width w, fixed separator state count W, and an admissible common effective security parameter lambda for both layouts including composition losses. Take n of order (h² lambda)^(1/delta), log q of order h² lambda, and the trapdoor column count of order nw log q. For a length large enough to have interior blocks, the monolithic interior bit count scales as h^(7+4/delta) w² lambda^(3+2/delta). Balanced formula composition uses B^(1+log2 W) local encryptions; substituting the local length gives a composed-to-monolithic interior-bit ratio of order B^(log2 W-6-4/delta). The ratio decreases if log2 W < 6+4/delta. Along an honest witness only B local paths are multiplied. At comparable width, the modular multiply-add count for their interior blocks is smaller by order B^(4+4/delta). Reading all ciphertexts on a sequential machine may instead dominate Dec. These exponents apply to the stated scaling family; leaf framing, root and terminal blocks, precision and noise inequalities, and full simulator clocks remain necessary for a parameterized deployment. In particular, no numerical security level follows from choosing a value of delta. A family with tiny private witnesses can also be solved by the public shortcut before any encrypted comparison.
+
+To reproduce the last listing, save PR 99's first Python listing as frontend.py, this note's second listing as nand.py and its first as paths.py. Run python shape.py frontend.py nand.py paths.py.
+
+~~~python
+"""Compare matrix geometry at a common scale, using the frontend of PR 99."""
+from collections import Counter
+import runpy,sys
+def geometry(front,local,paths):
+    n=128;g=[];prev=0
+    def nand(a,b):
+        g.append((a,b));return n+len(g)
+    for i in range(64):
+        a,b=2*i+1,2*i+2;v=nand(a,b);tmp=nand(prev,v);prev=nand(tmp,tmp)
+        nand(0,0)
+        for _ in range(30):tmp=nand(prev,prev);prev=nand(tmp,tmp)
+    p=local['schedule'](n,g,list(range(0,len(g)+1,64)))
+    def shape(lo,hi,binding,require):
+        fixed={0:1,**binding}
+        clauses=[];order={}
+        def put(lits):
+            row=[]
+            for x,y in lits:
+                if x in fixed:
+                    if fixed[x]==y:return
+                else:row.append(order[x] if y else -order[x])
+            clauses.append(tuple(row))
+        for j in range(lo,hi):
+            a,b=p[0][j];z=n+j+1
+            for v in (a,b,z):
+                if v not in order and v not in fixed:order[v]=len(order)+1
+            put([(a,1),(z,1)]);put([(b,1),(z,1)])
+            put([(a,0),(b,0),(z,0)])
+        if require:put([(n+len(g),1)])
+        pr=front['compile_program'](clauses,len(order),0)
+        return len(pr[1]),len(pr[0])
+    def coeff(hw):
+        h,w=hw
+        assert h>=2
+        # If m=alpha*w the interior residue count is alpha^2 times this number.
+        return 2*(h-2)*w*w
+    whole=shape(0,len(g),{},True)
+    print('monolithic shape and interior coefficient',whole,coeff(whole))
+    for chunk in (64,128,256,512,1024,2048,4096):
+        p=local['schedule'](n,g,list(range(0,len(g)+1,chunk)))
+        d=tuple(1<<len(bd) for bd in p[2])
+        weights=Counter(e for _,_,e in paths['expand'](d)[0])
+        hist=Counter()
+        for (i,a,b),multiplicity in weights.items():
+            bind={x:a>>j&1 for j,x in enumerate(p[2][i])}
+            right={x:b>>j&1 for j,x in enumerate(p[2][i+1])}
+            assert all(x not in bind or y==bind[x] for x,y in right.items())
+            bind.update(right)
+            hw=shape(p[1][i],p[1][i+1],bind,i==len(p[3])-1)
+            hist[hw]+=multiplicity
+        real=sum(coeff(hw)*v for hw,v in hist.items())
+        print('bags, calls, total interior coefficient, required scale ratio',len(d)-1,sum(hist.values()),real,round((real/coeff(whole))**0.5,3))
+        if chunk==64:print('local shape histogram',dict(sorted(hist.items())))
+if __name__=='__main__':geometry(*(runpy.run_path(f) for f in sys.argv[1:]))
+~~~
+
+## Reusing a leaf ciphertext across directed transitions
+
+Suppose the public edge predicate is a conjunction of named local statements. The same statement may occur on many edges, even in different layers. This representation is exact only when a path plus all the required local witnesses implies one original witness (e.g. by the separator compatibility check above). Let J be the number of distinct named statements, E the number of directed edges, and I the total edge/statement incidences. Deduplicate repeated requirements on a single edge. Use disjoint namespaces for vertices, edges and local statements.
+
+Generate one independent k-bit key K_v per vertex and one independent k-bit key L_j per distinct statement. Publish K_s and encrypt L_j under statement j *once*, with fresh coins per leaf bit for a bit-only backend. Give each occurrence an exclusive k-bit pad obtained by expanding its statement key with a length-doubling PRG. Independently expand each vertex key for its outgoing edge slots. For e=(u,v) publish the clear k-bit word
+
+    W_e = K_v XOR pad(K_u,e) XOR sum_XOR_{j required by e} pad(L_j,e).
+
+Publish b masked with a separately allocated bit expanded from K_t. The witness decrypts a required statement's key once, derives its occurrence pads and follows the selected edges. An empty conjunction is a public unconditional edge. Distinct edge identifiers are essential even when endpoints coincide. Errors in a reused recovered key need only be counted once. A path that uses r distinct statements needs kr leaf-bit decryptions, with failure probability at most kr times the maximum leaf-bit error. With the earlier independently keyed leaf scheme the number of leaf-bit ciphertexts was kE for single-label edges; here it is kJ. The clear-data cost includes kE bits for W and k+1 header bits. Directory and predicate framing are extra if not derivable from the statement. Sender tree expansion uses O(I+E+1) PRG calls when each tree is pruned to its assigned slots; a receiver derives chosen pads in logarithmic tree depth. This improves expensive leaf work when J is small and does not automatically shorten every ciphertext.
+
+**Joint security with reused keys.** Fix a false instance, R the states accessible from s along true conjunctions, and one false requirement on each edge leaving R. Such a requirement exists even if different edges fail different local statements. Let F be the distinct chosen requirements. First replace each WE encryption of L_j for j in F by an encryption of zero (at most k|F| bit challenges). Then replace all occurrence pads of each of these keys by independent uniform strings, by the fixed PRG tree hybrid. This includes occurrences away from the cut. No other part now exposes L_j. Each edge leaving R has its own fresh uniform mask; the masked words on the cut can be sampled jointly independently of all vertex keys. Process every unreachable vertex in topological order as in the original directed construction. An incoming edge from R already has an independent mask. An incoming edge from an earlier unreachable vertex has a unique fresh source pad. In both cases its W can be reparametrized as independent uniform, without knowing the challenged seed at the current vertex. Thus the terminal bit can be replaced by uniform. The losses add over the expansions of F and of the unreachable vertices, plus the selected false leaf bits, for each message hybrid. The reduction can hardwire the cut and the chosen labels under nonuniform leaf security; it queries no quantum oracle. Hiding a single reused key under a false statement alone would not justify reusing *the same pad* on several edges.
+
+**A succinct directed routing case.** If a layer relation is given as a union of rectangles A_h times B_h with the same conjunction on each pair in rectangle h, introduce one private vertex for that rectangle. Add incoming edges from A_h carrying its conjunction and unconditional edges out to B_h. No cross-rectangle path is introduced, and every original edge has a realizing two-step path. A witness may find a valid rectangle by scanning the public list and checking its predicates with the witnesses it possesses; for a compiler using overlapping rectangles it must have a polynomial way to identify a satisfied one, for instance provenance from the original trace. This uses sum_h(|A_h|+|B_h|) clear edge words instead of sum_h |A_h||B_h| words in the unmerged occurrence list. Compare against the actual distinct-edge count before using it. For one 64-by-64 rectangle with a single shared predicate and k=128, the original pair scheme uses 524288 leaf-bit ciphertexts. The shared construction with the rectangle needs 128 leaf-bit ciphertexts plus 128 clear edge words (16384 bits), apart from header/framing. Receiver graph depth doubles in that layer. This comparison is an interface count; a publicly decidable predicate may instead be evaluated directly and an isolated one-rectangle terminal network may simplify further.
+
+If the leaf statements themselves lack a fixed-assumption polynomial WE, amortizing them cannot close general CircuitSAT. The new step removes repeated *uses* of a primitive and allows a polynomial directed graph with polynomially many incidences and tractable leaf statements to give an actual public ciphertext. It does not compile every circuit into such a graph with easy leaves.
+
+The following check exhausts two-edge cuts that reuse the same false statement key in the ideal-pad hybrid. It also compares directed reachability before and after splitting overlapping labeled rectangles for all 16 possible truth assignments to four requirements.
+~~~python
+from itertools import product
+from collections import Counter
+for key_pair in product(range(4),repeat=2):
+    hist=Counter((key_pair[0]^a,key_pair[1]^b) for a,b in product(range(4),repeat=2))
+    assert len(hist)==16 and max(hist.values())==1
+rects=[({0,1},{0,1},(0,1)),({1,2},{1,2},(1,2)),({2},{0,2},(3,))]
+for truth in product(range(2),repeat=4):
+    direct={(u,v) for A,B,req in rects if all(truth[j] for j in req)
+                  for u in A for v in B}
+    for u in range(3):
+        mid={i for i,(A,B,req) in enumerate(rects) if u in A and all(truth[j] for j in req)}
+        reached={v for i in mid for v in rects[i][1]}
+        assert reached=={v for a,v in direct if a==u}
+print("16 joint mask laws; 48 directed source/assignment comparisons")
+~~~
+
+## Compiling linear consistency between nonlinear local checks
+
+Give each bag its own witness w_i, a local check P_i(w_i), and a computable vector z_i(w_i) of interface bits. Suppose the remaining global constraint is exactly XOR_i H_i z_i = d over F_2, with public matrices. This admits nonlinear local checks. Copying a wire into multiple bags fits by adding consecutive-copy equality rows and supplying copies as interface bits. An accepting original trace must efficiently yield these local witnesses, and any consistent list must glue to an accepting trace. These conditions hold for gate bags with all shared wires linked by copy equalities.
+
+Let U_i be the span of all matrix columns up through bag i and V_i the span of all later columns. Abort to a constant NO ciphertext if d is outside the total span. At cut i use only the states S_i = U_i intersect (d + V_i). These form an affine space of dimension h_i = rank(U_i) + rank(V_i) - rank(U_i+V_i). Compute an origin and basis by binary elimination before enumerating any states. The endpoints are 0 and d, layer-indexed even when equal. Use the state-space principle from [Forney, Minimal trellises and the state space theorem](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/1b67ae9f5c124c3bd56c8649afa5af47_chap10.pdf).
+
+For each adjacent pair a,b enumerate an edge only if delta = a XOR b lies in the column span of H_i. Label it by the local NP statement "there exists w_i with P_i(w_i) and H_i z_i(w_i) = delta." Bind the bag description and delta to the label. Many distinct pairs can now share that exact statement. Every accepting trace visits its partial sums. Conversely, summing the local statements along a path cancels the internal states and gives d, so the chosen witnesses glue. The compiler and its NO security reduction need no certificate for the truth of a label during encryption. Use the directed scheme above with one leaf key per distinct label. Its nonuniform security proof still requires hiding for false local labels.
+
+For m bags and h = max_i h_i the pair scan has at most m*2^(2h) iterations. A bag has at most min(2^rank(H_i), |S_(i-1)|*|S_i|) distinct leaf labels. There are at most m decryptions of k-bit leaf keys on a path. All three costs are polynomial for logarithmic h and a polynomial leaf backend. With publicly decidable local labels this case can instead be decided directly by reachability. The counting gain is relevant when the leaf checks themselves carry hard private witnesses.
+
+The width estimate is exact for an ordered, explicitly routed interface required to preserve every consistent prefix/suffix combination when local vectors are unrestricted. Choose for each s in S_i a prefix of contribution s and suffix of contribution d XOR s. Each matched pair is valid. Splicing a prefix and suffix belonging to distinct states violates the equation. Even a nondeterministic router must therefore have a distinct cut vertex for each of these matched paths, provided the two halves interact only via that vertex. Restrictions imposed by local predicates, reordering, or cryptographic checks spanning the cut can escape this lower bound. In particular r independent paired copy constraints have peak h=r in the order of all first copies followed by all second copies, and peak h=1 if the pairs can be interleaved. A short random linear fingerprint substituted for exact equality admits a nonzero kernel for every choice of fewer than r rows. Its resulting extra paths invalidate this exact routing argument; any computational substitute needs a separate NO-instance security proof.
+
+~~~python
+from itertools import product
+
+def span(columns):
+    vals = {0}
+    for c in columns:
+        vals |= {v ^ c for v in vals}
+    return vals
+
+def cuts(columns, d):
+    return [span(columns[:i]) & {d ^ x for x in span(columns[i:])}
+            for i in range(len(columns) + 1)]
+
+checked = 0
+for columns in product(range(4), repeat=3):
+    for d in range(4):
+        states = cuts(columns, d)
+        for bits in product(range(2), repeat=3):
+            s = 0
+            accepted = s in states[0]
+            for i, (c, bit) in enumerate(zip(columns, bits)):
+                s ^= c * bit
+                accepted &= s in states[i + 1]
+            assert accepted == (s == d)
+            checked += 1
+cols = [1 << i for i in range(8)]
+assert max(map(len, cuts(cols * 2, 0))) == 256
+assert max(map(len, cuts([c for c in cols for _ in range(2)], 0))) == 2
+print(checked, "trace checks; paired-copy peaks 256 and 2")
+~~~
+
+## Randomized compression controlled by distinct attainable residuals
+
+A short public linear fingerprint can work on a wider class than exact, trace-preserving routing if the original NO instance has few *distinct* attainable errors. For a fixed statement let D consist of all d XOR (XOR_i H_i z_i(w_i)) over independently locally accepting witnesses. Its cardinality N counts vectors, not witness tuples. A YES instance contains zero. For NO, choose a public random binary k-by-r matrix M, where r is the original syndrome length. Build the preceding trellis with matrices M H_i and target M d. Its terminal is reachable precisely when D intersects ker(M). In particular, a true witness gives a path for every M. When a projected target is outside its total column span, emit a fixed dummy ciphertext in that branch and define decryption there arbitrarily; a valid witness never needs this case.
+
+Suppose a public bound B >= 1 holds on N for every NO in the intended family. Use k = ceil(log2 B) + 1 rows and T independent matrices. Split the payload bit into T uniform XOR shares constrained to sum to that bit, and apply the directed compiler separately with independent keys to every projected instance. For fixed nonzero v, Pr[Mv=0]=2^-k. A union bound gives projected satisfiability probability at most B/2^k. All T projections admit paths with probability at most (B/2^k)^T. A receiver with a true witness decrypts every share using that same witness; its error is bounded by the sum of the branch errors. Different witnesses could open different projections, which is why a single stacked matrix and its joint rank do not give the NO security bound here.
+
+Condition on the public matrices. If any projection is NO, select the first such branch. Sample all other shares uniformly and run their public encryptions. Distinguishing the two payloads then distinguishes an encryption of complementary bits in the selected NO branch; orient the challenge according to the parity of the sampled shares. Thus the absolute difference of acceptance probabilities is at most the worst projected-NO distinguishing bound plus (B/2^k)^T. Hardwiring a worst matrix tuple and its index uses the same nonuniform, pointwise security convention as the preceding compiler. This proof neither tests branch membership at encryption time nor requires a new hash hardness assumption. With T equal to the security parameter the additive term is at most 2^-T. Width is at most 2^k per layer, pair enumeration costs O(T m 4^k) iterations, the matrix headers cost Tkr bits, and there are at most T m 2^k distinct local labels counted separately across branches. For polynomial B all three resources are polynomial assuming polynomial local WE algorithms, polynomial field bookkeeping and polynomial-size local statements. Cryptographic security still depends on the actual false projected leaf statements. A public B can follow, for example, from enumerated sets bounding local contributions with polynomial product of their cardinalities, even when witnesses per contribution are numerous.
+
+There is also a limitation for this exact distribution of random tests. On a NO with N>0 let X count nonzero attainable residuals mapped to zero. Different nonzero vectors over F_2 are linearly independent in pairs, so their indicators are pairwise independent. Then E[X]=N/2^k and Var[X]=N*2^-k*(1-2^-k). Chebyshev gives Pr[X=0] <= (2^k-1)/N. Even T tests have probability at most T*(2^k-1)/N of producing *any* projected NO. Thus for exponentially many residuals, logarithmic row count and polynomial repetitions generally fail to deliver the false branch required by this proof. This is a bound on the compiler's false-branch argument, not a general WE impossibility. An explicit example has two bags with H_1=H_2=identity, target zero, left local vectors all nonzero and right local vector only zero. Every k<r projection has a false match. At the opposite extreme if each side is locally restricted to a single different r-bit value, the same matrices have exact middle width 2^r yet one random row rejects with probability 1/2. These examples illustrate the interface; their simple local predicates allow independent simplifications.
+
+~~~python
+from itertools import combinations, product
+from fractions import Fraction
+for k in (1, 2):
+    matrices = list(product(range(8), repeat=k))
+    for n in range(1, 8):
+        for D in combinations(range(1, 8), n):
+            counts = [sum(all((v & row).bit_count() % 2 == 0 for row in rows)
+                          for v in D) for rows in matrices]
+            mean = Fraction(sum(counts), len(counts))
+            var = sum((x - mean)**2 for x in counts) / len(counts)
+            no = Fraction(counts.count(0), len(counts))
+            assert mean == Fraction(n, 2**k)
+            assert var == mean * (1 - Fraction(1, 2**k))
+            assert 1-no <= mean and no <= Fraction(2**k-1, n)
+            if n == 7:
+                assert no == 0
+print("254 residual-set/row-count cases: both bounds and exact moments")
+~~~
+
+## Projective hashing at the leaves with a cut that tolerates undecided words
+
+A local backend can generate its own shared key. For each distinct label j sample an independent secret hash key, publish its projection key, and derive L_j by secretly hashing the public word. An authorized witness derives the same value via projected hashing. Feed L_j directly into the occurrence-pad expansion above. This eliminates the bit-by-bit encryption of an independently chosen L_j. It uses one projection key per distinct label if one hash yields a full-length seed with the required hiding. Include all setup and framing in the size bound; one projection can itself exceed the old k ciphertexts. If the hash instead gives conditional average min-entropy h on a certified false word given the public view, apply a fresh public two-universal hash seed for that label, on both evaluation paths. The leftover hash bound for k extracted bits is at most (1/2)*2^((k-h)/2) in statistical distance for classical side information. A computationally pseudorandom full-length hash needs no entropy claim. Short outputs require independent repetitions or another justified conversion.
+
+There are two graphs. For a fixed word and admissible setup, classify each label as witness-projective YES, smooth NO, or unresolved. In the permissive graph enable an edge unless at least one required label is smooth NO. On an original NO require that this graph have no source-to-terminal path. On an original YES the honest trace must use only projective labels with available witnesses. The distinction avoids demanding smoothness for every false occurrence. Take the source-reachable set in the permissive graph. Every outgoing cut edge has a smooth label, possibly shared with other edges. Replace the joint (projection, seed) for each distinct selected label by (projection, independent uniform seed), with loss at most the sum of the individual distances or quantum distinguishing bounds. The reduction computes all other label pairs, and computes even the selected label's edge pads from the challenge seed. Then the fixed PRG expansion and vertex hybrids from the directed construction apply. This requires independent hash coins and a joint simulation compatible with any common public parameters. Instance-wise security for arbitrary hardwired public keys does not follow from average security over generated keys. For randomized compilation, add the probability of a permissive path on an original NO and charge any setup exceptions explicitly. On YES sum projection disagreement probabilities along the chosen path, once per label for a full-length hash. If there is a permissive path, replacing all unresolved labels by publicly known matching keys shows that these local guarantees alone cannot justify a cut proof.
+
+For a code-based candidate, the RQC hash proof system of [Bettaieb et al., section 3](https://eprint.iacr.org/2021/026.pdf) uses the language of valid encryptions of a specified message and restricts its ambient domain to valid ciphertexts of some message. The construction's domain restriction matters here. An arbitrary projected syndrome or a malformed ciphertext cannot be classified as smooth merely because no target-message opening exists. To use this paper one must supply a witness-preserving map to actual RQC words, the joint setup and quantum security reduction, and a proof that every spurious path crosses an in-domain smooth word. A validity proof mentioned by that work is not a witness-free method to turn an arbitrary instance into a valid word. This gives an explicit interface and a weaker necessary coverage obligation for this proof route; the general CircuitSAT embedding remains open.
+
+~~~python
+from itertools import product
+# Two directed two-hop routes; a shared label is required on two edges.
+edges = [(0,1,(0,)), (1,3,(1,2)), (0,2,(1,)), (2,3,(2,3))]
+for classes in product("YS?", repeat=4):
+    def reaches(enabled):
+        seen = {0}
+        for u,v,req in edges:
+            if u in seen and all(enabled(j) for j in req):
+                seen.add(v)
+        return seen
+    possible = reaches(lambda j: classes[j] != "S")
+    cut = [req for u,v,req in edges if u in possible and v not in possible]
+    assert all(any(classes[j] == "S" for j in req) for req in cut)
+    unknown = [i for i,c in enumerate(classes) if c == "?"]
+    completions = []
+    for bits in product((0,1), repeat=len(unknown)):
+        available = dict(zip(unknown,bits))
+        completions.append(3 in reaches(lambda j: classes[j]=="Y" or available.get(j,0)))
+    assert (3 in possible) == any(completions)
+print("81 three-way classifications; all permissive cuts and completions agree")
+~~~
+
+## Retaining honest decryption keys decides a proposed ciphertext-language embedding
+
+Consider a uniform, witness-free compiler whose polynomial-size labeled graph and honest leaf public keys can be generated on input x while retaining the matching decryption keys, with exactly the specified joint distribution. For each leaf j with ciphertext c_j and target message mu_j, set T_j to the outcome of Dec(sk_j,c_j) = mu_j, treating decoder failure as false. Form the graph whose edges require all their T_j to be true. Run ordinary reachability. This polynomial-time decision procedure uses neither witnesses nor the private hash keys.
+
+Precisely, suppose that except with probability epsilon_Y on each YES input there is one path whose labels are all valid encryptions of their targets and decode correctly. Except with probability epsilon_N on each NO input suppose every path contains a valid encryption of another message that decrypts correctly. These are joint events under the *actual* label generator. The procedure accepts with probability at least 1-epsilon_Y on YES and at most epsilon_N on NO. No behavior whatsoever is needed on malformed words: an arbitrary answer there cannot delete the guaranteed YES path or put back the missing crossing edge on NO. Equivalently, on good runs the decoded graph contains the witness path on YES and is contained in the permissive graph on NO if all smooth designated labels decrypt to other messages. Marginal bounds on decryption failures for independently and honestly sampled ciphertexts need not hold on compiler-selected words, especially when they depend on the key. Bounds on actual joint failures, or applicable per-label bounds and a union bound, suffice.
+
+For an asymptotic CircuitSAT embedding with both errors at most 1/3 this implies NP is contained in BPP. Independently repeating the decision test amplifies the constant gap. For this restricted family it even yields a direct one-bit WE: run the amplified classifier, emit the payload on acceptance and zero on rejection, and let the receiver read the bit. The YES error and the NO total variation distance are bounded by the respective classification errors. No code hardness assumption is used here. The implication is asymptotic; a fixed-size finite benchmark alone does not give a complexity-class inclusion.
+
+Consequently the straightforward use of honest RQC key generation and a cut entirely covered by valid other-message ciphertexts cannot by itself explain a general polynomial construction unless CircuitSAT has the indicated decision algorithm. Erasing the secret keys in Enc does not help: the independent classifier can re-run the same key generation and keep them. The argument also applies to a freshly sampled honest CRS whose full sampling algorithm reveals those keys and for which the embedding guarantee holds with high probability. It does not cover a word language with computationally hidden membership even given the compiler's generation coins, or a proof in which false-branch hiding has no such efficiently recognizable cut. This qualifies the embedding objective in the preceding section, not the security theorem of the cited RQC paper.
+
+## Directed threshold gates with n-t+1 public corrections
+
+Use a monotone threshold circuit of polynomially many wires as the public combination of named local statements. This is a circuit: a subgate can feed several parents. The compiler must prove that on YES an original witness efficiently supplies enough true leaves to activate the output, and on NO even jointly granting all unresolved leaves cannot activate it. This last condition is substantive: testing the clauses of a CNF with unrelated assignments does not implement SAT. Classical threshold secret sharing in monotone formulas is described by [Benaloh and Leichter](https://www.cs.cornell.edu/courses/cs754/2001fa/bena88.pdf). The following use of per-wire pads lets threshold gates share child seeds across parents and removes redundant public share words.
+
+Work in a publicly represented F_(2^k) with more elements than the maximum fan-in. Give every gate an independent uniform k-bit key K_g, and obtain distinct leaf keys as above. Expand a child key with a fixed quantum-secure PRG tree to a separate field pad p_i for each wire out of the child. Use a separate root slot to mask the payload. For a t-of-n gate, 1 <= t <= n, choose distinct public nonzero points x_1,...,x_n. Use the first t-1 wires as anchors. Interpolate the unique polynomial f of degree less than t with f(0)=K_g and f(x_i)=p_i for each anchor. Publish f(x_i)+p_i on each non-anchor wire, and nothing on anchor wires. Any t available children recover their evaluations (an anchor pad itself is an evaluation) and interpolate K_g. Require distinct children when counting distinct conditions; intentional duplicate wires give a weighted policy. Every wire still has a distinct slot.
+
+On NO process inactive leaves and then inactive gates in topological order. Inactive here means unreachable even with all unresolved leaves granted. Replace inactive leaf seeds or their pads using their false-leaf security as in the preceding sections. In the gate hybrid every inactive child wire now has its own independent random pad. Condition on the active child pads. Suppose a anchors and b non-anchors are active. The remaining t-1-a anchor pads are independent uniform, so f is uniform among polynomials satisfying the value at zero and the a active anchors. Since a+b<t, its evaluations at the b active non-anchors are jointly uniform for every fixed K_g by interpolation at distinct points. Corrections on inactive non-anchors are independently masked. Thus all corrections at this gate can be simulated without K_g: sample independent uniform words for the non-anchors. This conditional law holds jointly with other gates because inactive occurrence pads are exclusive. K_g's outgoing expansion can now be replaced by independent pads by a PRG hybrid, including the reserved payload slot at an inactive root. The reductions use the earlier nonuniform classification convention. Only polynomially many PRG nodes and the genuinely false leaf challenges are used. No iO intermediate is involved.
+
+The gate payload is exactly k * sum_g(n_g-t_g+1) bits, plus leaf material, final mask and any topology/framing. Direct interpolation and evaluation take polynomial field time (for instance O(t^2+nt) operations with standard interpolation and Horner evaluation). Decryption of a selected gate takes O(t^2) operations by direct Lagrange evaluation at zero, plus pad derivation. Each selected shared gate need only be decrypted once. For a 48-of-64 gate with 128-bit seeds this uses 17 corrections or 2176 bits versus 64 corrections or 8192 bits for separately masking all shares. Actual total cost depends on the leaves. This construction supplies a polynomial combiner for polynomial threshold DAGs, not a fixed-assumption general-NP leaf implementation.
+
+~~~python
+from itertools import combinations, product
+from collections import Counter
+# Exhaust in F_5 to check the interpolation law, using modular subtraction for masking.
+def eval_at(points, x):
+    value = 0
+    for i, (u,v) in enumerate(points):
+        weight = 1
+        for j,(w,_) in enumerate(points):
+            if i != j:
+                weight = weight*(x-w)*pow((u-w)%5,-1,5)%5
+        value += v*weight
+    return value%5
+
+for t in range(1,5):
+    for size in range(5):
+        for active in combinations(range(4), size):
+            hist = []
+            for key in range(5):
+                counts = Counter()
+                for hidden in product(range(5), repeat=4-size):
+                    it = iter(hidden)
+                    pads = [i%5 if i in active else next(it) for i in range(4)]
+                    points = [(0,key)] + [(i+1,pads[i]) for i in range(t-1)]
+                    shares = [eval_at(points,i+1) for i in range(4)]
+                    corr = tuple((shares[i]-pads[i])%5 for i in range(t-1,4))
+                    counts[corr] += 1
+                    if size >= t:
+                        opened = [(i+1,(pads[i]+(corr[i-t+1] if i>=t-1 else 0))%5)
+                                  for i in active[:t]]
+                        assert eval_at(opened,0)==key
+                hist.append(counts)
+            if size<t:
+                assert all(h == hist[0] for h in hist)
+                assert len(hist[0]) == 5**(5-t)
+print("64 threshold/subset cases: full correction histograms or witness reconstruction")
+~~~
+
+## Deriving the gate key removes one more correction and extends to span programs
+
+When the gate key can be chosen by the construction, use t anchor pads, interpolate the degree-less-than-t polynomial through them, and use its value at zero as the gate key. Only n-t non-anchor corrections remain. More generally, let rows m_i describe a monotone span program over the seed field, with nonzero target tau in their full span. The gate opens exactly when the rows on available wires span tau. Use coordinates in a fixed public row basis so the n-by-r matrix has rank r. Pick r independent anchor rows B. With one domain-separated child pad p_i per row occurrence, solve M_B y = p_B. Set K = tau y. Publish c_i = m_i y - p_i only on the n-r nonanchors. Authorized children supply p_i and hence m_i y (with c_i added for a nonanchor); use any public reconstruction coefficients for tau. This is ordinary row-span reconstruction; background on span programs and linear sharing appears in [Babai, Gal and Wigderson](https://doi.org/10.1007/s004930050058). The field subtraction also covers odd characteristic; for the seed implementation use a binary extension field.
+
+**Joint hiding of a derived key.** In topological order, replace the outgoing expansions of inactive children with independent per-occurrence pads, starting with the secured false leaves. Fix the active input pads and all randomness external to the fresh inactive wire slots at the gate. For an inactive gate with active rows A there exists a vector h with M_A h=0 and tau h=1. For every field element d, shift all local pads by p_i -> p_i + d m_i h. This fixes active pads and permutes the uniformly random inactive pads. It sends y to y+d h, fixes every correction, and translates K by d. Thus K is exactly uniform jointly independently of the gate corrections conditional on the fixed data. This is independence from the *public corrections*, not independence from the full internal pad vector. No later computation takes these private pads as inputs except via this gate's key and corrections; exclusive wire slots are essential even for a repeated child. A reduction samples local pads to generate the corrections, discards the derived key, and uses its PRG challenge for the outgoing expansion (or reserved root slot). The independence just proved makes the real side of that hybrid exact. Gates whose policy is true are evaluated as prescribed. This yields the same polynomial, nonuniform fixed-PRG/leaf reduction as above. It does not require a PRG secure under related seeds.
+
+**Two specializations.** Vandermonde rows with target evaluation at zero give exactly n-t corrections, so a 48-of-64 gate with 128-bit pads now uses 16 words or 2048 bits. An all-input AND gate has zero correction words, and the DAG still pays for child-to-wire pad derivations, leaf material, topology and the final payload mask. For undirected s-to-t connectivity, use vertex incidence rows e_u+e_v in characteristic two and target e_s+e_t for distinct terminals. If the full graph disconnects the terminals the gate is always false and can be handled directly. Otherwise a path sums to the target; if disconnected in the available subgraph, its component indicator annihilates all available rows and separates the target. Choose a public spanning forest as anchors. Its rank is |V|-c for c full-graph components, including isolated vertices. Only |E|-|V|+c words, one per nonforest edge, are published. Implementation needs only XOR: assign root potential zero in each tree, propagate potentials along anchor edges using their pads, and publish the endpoint potential difference minus the pad for each remaining edge. Set the gate key to the terminal potential difference. For a connected graph with 100 vertices and 110 edges this costs 11 correction words, or 1408 bits at k=128. The graph arithmetic is linear time given a forest; a receiver can find an available path and XOR its corrected values. Directed connectivity in general is outside this incidence representation. Both specializations still require a sound embedding of the original witness relation and secure local keys.
+
+~~~python
+from collections import Counter, defaultdict
+from itertools import product
+
+# Five occurrences, rank three, anchors first; two non-anchors.
+rows = (1,2,4,3,6)
+target = 5
+dot = lambda a,b: (a & b).bit_count() % 2
+for mask in range(1 << len(rows)):
+    active = [i for i in range(len(rows)) if mask >> i & 1]
+    coeff = next((s for s in range(1 << len(rows))
+                  if not (s & ~mask) and
+                  all(dot(s,sum(dot(m,1<<j)<<i for i,m in enumerate(rows)))
+                      == dot(target,1<<j) for j in range(3))), None)
+    views = defaultdict(Counter)
+    for pads in product((0,1), repeat=len(rows)):
+        y = sum(pads[i]<<i for i in range(3))
+        corr = tuple(dot(m,y)^p for m,p in zip(rows[3:],pads[3:]))
+        key = dot(target,y)
+        views[tuple(pads[i] for i in active),corr][key] += 1
+        if coeff is not None:
+            assert sum((pads[i] ^ (corr[i-3] if i>=3 else 0))
+                       for i in active if coeff>>i & 1)%2 == key
+    if coeff is None:
+        assert all(h[0]==h[1] for h in views.values())
+print("1024 active-set/pad combinations: authorized reconstruction or joint key hiding")
+~~~
