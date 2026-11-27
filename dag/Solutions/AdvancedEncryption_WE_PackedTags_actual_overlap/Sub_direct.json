@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedTags.actual_overlap",
+  "proof_type": "prove",
+  "explanation": "The missing coefficient of the product of the actual affine source aggregates counts their common variables."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedTags.nearest_scaled",
+  "proof_type": "prove",
+  "explanation": "Nearest scaled decoding is invariant under full ciphertext wraps."
+}

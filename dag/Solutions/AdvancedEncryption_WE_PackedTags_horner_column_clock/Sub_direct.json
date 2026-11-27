@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedTags.horner_column_clock",
+  "proof_type": "prove",
+  "explanation": "Registered tape compiler clock for a fixed-width Horner multiply bit."
+}

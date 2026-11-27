@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedTags.weighted_extraction",
+  "proof_type": "prove",
+  "explanation": "Weighted extracted rows of repeated negacyclic samples recover the packed messages and noise."
+}

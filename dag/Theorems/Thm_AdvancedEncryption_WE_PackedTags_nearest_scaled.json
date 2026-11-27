@@ -1,0 +1,4 @@
+{
+  "name": "AdvancedEncryption.WE.PackedTags.nearest_scaled",
+  "title": "Nearest scaled decoding is invariant under full ciphertext wraps"
+}
