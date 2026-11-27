@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Reduction_Rogers_RogersOrder2", "title": "Rogers' mean value formula of order two (the `k = 2` case of `ClassicalRogersFormula.formula`):", "description": "Moved from SigabaNeo.Lib.Lattices.Reduction.Rogers.RogersOrder2 on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}
