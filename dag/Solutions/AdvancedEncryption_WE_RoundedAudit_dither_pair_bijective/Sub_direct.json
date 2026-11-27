@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.RoundedAudit.dither_pair_bijective","proof_type":"prove","explanation":"Subtract the two residue equations for injectivity, and divide by the nonzero coefficient difference for surjectivity."}

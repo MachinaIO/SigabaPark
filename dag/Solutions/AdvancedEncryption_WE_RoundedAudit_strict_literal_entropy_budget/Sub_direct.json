@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.RoundedAudit.strict_literal_entropy_budget","proof_type":"prove","explanation":"Bound the number of full literal responses by integer arithmetic and normalize the finite exponent comparison."}
