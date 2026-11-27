@@ -1,0 +1,19 @@
+{
+ "schema": "sigaba.generator.v1",
+ "role": "design",
+ "family_id": "avoid-word",
+ "family_revision": "sha256:6facd80ba216ccfcaa27f26511db72e1a9933450e50376c3630236a07eb475d2",
+ "generator_id": "seed-word",
+ "version": 1,
+ "parent": null,
+ "seed_bits": 8,
+ "levels": 2,
+ "generate_decl": "Generators.Design.AvoidWord.SeedWord.V0001.generate",
+ "certificate_decl": "Generators.Design.AvoidWord.SeedWord.V0001.certified",
+ "source_refs": [],
+ "bootstrap": {
+  "approved_by": "SoraSuegami",
+  "provenance": "SigabaNeoStd.Benchmarks bootstrap fixture families (core); no DAG source"
+ },
+ "description": "Bootstrap pilot generator: the task is to avoid a seed-derived word. Not a research benchmark."
+}
