@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Guard.rank_collision_budget", "title": "Rank charged to erroneous off-diagonal context matches", "statement": "For a uniform finite seed, perfect diagonal acceptance, width at most r, and at most c accepting seeds per unequal pair imply 2 s n \u2264 2 s r + n (n-1) c, for an n-context bilinear field test with s seeds."}
