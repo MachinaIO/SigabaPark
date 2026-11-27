@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceProject.support_union","proof_type":"prove","explanation":"Taking the union of a sufficient certificate for each output on one private support preserves the complete output profile, and its support size is at most the sum of certificate sizes."}
