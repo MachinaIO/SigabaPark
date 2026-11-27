@@ -1,0 +1,10 @@
+{
+ "name": "SeparatingCoherent",
+ "title": "Exact finite-query density equality for losing pairs of address histories",
+ "description": "Finite sums over bra and ket histories give equal public-record density blocks whenever each pair jointly loses. Every single coherent source lookup satisfies this condition. An XOR lookup is included.",
+ "tags": [
+  "witness-encryption",
+  "machine",
+  "privacy"
+ ]
+}

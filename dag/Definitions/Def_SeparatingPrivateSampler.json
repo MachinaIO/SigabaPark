@@ -1,0 +1,10 @@
+{
+ "name": "SeparatingPrivateSampler",
+ "title": "Fresh private operands and the joint distribution of pads and correction bits",
+ "description": "A clocked fair-bit scanner samples the complete private operand word. Composing its output law with the dense encoder and a private pad projection realizes the joint distribution of independent pads and their public corrections.",
+ "tags": [
+  "witness-encryption",
+  "machine",
+  "privacy"
+ ]
+}
