@@ -67,9 +67,17 @@ Maintainers' setup:
 1. Require `learning / decide` next to `gate / decide` in the ruleset of `main`, with the merge
    queue (one pull request per merge group). Protect `learning-records` and `learning-report`
    (no force push, no deletion, writes by the `learning` workflow and administrators only).
-2. Create the Environment `learning-evaluator` (required reviewers, `main` only). Put the
-   authorized inference provider's configuration there, and set `evaluator` in
-   `meta/learning.json`, only when a paid evaluation budget is authorized.
+2. Create the Environment `learning-evaluator` (required reviewers, `main` only). Evaluation
+   needs a runner with the pinned core built and the model's CLI: set the repository variable
+   `LEARNING_EVALUATOR_RUNNER` (e.g. a self-hosted runner label) and, in the Environment,
+   `LEARNING_EVALUATOR_AUTHORIZED = true` and `LEARNING_EVALUATOR_CORE` (the core checkout on that
+   runner). Then add a profile (`provider: local-cli`, `settings.solver: claude-code`, a budget)
+   and enable `evaluator` in `meta/learning.json` — only when a paid evaluation budget is
+   authorized. Solvers are programs in `ci/learning/solvers/` chosen by name
+   (`ci/learning/providers.py`); `scripted-fixture` is a model-free pipeline test for the
+   bootstrap families. A maintainer may instead run the same evaluator on their own machine
+   (`SIGABA_LEARNING_EVALUATOR=authorized python3 -m ci.learning.cli evaluate ... --core <core>
+   --workdir <dir> --publish`) and push the records to `learning-records`.
 3. Certification needs an environment whose core has the benchmark commands
    (`SigabaNeo.Trusted.GeneratorCheck`): add it to `env/environments.json` as for any core
    release.

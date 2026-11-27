@@ -455,3 +455,22 @@ class TestHostileLabels(ReportCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EmptyPredecessor(unittest.TestCase):
+    """The first activation of a role names the empty notebook (its SHA-256, as
+    ci/learning/activation.py writes it) or null: both start the chain."""
+
+    def test_both_forms(self):
+        from ci.learning import report as R
+        empty = R.EMPTY_NOTEBOOK
+        for pred in (None, empty):
+            issues = []
+            a = {"sequence": 1, "_ts": 1.0, "record_id": "sha256:" + "1" * 64,
+                 "predecessor_sha256": pred, "successor_sha256": "sha256:" + "2" * 64}
+            chain, active = R.derive_activations([a], issues)
+            self.assertEqual((len(chain), active, issues), (1, "sha256:" + "2" * 64, []), pred)
+        issues = []
+        bad = dict(a, predecessor_sha256="sha256:" + "3" * 64)
+        self.assertEqual(R.derive_activations([bad], issues)[0], [])
+        self.assertEqual(len(issues), 1)

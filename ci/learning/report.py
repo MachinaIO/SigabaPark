@@ -640,10 +640,15 @@ def comparison_row(cmp, contract):
         "notes": notes, "record_ids": rids(cmp, contract)}
 
 
+EMPTY_NOTEBOOK = "sha256:" + hashlib.sha256(b"").hexdigest()
+
+
 def derive_activations(activations, issues):
     """Apply activations in sequence order with compare-and-swap; invalid events are reported."""
+    # As ci/learning/activation.py: every role starts from the empty notebook, and a null
+    # predecessor means the empty notebook.
     chain = []
-    active = None
+    active = EMPTY_NOTEBOOK
     seen_seq = set()
     ordered = sorted(activations, key=lambda a: (
         as_int(a.get("sequence")) if as_int(a.get("sequence")) is not None else 1 << 62,
@@ -655,7 +660,7 @@ def derive_activations(activations, issues):
             problem = "activation without a valid sequence"
         elif seq in seen_seq:
             problem = "duplicate activation sequence %d" % seq
-        elif a.get("predecessor_sha256") != active:
+        elif (a.get("predecessor_sha256") or EMPTY_NOTEBOOK) != active:
             problem = "activation predecessor does not match the active notebook " \
                       "(compare-and-swap)"
         if problem:
@@ -2177,7 +2182,7 @@ def render_markdown(data):
         if an:
             lines.append("- Active notebook: %s (activation %s, %s%s, %s): %s bytes, %s." % (
                 md_id(an["sha256"]), md(an["sequence"]), md(an["reason"]),
-                md(" provisional" if an["provisional"] else ""), md(an["date"]),
+                (", provisional" if an["provisional"] else ""), md(an["date"]),
                 md(an["bytes"] if an["bytes"] is not None else "n/a"),
                 md("%d tokens (%s)" % (an["tokens"], an["tokenizer"]) if an["tokens"]
                    is not None else "tokens unavailable: %s" % an["tokens_unavailable_reason"])))

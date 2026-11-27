@@ -19,8 +19,9 @@ the randomness, the frozen contracts, the provider and the verifier:
   infrastructure failures starts a full replacement run (new `run_id`), at most
   `infra_retries + 1` runs per contract.
 
-Providers implement `Provider`. Only `MockProvider` (tests and `--dry-run`) exists here: a real
-model provider must be added and authorized by a maintainer; until then evaluation is
+Providers implement `Provider`: `MockProvider` (tests and `--dry-run`) and `local-cli`
+(`providers.py`: one solver program per trial, run only when the runner is authorized). Until a
+maintainer enables one in the policy and authorizes the runner, evaluation is
 `awaiting_evaluator`.
 """
 
@@ -102,7 +103,13 @@ class MockProvider(Provider):
         return self.behavior(req)
 
 
-PROVIDERS: dict[str, Callable[[], Provider]] = {}
+def _local_cli() -> Provider:
+    from .providers import LocalCliProvider
+    return LocalCliProvider()
+
+
+# Installed providers, by policy name (`evaluator.provider`, `profiles[].provider`).
+PROVIDERS: dict[str, Callable[[], Provider]] = {"local-cli": _local_cli}
 
 
 def provider_for(pol: dict, profile: dict | None, dry_run: bool) -> tuple[Provider | None, str]:
@@ -180,6 +187,12 @@ class LeanTaskVerifier(Verifier):
         text = solution.get("module_text")
         theorem = solution.get("theorem")
         if not isinstance(text, str) or not isinstance(theorem, str) or len(text) > 1 << 20:
+            return {"verdict": "rejected", "theorem_sha256": None, "certified_value": None}
+        # A model's answer is untrusted code: the same source rules as a generator (no `#eval`,
+        # no syntax or elaboration extensions, no `unsafe`/`extern`, imports of the libraries
+        # only, never a generator module) before anything of it is built.
+        from .route import lean_problems
+        if lean_problems(text):
             return {"verdict": "rejected", "theorem_sha256": None, "certified_value": None}
         ws.write_module(module, text.encode())
         ok, log, timed_out = ws.build([module])

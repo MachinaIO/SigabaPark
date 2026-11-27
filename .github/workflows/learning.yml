@@ -179,13 +179,16 @@ jobs:
           IMAGE: ${{ needs.route.outputs.image }}
           ENV_ID: ${{ needs.route.outputs.env_id }}
         # The certifier is the base branch's ci/learning, run with the image's Python; Lean runs
-        # as uid 1000 apart from it, without network, token or secret.
+        # as uid 1000 apart from it, without network, token or secret. CHOWN and FOWNER let the
+        # certifier (root) make the build outputs read only for Lean's user before any generator
+        # code runs (ci/learning/lean_iface.py, Workspace.lock); Lean gets no capability.
         run: |
           mkdir -p out fetched/files
           docker pull "$IMAGE"
           set +e
           docker run --rm --network none --read-only --cap-drop ALL \
-            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --cap-add SETUID --cap-add SETGID --cap-add CHOWN --cap-add FOWNER \
+            --security-opt no-new-privileges \
             --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
             --memory 14g --cpus 4 --pids-limit 4096 \
             --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
@@ -206,11 +209,14 @@ jobs:
   evaluate:
     needs: route
     if: needs.route.outputs.route == 'notebook'
-    runs-on: ubuntu-latest
+    # The evaluator needs the pinned core built (Lean) and the model's CLI: a runner the
+    # maintainers provide (variable LEARNING_EVALUATOR_RUNNER, e.g. a self-hosted runner label).
+    # Maintainers protect this Environment (required reviewers, `main` only) and set in it
+    # LEARNING_EVALUATOR_AUTHORIZED = true and LEARNING_EVALUATOR_CORE (the core checkout on that
+    # runner). Without them, or with `evaluator.enabled = false` in meta/learning.json, the
+    # evaluator answers `awaiting_evaluator` and runs nothing.
+    runs-on: ${{ vars.LEARNING_EVALUATOR_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 360
-    # Maintainers protect this Environment (required reviewers, `main` only) and put the
-    # authorized provider configuration in it. Without it, or with `evaluator.enabled = false`
-    # in meta/learning.json, the evaluator answers `awaiting_evaluator` and runs nothing.
     environment: learning-evaluator
     permissions:
       contents: write   # appends to `learning-records` only
@@ -232,9 +238,14 @@ jobs:
           path: fetched
       - name: Evaluate the candidate against the active notebook
         working-directory: base
+        env:
+          SIGABA_LEARNING_EVALUATOR: ${{ vars.LEARNING_EVALUATOR_AUTHORIZED == 'true' && 'authorized' || '' }}
+          SIGABA_CORE: ${{ vars.LEARNING_EVALUATOR_CORE }}
         run: |
+          args=()
+          [ -n "$SIGABA_CORE" ] && args+=(--core "$SIGABA_CORE" --workdir "$RUNNER_TEMP/learning-eval")
           python3 -m ci.learning.cli evaluate --route ../fetched/route.json --fetched ../fetched \
-            --base . --records ../learning-records --publish --out ../eval.json
+            --base . --records ../learning-records --publish "${args[@]}" --out ../eval.json
       - name: Publish the records
         working-directory: learning-records
         run: |
@@ -345,6 +356,54 @@ jobs:
             fi
           done < label-ops.txt
 
+  # Calibration and anchor assessments (manual, maintainers): the trusted evaluator on the
+  # maintainers' runner, as `evaluate`. The report is rebuilt by `post-merge` afterwards.
+  assess:
+    if: github.event_name == 'workflow_dispatch' && inputs.action != 'report'
+    runs-on: ${{ vars.LEARNING_EVALUATOR_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 360
+    environment: learning-evaluator
+    permissions:
+      contents: write   # appends to `learning-records` only
+    steps:
+      - name: Check out main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          path: base
+          persist-credentials: false
+      - name: Check out the learning records
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: learning-records
+          path: learning-records
+      - name: Calibrate or assess
+        working-directory: base
+        env:
+          ACTION: ${{ inputs.action }}
+          ROLE: ${{ inputs.role }}
+          EPOCH: ${{ inputs.epoch }}
+          SIGABA_LEARNING_EVALUATOR: ${{ vars.LEARNING_EVALUATOR_AUTHORIZED == 'true' && 'authorized' || '' }}
+          SIGABA_CORE: ${{ vars.LEARNING_EVALUATOR_CORE }}
+        run: |
+          case "$ROLE" in design|cryptanalysis) ;; *) echo "role: design | cryptanalysis"; exit 2 ;; esac
+          args=()
+          [ -n "$SIGABA_CORE" ] && args+=(--core "$SIGABA_CORE" --workdir "$RUNNER_TEMP/learning-assess")
+          case "$ACTION" in
+            calibrate) python3 -m ci.learning.cli calibrate --role "$ROLE" --base . --records ../learning-records --publish "${args[@]}" ;;
+            anchor)
+              [[ "$EPOCH" =~ ^[A-Za-z0-9._-]{1,64}$ ]] || { echo "bad epoch"; exit 2; }
+              python3 -m ci.learning.cli anchor --role "$ROLE" --epoch "$EPOCH" --base . --records ../learning-records --publish "${args[@]}" ;;
+            *) echo "unknown action $ACTION"; exit 2 ;;
+          esac
+      - name: Publish the records
+        working-directory: learning-records
+        run: |
+          git config user.name "sigaba-learning"
+          git config user.email "learning@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || { git commit -q -m "Assessment records" && git push -q; }
+
   # On `main`: what was merged becomes a record. A generator version is certified again in the
   # sandbox at the merge commit (its record is about exactly what is on main); a changed notebook
   # is activated only against a passing confirmation for its exact bytes and the notebook it
@@ -404,6 +463,7 @@ jobs:
           ENV_ID: ${{ steps.env.outputs.env_id }}
           BEFORE: ${{ github.event.before }}
           PR: ${{ steps.changed.outputs.pr }}
+          ACTOR: ${{ steps.changed.outputs.actor }}
         run: |
           mkdir -p merged/files out
           # The merged version's files, as the certifier reads them from a pull request, routed
@@ -411,12 +471,13 @@ jobs:
           # admitted and merged under the repository's rules, so the route is run as a writer.
           git -C base worktree add --quiet --detach ../before "$BEFORE"
           (cd base && python3 -m ci.learning.cli fetch-local --base "$BEFORE" --head "$GITHUB_SHA" --out ../merged)
-          (cd base && python3 -m ci.learning.cli route --base ../before --fetched ../merged --author "${{ steps.changed.outputs.actor }}" \
+          (cd base && python3 -m ci.learning.cli route --base ../before --fetched ../merged --author "$ACTOR" \
              --permission write --draft false --event push --pr "${PR:-0}" --out ../merged/route.json)
           docker pull "$IMAGE"
           set +e
           docker run --rm --network none --read-only --cap-drop ALL \
-            --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --cap-add SETUID --cap-add SETGID --cap-add CHOWN --cap-add FOWNER \
+            --security-opt no-new-privileges \
             --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
             --memory 14g --cpus 4 --pids-limit 4096 \
             --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
@@ -444,19 +505,6 @@ jobs:
           python3 -m ci.learning.cli activate --role auto --base . --records ../learning-records \
             --merge-commit "$GITHUB_SHA" --pr "${PR:-0}" --head "${HEAD:-$GITHUB_SHA}" --actor "$ACTOR" \
             --permission "$perm" --publish --out ../activation.json
-      - name: Calibrate or assess (manual, maintainers)
-        if: github.event_name == 'workflow_dispatch' && inputs.action != 'report' && steps.lr.outcome == 'success'
-        working-directory: base
-        env:
-          ACTION: ${{ inputs.action }}
-          ROLE: ${{ inputs.role }}
-          EPOCH: ${{ inputs.epoch }}
-        run: |
-          case "$ACTION" in
-            calibrate) python3 -m ci.learning.cli calibrate --role "$ROLE" --base . --records ../learning-records --publish ;;
-            anchor) python3 -m ci.learning.cli anchor --role "$ROLE" --epoch "$EPOCH" --base . --records ../learning-records --publish ;;
-            *) echo "unknown action $ACTION"; exit 2 ;;
-          esac
       - name: Publish the records
         if: steps.lr.outcome == 'success'
         working-directory: learning-records
