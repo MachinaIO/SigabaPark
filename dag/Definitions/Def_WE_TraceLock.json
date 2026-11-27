@@ -1,0 +1,1 @@
+{"name":"WE_TraceLock","title":"Compiled honest-trace lock predicate for the fixed NAND statement","description":"Literal wire selection at compilation time, local XOR/AND flags, and a balanced AND tree over 4096 checks. The predicate exposes witness and trace data inputs internally.","tags":["witness-encryption","circuits"]}

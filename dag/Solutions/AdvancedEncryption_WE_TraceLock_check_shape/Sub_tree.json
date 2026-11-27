@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceLock.check_shape","proof_type":"prove","explanation":"Compile the current wire list to literals with a true default. Induct over the gates to prove that every local flag accepts exactly the computed trace. Induct on the complete binary tree for its gate count, depth, and accepted assignments."}
