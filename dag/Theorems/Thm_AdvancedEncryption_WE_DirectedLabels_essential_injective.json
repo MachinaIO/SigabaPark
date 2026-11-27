@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.essential_injective",
+  "title": "Irreplaceable sampled positions have injective subset sums",
+  "statement": "If no indexed vector is a difference of two subset sums avoiding that index, then all subset sums are distinct."
+}

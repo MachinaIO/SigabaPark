@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.essential_injective",
+  "proof_type": "prove",
+  "explanation": "Any index on exactly one side of a collision can be isolated by erasing it from that side."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.interval_overlap",
+  "title": "Overlap of equal integer flooding intervals under a bounded center shift",
+  "statement": "The overlap of two radius-W intervals at nonnegative offset e within the interval width has exactly 2W+1-e elements."
+}
