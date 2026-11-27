@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TagBank.rescale_error",
+  "proof_type": "prove",
+  "explanation": "Nearest-grid coefficient rounding and binary switching errors admit a uniform phase radius."
+}

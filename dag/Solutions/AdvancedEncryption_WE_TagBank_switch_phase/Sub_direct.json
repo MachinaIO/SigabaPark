@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TagBank.switch_phase",
+  "proof_type": "prove",
+  "explanation": "One fresh-key bank switches the product of two affine label phases."
+}
