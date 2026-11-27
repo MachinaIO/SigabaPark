@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.QuadraticResidual.gauss_pivot","title":"Signed binary hyperbolic-pair elimination","statement":"Summing the sign of xy+xU+yV+W over both pivot bits gives exactly twice the sign of W+UV for every residual assignment, including the constant and sign."}

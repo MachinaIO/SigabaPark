@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.QuadraticResidual.isotropic_coset","title":"Restriction to each common isotropic coset is affine","statement":"If the polar form vanishes on a subgroup W times itself, the restriction of the quadratic to each translate t+W is affine, with a homomorphism from W depending on t."}

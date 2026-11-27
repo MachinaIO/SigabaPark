@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.QuadraticResidual.radical_fiber","proof_type":"prove","explanation":"Translate by a chosen solution and subtract it on the inverse direction. For a finite GF(2) vector space this supplies the exact power-of-two counting multiplier."}
