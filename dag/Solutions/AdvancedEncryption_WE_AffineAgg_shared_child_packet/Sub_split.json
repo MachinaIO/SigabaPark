@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.AffineAgg.shared_child_packet","proof_type":"prove","explanation":"Split the input into disjoint summands and cancel the mask and affine offset. No coefficient basis has to be recovered."}
