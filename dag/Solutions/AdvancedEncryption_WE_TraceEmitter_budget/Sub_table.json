@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceEmitter.budget","proof_type":"prove","explanation":"Count the finite controller states and apply the canonical transition table formula for three work tapes."}
