@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.FETree.exact_issuer_queries","title":"Query coverage for an exact offline issuer","statement":"An offline compiler whose transcript determines a static emitter, required to reproduce every oracle at every address, must query every address, even if the queried set depends on its answers."}
