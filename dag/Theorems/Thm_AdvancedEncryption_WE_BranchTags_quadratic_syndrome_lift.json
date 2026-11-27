@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.quadratic_syndrome_lift",
+  "title": "A five-term lift for quadratic syndrome tags",
+  "statement": "Three bounded additive preimages at equally spaced parameters 0, 1 and 3 yield a preimage at 4 with norm at most five times the honest bound. The syndrome has arbitrary constant, linear and quadratic group coefficients."
+}

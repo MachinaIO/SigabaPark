@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.quadratic_tag_pair_unique",
+  "proof_type": "prove",
+  "explanation": "Eliminate the fourth point with the linear equation. The quadratic equation factors, and cancellation in the domain determines the pair."
+}
