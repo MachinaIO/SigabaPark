@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.rounded_branch_unique",
+  "proof_type": "prove",
+  "explanation": "The difference of the two scaled rounding errors is a multiple of q with magnitude below q. Cancelling q leaves a difference of decoded integers divisible by p, and the interval selects one representative."
+}

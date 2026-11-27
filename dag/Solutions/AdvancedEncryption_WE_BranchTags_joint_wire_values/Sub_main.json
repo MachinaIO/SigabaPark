@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.joint_wire_values",
+  "proof_type": "prove",
+  "explanation": "Glue the left assignment on S to the right assignment off S. Agreement on the intersection and the support hypotheses preserve both outputs."
+}

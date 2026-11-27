@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.masked_view_count",
+  "title": "Exact fiber size for a joint view with correlated additive masks",
+  "statement": "For an arbitrary seed map and a homomorphic uniform mask, every attainable seed contributes exactly the kernel size to the full-transcript fiber."
+}

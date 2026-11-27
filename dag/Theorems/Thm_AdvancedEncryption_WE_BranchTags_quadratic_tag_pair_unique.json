@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.quadratic_tag_pair_unique",
+  "title": "Pair sums of quadratic assignment tags determine the unordered pair",
+  "statement": "Over an integral domain with nonzero two, a pair has the same sum and sum of squares as a second pair exactly when they agree up to permutation."
+}

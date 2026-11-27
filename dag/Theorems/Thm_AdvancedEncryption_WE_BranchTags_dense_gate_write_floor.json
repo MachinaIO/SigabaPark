@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.dense_gate_write_floor",
+  "title": "Write floor for 4096 explicit dense branch indices",
+  "statement": "At the listed minimum dimensions and coefficient widths, writing one full matrix index per gate requires at least 8455716864 output steps."
+}

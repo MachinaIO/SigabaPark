@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BranchTags.nand_rectangle_quotient",
+  "title": "A complete invariant of independent row and column translations on a Boolean gate",
+  "statement": "Two abelian-group-valued Boolean gate tables differ by separable input masks exactly when their alternating rectangle sums agree."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.masked_view_count",
+  "proof_type": "prove",
+  "explanation": "Choose a mask opening per attainable seed and subtract it. The residual is a kernel element, giving an explicit equivalence and the cardinality formula."
+}

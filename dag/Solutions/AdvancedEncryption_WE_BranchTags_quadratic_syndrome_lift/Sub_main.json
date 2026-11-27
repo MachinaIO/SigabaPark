@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BranchTags.quadratic_syndrome_lift",
+  "proof_type": "prove",
+  "explanation": "Apply the additive map and collect integer coefficients. Apply the triangle inequality once per addition or subtraction."
+}
