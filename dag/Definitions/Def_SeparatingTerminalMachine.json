@@ -1,0 +1,6 @@
+{
+ "name": "SeparatingTerminalMachine",
+ "title": "Explicit machine for the dense 63-term terminal correction stream",
+ "description": "EncCorrection computes every public correction from the private message, term coins and pads. Its fixed finite transition table includes the field-derived eligibility schedule. The machine has no work tapes and total cost 6900325889. The source issuer, tape layout conversion and private sampling are separate.",
+ "tags": ["witness-encryption", "cost", "machine"]
+}
