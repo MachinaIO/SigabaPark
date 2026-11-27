@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LiftedProduct.public_matrix_recovery",
+  "proof_type": "prove",
+  "explanation": "MSB repacking with one parity bit recovers the original negacyclic product for every public vector."
+}

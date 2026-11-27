@@ -1,0 +1,4 @@
+{
+  "name": "AdvancedEncryption.WE.LiftedProduct.public_matrix_recovery",
+  "title": "MSB repacking with one parity bit recovers the original negacyclic product for every public vector"
+}
