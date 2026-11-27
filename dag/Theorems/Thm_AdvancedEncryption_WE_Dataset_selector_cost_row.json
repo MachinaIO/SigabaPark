@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.Dataset.selector_cost_row", "title": "Dense selector row with projected evaluation", "statement": "The given literal payload and two specified table descriptions imply a total-cost floor; the two public matrix sweeps and the projected reverse sweep have the stated inner bit-position count."}
