@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CDS.two_layer_choice_separation","proof_type":"prove","explanation":"Apply finite pigeonhole to the header map, then separate the two root words or their underlying bit databases by extensionality."}

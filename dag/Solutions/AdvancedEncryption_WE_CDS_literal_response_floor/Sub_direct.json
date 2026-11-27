@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CDS.literal_response_floor","proof_type":"prove","explanation":"Bootstrap the modulus inequality to at least 33 bits, apply the resulting minimum database width, and count the transmitted residue bits."}
