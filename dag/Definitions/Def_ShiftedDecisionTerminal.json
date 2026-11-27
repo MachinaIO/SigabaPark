@@ -1,0 +1,5 @@
+{
+  "name": "ShiftedDecisionTerminal",
+  "title": "Full-rank retained-secret decision-LWE row issuer, decoder and native packet converters",
+  "description": "Physical terminal machines for the 512 by 1025 uniform-secret decision-LWE experiment at modulus 257. The issuer and decoder together cost below 2^64. A shifted honest terminal has exact fixed-secret CBD(1) decoding and a quantitative conditional mixed-decision reduction."
+}
