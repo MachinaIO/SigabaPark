@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ShortFrame.gap",
+  "proof_type": "prove",
+  "explanation": "Exact integral norm gap for every registered NAND circuit"
+}

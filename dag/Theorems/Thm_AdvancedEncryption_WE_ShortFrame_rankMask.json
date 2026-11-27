@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ShortFrame.rankMask",
+  "title": "A separator translates the mask while preserving all columns and the terminal packet",
+  "statement": "A separator translates the mask while preserving all columns and the terminal packet"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "ShortNand",
+  "title": "Integer modular selector rows for the registered NAND evaluator",
+  "description": "Four integer selector coordinates per gate, their squared Euclidean energy, and the modular primary/port constraints using the default-true registered evaluator."
+}

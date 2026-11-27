@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ShortFrame.rankMask",
+  "proof_type": "prove",
+  "explanation": "A separator translates the mask while preserving all columns and the terminal packet"
+}
