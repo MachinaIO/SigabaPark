@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.terminal_ciphertext_composition",
+ "proof_type": "prove",
+ "explanation": "Induction with generalized message width proves the composition bound."
+}
