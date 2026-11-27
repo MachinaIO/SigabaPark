@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.full_table_admissibility",
+ "proof_type": "prove",
+ "explanation": "Specialize equality to a tuple decoding any given witness. Conversely rewrite the predicate value to false on each tuple."
+}

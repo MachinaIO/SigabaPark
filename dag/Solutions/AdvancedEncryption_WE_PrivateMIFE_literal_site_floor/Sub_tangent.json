@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.literal_site_floor",
+ "proof_type": "prove",
+ "explanation": "Prove the global supporting-line inequality (n+1)2^a \u2264 2^n+a2^a. Sum its a=10 instance over the adjusted widths, then add the a=13 instance for k. The k-dependent linear terms cancel."
+}

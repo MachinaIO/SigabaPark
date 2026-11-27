@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.PrivateMIFE.serial_key_floor",
+  "title": "Explicit bit-parallel key expansion exhausts the write budget under a 128-bit component floor",
+  "statement": "If a prefix and remaining table widths cover 128 witness bits and every table has fewer than 2^32 rows, the number 2^prefix times 128^(number of tables) is at least 2^32."
+}

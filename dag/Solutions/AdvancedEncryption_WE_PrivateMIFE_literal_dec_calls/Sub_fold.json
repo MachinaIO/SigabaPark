@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.PrivateMIFE.literal_dec_calls",
+ "proof_type": "prove",
+ "explanation": "Induct on the excess arity and rewrite the power recurrence."
+}
