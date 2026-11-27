@@ -1,0 +1,10 @@
+{
+ "name": "MixedOrderMaskMachine",
+ "title": "Clocked union and disjointness test for support masks",
+ "description": "A zero-work-tape machine reads interleaved mask bits, emits their union and their disjointness bit, and has exact cost 2659 on 124-coordinate masks.",
+ "tags": [
+  "witness-encryption",
+  "circuit-sat",
+  "cost"
+ ]
+}
