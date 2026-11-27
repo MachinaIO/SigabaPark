@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TerminalTokens.ternary_floor","title":"A three-cell return still exhausts the 128-bit serial layout budget","statement":"For table widths at most 25 summing to 128, the nonterminal fields at 64 bits per item plus a terminal factor of three per aggregator leaf already reach 2^32."}

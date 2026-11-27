@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TerminalTokens.ternary_floor","proof_type":"prove","explanation":"At rank five split the terminal width at eight bits; for a short terminal the other five widths sum to at least 120. Bound each 2^a by the affine tangent at exponent 23. Larger ranks already have at least 31 aggregator leaves."}

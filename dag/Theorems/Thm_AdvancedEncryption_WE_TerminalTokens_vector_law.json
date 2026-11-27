@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TerminalTokens.vector_law","title":"Exact ideal-kernel privacy for two-bit terminal labels","statement":"For fixed control colors, active tokens and hidden truth bits, a uniform vector of hidden control masks gives exactly the simulator law of a fresh point vector and its output-determined companion tokens against any joint real-valued test."}

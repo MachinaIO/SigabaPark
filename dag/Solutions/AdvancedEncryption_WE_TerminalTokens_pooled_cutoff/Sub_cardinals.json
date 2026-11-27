@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TerminalTokens.pooled_cutoff","proof_type":"prove","explanation":"Partition the success-position subsets by their cardinalities; the corresponding powerset-card families are pairwise disjoint."}
