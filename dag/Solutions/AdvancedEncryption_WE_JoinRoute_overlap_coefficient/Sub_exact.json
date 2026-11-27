@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.JoinRoute.overlap_coefficient","proof_type":"prove","explanation":"When positive and negative source coefficients are one, the coefficient at a zero signed offset counts the actual intersection of the two chosen supports and detects overlap in characteristic zero."}
