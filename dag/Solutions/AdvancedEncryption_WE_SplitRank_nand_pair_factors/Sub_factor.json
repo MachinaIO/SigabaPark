@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.SplitRank.nand_pair_factors",
+ "proof_type": "prove",
+ "explanation": "Expand the dot product over the optional product index. Its constant term is one. Reorder the four factors in each double summand and distribute to recover the two input dot products. The four binary cases give NAND."
+}

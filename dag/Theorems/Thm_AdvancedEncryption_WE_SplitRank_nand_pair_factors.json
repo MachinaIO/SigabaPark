@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.SplitRank.nand_pair_factors",
+ "title": "Separated row and column factors for a NAND gate",
+ "statement": "If the inputs to a NAND gate use factor coordinates I and J, each side can locally construct one constant coordinate and all |I||J| pair products. Their GF(2) dot product encodes the Boolean NAND of the two represented bits."
+}

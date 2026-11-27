@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.SplitRank.reencode_rows",
+ "title": "Exact coordinate reduction from a row expansion certificate",
+ "statement": "A coordinate expansion of the left factors into k rows permits reduction to k coordinates: replace every right row by its k dot products against the expansion rows. Each individual truth-table entry is preserved, including for empty bases."
+}

@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.SplitRank.output_span_test",
+ "proof_type": "prove",
+ "explanation": "Use bilinear span induction to extend zero pairings from generators to their spans. Substitute the given span equalities and take the classical negation."
+}

@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.SplitRank.output_span_test",
+ "title": "Exact output test on any pair of spanning row families",
+ "statement": "For any GF(2) dot-product factorization, there exists a nonzero output on a pair of assignments iff there exists a nonzero pairing in any two replacement families spanning exactly the row spaces of the factors. Both families can in particular be replaced by row bases."
+}

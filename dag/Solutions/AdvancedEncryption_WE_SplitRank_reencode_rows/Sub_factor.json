@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.SplitRank.reencode_rows",
+ "proof_type": "prove",
+ "explanation": "Expand the left-factor row using the certificate, use distributivity, and interchange the two finite sums."
+}
