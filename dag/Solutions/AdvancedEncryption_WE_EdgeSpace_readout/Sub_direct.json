@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.EdgeSpace.readout",
+  "proof_type": "prove",
+  "explanation": "A common linear functional factoring through each restriction reads the endpoint from every transcript"
+}

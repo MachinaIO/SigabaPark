@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.EdgeSpace.atoms",
+  "proof_type": "prove",
+  "explanation": "Locally vanishing basis expansions lift to a sum of normalized difference atoms"
+}

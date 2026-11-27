@@ -1,0 +1,5 @@
+{
+  "name": "SparseAtomPair",
+  "title": "Sparse canonical atom encoder and witness evaluator for a full-size tagged circuit pair",
+  "description": "One explicit one-work-tape issuer samples a uniform binary coefficient per gate atom and outputs the canonical ANF. A zero-work-tape decoder selects monomial values from the public fixture and a 128-bit witness. Both concrete fixed-circuit variants and their tables are included."
+}

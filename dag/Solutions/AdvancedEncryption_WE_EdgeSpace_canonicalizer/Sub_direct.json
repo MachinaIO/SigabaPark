@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.EdgeSpace.canonicalizer",
+  "proof_type": "prove",
+  "explanation": "One-cylinder canonicalization for an independent succinct feature tests formula unsatisfiability"
+}

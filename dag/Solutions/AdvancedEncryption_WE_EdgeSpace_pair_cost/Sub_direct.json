@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.EdgeSpace.pair_cost",
+  "proof_type": "prove",
+  "explanation": "Exact registered clocks and combined cost of the two-fixture public sparse-atom machines"
+}

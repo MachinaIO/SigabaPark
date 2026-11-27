@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.EdgeSpace.disjoint",
+  "proof_type": "prove",
+  "explanation": "Absence of a kernel decomposition forces public supports for shifted endpoints to be disjoint"
+}
