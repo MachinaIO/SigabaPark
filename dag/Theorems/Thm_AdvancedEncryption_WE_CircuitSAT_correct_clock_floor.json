@@ -1,0 +1,1 @@
+{"name": "AdvancedEncryption.WE.CircuitSAT.correct_clock_floor", "title": "Input-head clock floors for correct witness encryption", "statement": "Correctness alone forces the encryption clock to reach 207643654 and the decryption clock to reach 207643910 on the registered circuit relation."}

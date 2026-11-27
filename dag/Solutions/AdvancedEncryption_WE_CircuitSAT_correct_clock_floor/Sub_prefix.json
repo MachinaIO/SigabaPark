@@ -1,0 +1,1 @@
+{"theorem": "AdvancedEncryption.WE.CircuitSAT.correct_clock_floor", "proof_type": "prove", "explanation": "Use a nearly longest satisfiable unary circuit. Initial-segment locality makes the two decryption laws identical if either input head cannot reach the distinguishing field. Correctness puts total mass greater than one on two distinct outputs in that case."}
