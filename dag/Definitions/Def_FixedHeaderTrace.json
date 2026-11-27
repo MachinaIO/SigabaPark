@@ -1,0 +1,6 @@
+{
+  "name": "FixedHeaderTrace",
+  "title": "Native configurations for a fixed-header simulation",
+  "description": "A coin-indexed transition and config maps for the fixed-header adapter.",
+  "tags": ["machines", "compilation"]
+}

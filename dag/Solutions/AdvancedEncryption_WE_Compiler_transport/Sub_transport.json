@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.transport",
+  "proof_type": "prove",
+  "explanation": "Rewrite the decryption law on valid witnesses. Bind the target challenge to the simulated attacker and rewrite the full output law pointwise on each framed ciphertext. Cancel the positive cost factor against the extra target security bits."
+}

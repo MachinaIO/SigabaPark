@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Compiler.header_head_step",
+  "title": "Clamped input-head invariant for virtual header simulation",
+  "statement": "Every legal head move preserves the encoded prefix position, shared suffix offset and clamped physical head, including both input boundaries."
+}

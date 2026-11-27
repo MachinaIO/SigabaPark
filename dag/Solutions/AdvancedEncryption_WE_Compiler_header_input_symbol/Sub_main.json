@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.header_input_symbol",
+  "proof_type": "prove",
+  "explanation": "The target head parked at the suffix boundary or displaced along the shared suffix supplies exactly the native source input symbol, including both blanks."
+}

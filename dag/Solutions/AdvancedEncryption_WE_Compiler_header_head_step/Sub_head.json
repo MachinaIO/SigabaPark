@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Compiler.header_head_step",
+  "proof_type": "prove",
+  "explanation": "Unfold the boundary and parking cases and solve the resulting integer inequalities."
+}
