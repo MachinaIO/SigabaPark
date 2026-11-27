@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FrontierNand.carry",
+  "proof_type": "prove",
+  "explanation": "Complementary coins emit the identical finished block and propagate exactly the substituted residual"
+}

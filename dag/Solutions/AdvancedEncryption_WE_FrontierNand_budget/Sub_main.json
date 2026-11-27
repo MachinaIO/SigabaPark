@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FrontierNand.budget",
+  "proof_type": "prove",
+  "explanation": "Dense description and clock of the closed parsing stage fit the fixed implementation envelope"
+}

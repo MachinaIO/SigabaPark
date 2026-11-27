@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FrontierNand.point",
+  "proof_type": "prove",
+  "explanation": "A pair of literal primary supports covering every nonconstant monomial has a member with at least 2^127 monomials"
+}

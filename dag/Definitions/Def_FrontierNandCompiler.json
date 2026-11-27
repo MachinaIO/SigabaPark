@@ -1,0 +1,5 @@
+{
+  "name": "FrontierNandCompiler",
+  "title": "Unary-pair reading stage and fused mask update for a NAND frontier compiler",
+  "description": "Closed zero-tape Sigaba machine for the framed input prefix, mathematical wire-pair decoder, and the one-bit accumulation update."
+}

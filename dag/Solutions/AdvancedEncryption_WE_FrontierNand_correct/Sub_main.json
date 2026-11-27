@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FrontierNand.correct",
+  "proof_type": "prove",
+  "explanation": "For the honest NAND value, one emitted block and its carry reconstruct the unmasked accumulated value"
+}

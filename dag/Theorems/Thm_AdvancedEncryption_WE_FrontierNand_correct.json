@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.FrontierNand.correct",
+  "title": "For the honest NAND value, one emitted block and its carry reconstruct the unmasked accumulated value",
+  "statement": "For the honest NAND value, one emitted block and its carry reconstruct the unmasked accumulated value"
+}
