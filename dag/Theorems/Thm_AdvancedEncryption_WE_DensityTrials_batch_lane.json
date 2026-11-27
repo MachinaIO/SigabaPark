@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DensityTrials.batch_lane",
+  "title": "Parallel Boolean NAND scanning agrees with registered evaluation on every lane",
+  "statement": "Each output coordinate of the column-wise gate fold equals SigabaNeo.evalGates on its coordinate input for every gate list."
+}

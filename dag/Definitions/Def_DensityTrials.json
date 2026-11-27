@@ -1,0 +1,9 @@
+{
+  "name": "DensityTrials",
+  "title": "Boolean table degree and parallel NAND trials",
+  "description": "Recursive low degree, table difference and support weight, plus componentwise NAND scanning under the registered forward-read convention.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DensityTrials.trial_bound",
+  "title": "Integer failure threshold from a certified witness density",
+  "statement": "The integer threshold for the minimum density implies the same failure-count bound for any compatible actual number of accepting witnesses."
+}
