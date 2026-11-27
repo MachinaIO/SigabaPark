@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DensityTrials.fair_error_count",
+  "proof_type": "prove",
+  "explanation": "Use the explicit equivalence to a tuple of rejecting witnesses; its inverse inserts the unique wrong Boolean fallback."
+}

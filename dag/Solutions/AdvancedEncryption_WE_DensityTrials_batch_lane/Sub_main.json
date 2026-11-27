@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DensityTrials.batch_lane",
+  "proof_type": "prove",
+  "explanation": "Commute list map with default lookup, extend by the pointwise NAND column, and induct through the actual registered gate fold."
+}
