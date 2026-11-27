@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CommonMask.view_coset","proof_type":"prove","explanation":"The joint record for zero message can reach every shifted record precisely when some secret-key translation fixes all restriction records and adds the desired aggregate offset."}

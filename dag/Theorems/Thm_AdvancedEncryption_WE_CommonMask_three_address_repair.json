@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.CommonMask.three_address_repair","title":"One cross term repairs the three-check masked aggregate","statement":"The three shift functions sum to one at every address and each vanishes on the full domain on which its corresponding difference key is released."}

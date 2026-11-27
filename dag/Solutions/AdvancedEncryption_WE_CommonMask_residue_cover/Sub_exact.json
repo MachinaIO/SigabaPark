@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CommonMask.residue_cover","proof_type":"prove","explanation":"If the total violation weight is nonzero modulo three, multiplying each violation by the total gives local kernel shifts whose sum is one. A vanishing violation still gives a vanishing local shift."}

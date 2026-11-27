@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CommonMask.three_address_leak","proof_type":"prove","explanation":"For local masks depending on x alone and y alone, three endpoint evaluations plus the authorized edge data at those points deterministically reconstruct the bit."}

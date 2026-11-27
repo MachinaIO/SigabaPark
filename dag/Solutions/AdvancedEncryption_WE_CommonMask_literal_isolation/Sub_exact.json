@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.CommonMask.literal_isolation","proof_type":"prove","explanation":"A linear mask space containing the constant function and stable under multiplication by either value-test of each coordinate contains the exact indicator of every address."}
