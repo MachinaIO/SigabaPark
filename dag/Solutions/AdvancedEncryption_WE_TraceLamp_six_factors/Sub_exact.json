@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceLamp.six_factors","proof_type":"prove","explanation":"The actual six unitriangular factors with Boolean-controlled coordinates return to zero horizontally. Their central coordinate is zero for a valid NAND and lies between one and three for any invalid NAND."}
