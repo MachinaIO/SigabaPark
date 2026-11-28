@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.SharedSignedDigit.RadixRead","title":"A low residue word extracts the currently addressed signed coin","statement":"A base-four digit whose local count is positive identifies the bit even when all other digits come from an invalid address."}

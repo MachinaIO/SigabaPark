@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.SharedSignedDigit.TwoGateFlip","title":"A fixed public rejecting pin selects a measure-preserving sign flip","statement":"For every sign pair on a rejected addressed NAND composition a fixed XOR on one coordinate translates the residual by a half-turn."}

@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SharedSignedDigit.SignedLedger","proof_type":"prove","explanation":"This exact identity isolates the low-word encoding from the half-turn message and all high-word sign terms."}
