@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.NoisyFiber.OppositeCollision","title":"Exact support collision criterion for opposite noisy representatives","statement":"Two opposite anchor supports intersect exactly when a seed difference realizes the anchor shift and its header lies in the error difference set."}

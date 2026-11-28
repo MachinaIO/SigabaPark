@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.NoisyFiber.OppositeCollision","proof_type":"prove","explanation":"Two opposite anchor supports intersect exactly when a seed difference realizes the anchor shift and its header lies in the error difference set."}
