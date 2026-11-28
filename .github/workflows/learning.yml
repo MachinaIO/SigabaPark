@@ -40,7 +40,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "calibrate | anchor | report"
+        description: "calibrate | anchor | report | record (record a past push: before, after)"
         required: true
         default: report
       role:
@@ -49,6 +49,14 @@ on:
         default: design
       epoch:
         description: "anchor epoch id (anchor only)"
+        required: false
+        default: ""
+      before:
+        description: "record only: main before the push (full SHA)"
+        required: false
+        default: ""
+      after:
+        description: "record only: main after the push (full SHA)"
         required: false
         default: ""
 
@@ -367,7 +375,9 @@ jobs:
   # Calibration and anchor assessments (manual, maintainers): the trusted evaluator on the
   # maintainers' runner, as `evaluate`. The report is rebuilt by `post-merge` afterwards.
   assess:
-    if: github.event_name == 'workflow_dispatch' && inputs.action != 'report'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.action == 'calibrate' || inputs.action == 'anchor')
     runs-on: ${{ vars.LEARNING_EVALUATOR_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 360
     environment: learning-evaluator
@@ -429,7 +439,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           path: base
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
       - name: Check out the learning records
         id: lr
@@ -440,20 +450,25 @@ jobs:
           path: learning-records
       - name: What changed
         id: changed
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || inputs.action == 'record'
         working-directory: base
         env:
-          GH_TOKEN: ${{ github.token }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          IN_BEFORE: ${{ inputs.before }}
+          IN_AFTER: ${{ inputs.after }}
+        # The push's range (or, for `record`, a past push's, given by a maintainer); the CI code
+        # stays the one of this run's main.
         run: |
-          git fetch --quiet --depth=1 origin "${{ github.event.before }}"
-          git diff --name-only "${{ github.event.before }}" "$GITHUB_SHA" > ../changed.txt
+          if [ "$GITHUB_EVENT_NAME" = push ]; then before="$EVENT_BEFORE"; after="$GITHUB_SHA"
+          else before="$IN_BEFORE"; after="$IN_AFTER"; fi
+          [[ "$before" =~ ^[0-9a-f]{40}$ && "$after" =~ ^[0-9a-f]{40}$ ]] || { echo "bad range"; exit 2; }
+          git merge-base --is-ancestor "$before" "$after" || { echo "not a range of main"; exit 2; }
+          git merge-base --is-ancestor "$after" "$GITHUB_SHA" || { echo "after is not on main"; exit 2; }
+          git diff --name-only "$before" "$after" > ../changed.txt
+          echo "before=$before" >> "$GITHUB_OUTPUT"
+          echo "after=$after" >> "$GITHUB_OUTPUT"
           grep -q '^generators/' ../changed.txt && echo "generator=true" >> "$GITHUB_OUTPUT" || true
           grep -q '^notebooks/' ../changed.txt && echo "notebook=true" >> "$GITHUB_OUTPUT" || true
-          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')
-          echo "pr=$pr" >> "$GITHUB_OUTPUT"
-          if [ -n "$pr" ]; then
-            gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '"head=\(.head.sha)\nactor=\(.merged_by.login)"' >> "$GITHUB_OUTPUT"
-          fi
       - name: Read the default environment
         id: env
         run: |
@@ -464,57 +479,81 @@ jobs:
           assert re.fullmatch(r"[\w./:-]+@sha256:[0-9a-f]{64}", e["image"])
           print(f"env_id={e['id']}\nimage={e['image']}")
           PY
-      - name: Certify the merged generator in the sandbox
+      - name: Certify the merged generators in the sandbox
         if: steps.changed.outputs.generator == 'true' && steps.lr.outcome == 'success'
         env:
           IMAGE: ${{ steps.env.outputs.image }}
           ENV_ID: ${{ steps.env.outputs.env_id }}
-          BEFORE: ${{ github.event.before }}
-          PR: ${{ steps.changed.outputs.pr }}
-          ACTOR: ${{ steps.changed.outputs.actor }}
+          BEFORE: ${{ steps.changed.outputs.before }}
+          AFTER: ${{ steps.changed.outputs.after }}
+          GH_TOKEN: ${{ github.token }}
+        # The merge queue may land several pull requests in one push. Each generator version the
+        # range adds is routed (against main before the range: it must be new there), certified
+        # in the sandbox at the merged revision and recorded on its own; `dag/` nodes are the
+        # gate's. A merged version that cannot be certified fails this job, after the others.
         run: |
-          mkdir -p merged/files out
-          # The merged version's files, as the certifier reads them from a pull request, routed
-          # against main before the merge (the version must be new there). The pull request was
-          # admitted and merged under the repository's rules, so the route is run as a writer.
-          git -C base worktree add --quiet --detach ../before "$BEFORE"
-          (cd base && python3 -m ci.learning.cli fetch-local --base "$BEFORE" --head "$GITHUB_SHA" --out ../merged)
-          (cd base && python3 -m ci.learning.cli route --base ../before --fetched ../merged --author "$ACTOR" \
-             --permission write --draft false --event push --pr "${PR:-0}" --out ../merged/route.json)
+          mkdir -p merged
+          git -C base worktree add --quiet --detach "$PWD/before" "$BEFORE"
+          git -C base worktree add --quiet --detach "$PWD/after" "$AFTER"
+          (cd base && python3 -m ci.learning.cli fetch-local --repo-dir . --base "$BEFORE" --head "$AFTER" --out ../merged)
+          (cd base && python3 -m ci.learning.cli split-versions --fetched ../merged --dir "$PWD/versions" --out ../versions.json)
           docker pull "$IMAGE"
-          set +e
-          docker run --rm --network none --read-only --cap-drop ALL \
-            --cap-add SETUID --cap-add SETGID --cap-add CHOWN --cap-add FOWNER \
-            --security-opt no-new-privileges \
-            --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
-            --memory 14g --cpus 4 --pids-limit 4096 \
-            --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
-            -v "$PWD/base:/base:ro" -v "$PWD/merged/files:/new:ro" -v "$PWD/merged/route.json:/route.json:ro" \
-            -w /base --entrypoint python3 "$IMAGE" -m ci.learning.cli certify \
-              --route /route.json --files /new --core /core --workdir /work/ws --env "$ENV_ID" \
-              --smoke-seeds 2 --timeout 1800 --out - > out/certify.json 2> out/log.txt
-          echo $? > out/exit
-          set -e
-          cd base
-          python3 -m ci.learning.cli decide --route ../merged/route.json --base . --env "$ENV_ID" \
-            --certify ../out/certify.json --exit-code ../out/exit --records ../learning-records \
-            --out ../decision.json || true
-          python3 -m ci.learning.cli publish --records ../learning-records ../decision.json
+          failed=0
+          for v in $(python3 -c 'import json; print(" ".join(x["dir"] for x in json.load(open("versions.json"))["versions"]))'); do
+            vd=$(python3 -c 'import json,sys; print(next(x["version_dir"] for x in json.load(open("versions.json"))["versions"] if x["dir"] == sys.argv[1]))' "$v")
+            # The pull request that added this version, and who merged it.
+            sha=$(git -C base log --format=%H --diff-filter=A -1 "$BEFORE..$AFTER" -- "$vd/manifest.json")
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq '.[0].number // empty' || true)
+            actor=unknown
+            [ -n "$pr" ] && actor=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '.merged_by.login // .user.login')
+            prarg=(); [ -n "$pr" ] && prarg=(--pr "$pr")
+            (cd base && python3 -m ci.learning.cli route --base ../before --fetched "$v" --author "$actor" \
+               --permission write --draft false --event push "${prarg[@]}" --out "$v/route.json")
+            mkdir -p "$v/out"
+            set +e
+            docker run --rm --network none --read-only --cap-drop ALL \
+              --cap-add SETUID --cap-add SETGID --cap-add CHOWN --cap-add FOWNER \
+              --security-opt no-new-privileges \
+              --user 0:0 -e SIGABA_LEAN_UID=1000 -e PYTHONDONTWRITEBYTECODE=1 \
+              --memory 14g --cpus 4 --pids-limit 4096 \
+              --tmpfs /work:rw,exec,size=10g,mode=1777 --tmpfs /tmp:rw,exec,size=2g,mode=1777 \
+              -v "$PWD/after:/base:ro" -v "$v/files:/new:ro" -v "$v/route.json:/route.json:ro" \
+              -w /base --entrypoint python3 "$IMAGE" -m ci.learning.cli certify \
+                --route /route.json --files /new --core /core --workdir /work/ws --env "$ENV_ID" \
+                --smoke-seeds 2 --timeout 1800 --out - > "$v/out/certify.json" 2> "$v/out/log.txt"
+            echo $? > "$v/out/exit"
+            set -e
+            (cd base && python3 -m ci.learning.cli decide --route "$v/route.json" --base ../after --env "$ENV_ID" \
+               --certify "$v/out/certify.json" --exit-code "$v/out/exit" --records ../learning-records \
+               --out "$v/decision.json") || true
+            (cd base && python3 -m ci.learning.cli publish --records ../learning-records "$v/decision.json")
+            c=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["conclusion"])' "$v/decision.json")
+            echo "$vd (#${pr:-?}): $c"
+            [ "$c" = success ] || { failed=1; tail -c 3000 "$v/out/log.txt"; }
+          done
+          exit $failed
       - name: Activate the merged notebook
         if: steps.changed.outputs.notebook == 'true' && steps.lr.outcome == 'success'
         working-directory: base
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ steps.changed.outputs.pr }}
-          HEAD: ${{ steps.changed.outputs.head }}
-          ACTOR: ${{ steps.changed.outputs.actor }}
+          AFTER: ${{ steps.changed.outputs.after }}
         run: |
+          # The pull request that changed the notebook (a notebook pull request changes nothing
+          # else), its head, and who merged it.
+          sha=$(git log --format=%H -1 "$AFTER" -- notebooks/)
+          PR=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq '.[0].number // empty' || true)
+          HEAD=""; ACTOR=unknown
+          if [ -n "$PR" ]; then
+            HEAD=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
+            ACTOR=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq '.merged_by.login // .user.login')
+          fi
           perm=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq .permission || echo none)
           python3 -m ci.learning.cli activate --role auto --base . --records ../learning-records \
-            --merge-commit "$GITHUB_SHA" --pr "${PR:-0}" --head "${HEAD:-$GITHUB_SHA}" --actor "$ACTOR" \
+            --merge-commit "$AFTER" --pr "${PR:-0}" --head "${HEAD:-$AFTER}" --actor "$ACTOR" \
             --permission "$perm" --publish --out ../activation.json
       - name: Publish the records
-        if: steps.lr.outcome == 'success'
+        if: always() && steps.lr.outcome == 'success'
         working-directory: learning-records
         run: |
           git config user.name "sigaba-learning"
@@ -522,12 +561,14 @@ jobs:
           git add -A
           git diff --cached --quiet || { git commit -q -m "Learning records for ${GITHUB_SHA}" && git push -q; }
       - name: Build the report
+        if: always()
         working-directory: base
         run: |
           mkdir -p ../learning-records
           python3 -m ci.learning.cli report --records ../learning-records --out ../report \
             --policy meta/learning.json
       - name: Publish the report to learning-report
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

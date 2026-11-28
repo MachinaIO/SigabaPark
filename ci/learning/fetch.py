@@ -180,3 +180,34 @@ def fetch_local(repo_dir: Path, base: str, head: str, out: Path) -> list[dict]:
         rows.append(row)
     (out / "files.json").write_text(json.dumps({"revision": head, "files": rows}, indent=1) + "\n")
     return rows
+
+
+GEN_VERSION_DIR = re.compile(r"(generators/[^/]+/[^/]+/[^/]+/v[0-9]{4})/[^/]+")
+
+
+def split_versions(fetched: Path, out: Path) -> list[dict]:
+    """One listing per generator version added by a push (the post-merge job): the merge queue
+    may land several pull requests in one push, each adding one version (and others adding
+    `dag/` nodes, the gate's). Each listing holds exactly that version's rows and files, so that
+    it is routed, certified and recorded on its own. Rows outside `generators/` are dropped."""
+    fetched, out = Path(fetched), Path(out)
+    listing = json.loads((fetched / "files.json").read_text())
+    groups: dict[str, list[dict]] = {}
+    for r in listing["files"]:
+        m = GEN_VERSION_DIR.fullmatch(str(r.get("filename", "")))
+        if m and r.get("status") == "added":
+            groups.setdefault(m.group(1), []).append(r)
+    result = []
+    for i, (d, rows) in enumerate(sorted(groups.items())):
+        dst = out / f"{i:03d}"
+        (dst / "files").mkdir(parents=True, exist_ok=True)
+        for r in rows:
+            src = fetched / "files" / r["filename"]
+            if src.is_file() and not src.is_symlink():
+                p = dst / "files" / r["filename"]
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(src.read_bytes())
+        (dst / "files.json").write_text(json.dumps({"revision": listing["revision"],
+                                                    "files": rows}, indent=1) + "\n")
+        result.append({"dir": str(dst), "version_dir": d})
+    return result

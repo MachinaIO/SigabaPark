@@ -91,6 +91,12 @@ def cmd_fetch_local(a) -> int:
     return 0
 
 
+def cmd_split_versions(a) -> int:
+    from . import fetch
+    emit({"ok": True, "versions": fetch.split_versions(Path(a.fetched), Path(a.dir))}, a.out)
+    return 0
+
+
 def cmd_route(a) -> int:
     r = RT.route(Path(a.base), Path(a.fetched), a.author, a.permission, a.draft, a.event,
                  a.pr, Path(a.records) if a.records else None)
@@ -421,6 +427,11 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--head", required=True)
     s.set_defaults(out=None)
     s._option_string_actions["--out"].required = True
+
+    s = add("split-versions", cmd_split_versions, "one listing per generator version added by "
+            "a push (post-merge)")
+    s.add_argument("--fetched", required=True)
+    s.add_argument("--dir", required=True)
 
     s = add("route", cmd_route, "learning precheck: math, generator, notebook, rejected, skipped")
     s.add_argument("--base", required=True, help="base checkout (main)")
