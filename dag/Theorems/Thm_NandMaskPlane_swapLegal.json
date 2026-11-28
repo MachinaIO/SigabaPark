@@ -1,0 +1,5 @@
+{
+  "name": "NandMaskPlane.swapLegal",
+  "title": "Simultaneously complementing both inputs at odd anchor preserves the homogeneous NAND relation",
+  "statement": "Simultaneously complementing both inputs at odd anchor preserves the homogeneous NAND relation."
+}

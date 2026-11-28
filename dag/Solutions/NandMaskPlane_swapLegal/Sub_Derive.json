@@ -1,0 +1,5 @@
+{
+  "theorem": "NandMaskPlane.swapLegal",
+  "proof_type": "prove",
+  "explanation": "Simultaneously complementing both inputs at odd anchor preserves the homogeneous NAND relation."
+}

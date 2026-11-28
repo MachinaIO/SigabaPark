@@ -1,0 +1,5 @@
+{
+  "theorem": "NandMaskPlane.pairBias",
+  "proof_type": "prove",
+  "explanation": "A zero-correlation complementary sign pair bounds the sum of oriented biases and detects equality."
+}

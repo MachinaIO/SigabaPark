@@ -1,0 +1,5 @@
+{
+  "theorem": "NandMaskPlane.projectGate",
+  "proof_type": "prove",
+  "explanation": "Multiplication reconstruction carries each homogeneous local NAND relation to its secret ports."
+}
