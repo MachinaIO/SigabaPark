@@ -1,0 +1,86 @@
+{
+ "schema": "sigaba.learning.policy.v1",
+ "policy_id": "policy-0001",
+ "epoch": {
+  "id": "epoch-0001",
+  "dag_snapshot": "fa3fa31397be4e5c1fab73bf4454a7a109a39778",
+  "environment_id": "env-2",
+  "core_revision": "e2c934bd69781f0aa43da09484ee8d1c63b21cdd",
+  "strength_digest": "sha256:91eaeaac96fb538eb1fab799f99cb93ace0544197840dbe49c745766fadbfdcb"
+ },
+ "families": [
+  {
+   "family_id": "avoid-word",
+   "role": "design",
+   "lean_module": "SigabaNeoStd.Benchmarks.Families.AvoidWordDesign",
+   "lean_family": "SigabaNeo.Benchmark.Fixture.avoidDesignFamily",
+   "revision": "sha256:6facd80ba216ccfcaa27f26511db72e1a9933450e50376c3630236a07eb475d2",
+   "group": "bootstrap-avoid-word-design",
+   "seed_bits": 8,
+   "entropy_bits": 8,
+   "max_levels": 2,
+   "max_descriptor_bits": 256,
+   "assessment": "training",
+   "bootstrap": true,
+   "approved_by": "SoraSuegami"
+  },
+  {
+   "family_id": "avoid-word-attack",
+   "role": "cryptanalysis",
+   "lean_module": "SigabaNeoStd.Benchmarks.Families.AvoidWordAttack",
+   "lean_family": "SigabaNeo.Benchmark.Fixture.avoidAttackFamily",
+   "revision": "sha256:dfffff48d90f029ecb874127afc43c7e1c0be917afe0f9dace572c10b57adf35",
+   "group": "bootstrap-avoid-word-cryptanalysis",
+   "seed_bits": 8,
+   "entropy_bits": 8,
+   "max_levels": 2,
+   "max_descriptor_bits": 256,
+   "assessment": "training",
+   "bootstrap": true,
+   "approved_by": "SoraSuegami"
+  }
+ ],
+ "bootstrap_generators": [
+  {
+   "family_id": "avoid-word",
+   "generator_id": "seed-word",
+   "version": 1
+  },
+  {
+   "family_id": "avoid-word-attack",
+   "generator_id": "seed-word",
+   "version": 1
+  }
+ ],
+ "notebooks": {
+  "max_tokens": 4096,
+  "max_bytes": 32768,
+  "tokenizer": {
+   "kind": "proxy-bytes-div-3",
+   "version": "1"
+  }
+ },
+ "curriculum": {
+  "target": "0.40",
+  "lo": "0.20",
+  "hi": "0.60",
+  "min_samples": 20,
+  "exploration_fraction": "0.10",
+  "stale_after_days": 30
+ },
+ "promotion": {
+  "screen_pairs": 20,
+  "confirm_pairs": 100,
+  "alpha": "0.05",
+  "delta_ni": "0.05",
+  "infra_retries": 1,
+  "provisional_within_family": false,
+  "require_family_disjoint": true
+ },
+ "profiles": [],
+ "evaluator": {
+  "enabled": false,
+  "provider": null,
+  "max_trials_per_run": 0
+ }
+}

@@ -1,0 +1,166 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "A generator manifest (generators/<role>/<family>/<id>/v<NNNN>/manifest.json)",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "role",
+  "family_id",
+  "family_revision",
+  "generator_id",
+  "version",
+  "parent",
+  "seed_bits",
+  "levels",
+  "generate_decl",
+  "certificate_decl",
+  "source_refs",
+  "description"
+ ],
+ "properties": {
+  "schema": {
+   "const": "sigaba.generator.v1"
+  },
+  "role": {
+   "$ref": "#/$defs/role"
+  },
+  "family_id": {
+   "$ref": "#/$defs/ident"
+  },
+  "family_revision": {
+   "$ref": "#/$defs/sha256"
+  },
+  "generator_id": {
+   "$ref": "#/$defs/ident"
+  },
+  "version": {
+   "$ref": "#/$defs/version"
+  },
+  "parent": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "generator_id",
+      "version"
+     ],
+     "properties": {
+      "generator_id": {
+       "$ref": "#/$defs/ident"
+      },
+      "version": {
+       "$ref": "#/$defs/version"
+      }
+     }
+    }
+   ]
+  },
+  "seed_bits": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 4096
+  },
+  "levels": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 64
+  },
+  "generate_decl": {
+   "$ref": "#/$defs/lean_name"
+  },
+  "certificate_decl": {
+   "$ref": "#/$defs/lean_name"
+  },
+  "source_refs": {
+   "type": "array",
+   "maxItems": 32,
+   "uniqueItems": true,
+   "items": {
+    "$ref": "#/$defs/source_ref"
+   }
+  },
+  "bootstrap": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "approved_by",
+    "provenance"
+   ],
+   "properties": {
+    "approved_by": {
+     "$ref": "#/$defs/login"
+    },
+    "provenance": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 2000
+    }
+   }
+  },
+  "description": {
+   "type": "string",
+   "maxLength": 2000
+  }
+ },
+ "$defs": {
+  "git_sha": {
+   "type": "string",
+   "pattern": "[0-9a-f]{40}"
+  },
+  "ident": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9-]{0,62}"
+  },
+  "lean_name": {
+   "type": "string",
+   "pattern": "[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*",
+   "maxLength": 512
+  },
+  "login": {
+   "type": "string",
+   "pattern": "[A-Za-z0-9][A-Za-z0-9-]{0,38}(\\[bot\\])?"
+  },
+  "role": {
+   "enum": [
+    "design",
+    "cryptanalysis"
+   ]
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "sha256:[0-9a-f]{64}"
+  },
+  "source_ref": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "node_id",
+    "commit",
+    "content_sha256"
+   ],
+   "properties": {
+    "node_id": {
+     "type": "string",
+     "pattern": "(theorem|definition):[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*|solution:[A-Za-z_][A-Za-z0-9_']*/Sub_[A-Za-z0-9_]{1,64}",
+     "maxLength": 600
+    },
+    "commit": {
+     "$ref": "#/$defs/git_sha"
+    },
+    "content_sha256": {
+     "$ref": "#/$defs/sha256"
+    }
+   }
+  },
+  "version": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 9999
+  }
+ }
+}
