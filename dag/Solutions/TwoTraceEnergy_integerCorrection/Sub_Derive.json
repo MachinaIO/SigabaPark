@@ -1,0 +1,5 @@
+{
+  "theorem": "TwoTraceEnergy.integerCorrection",
+  "proof_type": "prove",
+  "explanation": "A fourfold sum of actual same-side quadratics dominates signed perturbations."
+}

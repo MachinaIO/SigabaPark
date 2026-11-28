@@ -1,0 +1,5 @@
+{
+  "theorem": "TwoTraceEnergy.independentTrace",
+  "proof_type": "prove",
+  "explanation": "Zero total energy characterizes an accepting diagonal trace and total energy is bounded."
+}
