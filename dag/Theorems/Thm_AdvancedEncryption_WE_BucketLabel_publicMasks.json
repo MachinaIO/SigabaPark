@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BucketLabel.publicMasks",
+  "title": "Public recovery of all masks yields the secret from any authorized shares",
+  "statement": "Public recovery of all masks yields the secret from any authorized shares"
+}

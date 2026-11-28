@@ -1,0 +1,5 @@
+{
+  "name": "BucketLabel",
+  "title": "Bucket-indexed linear shares over fixed-source labels",
+  "description": "Public local tag roles, linear reconstruction, and a small-ball predicate for ternary LWE training."
+}

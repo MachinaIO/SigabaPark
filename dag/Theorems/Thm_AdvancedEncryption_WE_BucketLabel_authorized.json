@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.BucketLabel.authorized",
+  "title": "An authorized witness reconstruction removes all LWE mask residues",
+  "statement": "An authorized witness reconstruction removes all LWE mask residues"
+}

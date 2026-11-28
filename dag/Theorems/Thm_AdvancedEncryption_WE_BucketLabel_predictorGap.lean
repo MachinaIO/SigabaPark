@@ -1,0 +1,5 @@
+import Definitions.Def_BucketLabel
+open BucketLabel
+theorem AdvancedEncryption.WE.BucketLabel.predictorGap (r0 r1 u0 u1 δ : ℚ)
+    (hIdeal : u0 = u1) (h : |(r0-r1)-(u0-u1)| ≤ 2*δ) :
+    |(r0 + (1-r1))/2 - 1/2| ≤ δ := by sorry

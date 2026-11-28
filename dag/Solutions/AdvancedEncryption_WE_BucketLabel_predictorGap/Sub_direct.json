@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.predictorGap",
+  "proof_type": "prove",
+  "explanation": "Equal ideal labels transfer real predictor advantage to the source gap"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.idealCoupling",
+  "proof_type": "prove",
+  "explanation": "Simultaneous ideal-mask translation for all observed role and tag pairs"
+}
