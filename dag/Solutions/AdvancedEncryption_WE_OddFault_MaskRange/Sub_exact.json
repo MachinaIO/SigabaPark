@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.OddFault.MaskRange","proof_type":"prove","explanation":"A clean-row perturbation can be added by translating all randomness for every payload exactly when its coefficient vector is in the mask range."}

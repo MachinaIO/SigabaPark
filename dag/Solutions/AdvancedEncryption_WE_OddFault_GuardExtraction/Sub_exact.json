@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.OddFault.GuardExtraction","proof_type":"prove","explanation":"If the clean coefficient vector is outside the image, one linear form recovers the scalar from the entire masked guard for every choice of the mask."}
