@@ -1,0 +1,1 @@
+role,sequence,created_at,reason,scope,provisional,predecessor_sha256,successor_sha256,pr,merge_commit,actor,policy_id,epoch_id,bytes,tokens,tokens_unavailable_reason,tokenizer,cap_tokens,cap_bytes,successor_success_rate,successor_n,comparison_ids,record_ids

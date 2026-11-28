@@ -1,0 +1,435 @@
+{
+ "adversary_model": "classical",
+ "adversary_statement": "The adversary model of every record is classical. Nothing in this report certifies post-quantum security.",
+ "as_of": null,
+ "generated_at": "2026-11-28T14:36:40Z",
+ "inputs": {
+  "activations.jsonl": {
+   "after_as_of": 0,
+   "lines": 0,
+   "loaded": 0,
+   "present": false,
+   "skipped": 0
+  },
+  "calibrations.jsonl": {
+   "after_as_of": 0,
+   "lines": 0,
+   "loaded": 0,
+   "present": false,
+   "skipped": 0
+  },
+  "certifications.jsonl": {
+   "after_as_of": 0,
+   "lines": 2,
+   "loaded": 2,
+   "present": true,
+   "skipped": 0
+  },
+  "comparisons.jsonl": {
+   "after_as_of": 0,
+   "lines": 0,
+   "loaded": 0,
+   "present": false,
+   "skipped": 0
+  },
+  "contracts.jsonl": {
+   "after_as_of": 0,
+   "lines": 0,
+   "loaded": 0,
+   "present": false,
+   "skipped": 0
+  },
+  "reveals.jsonl": {
+   "after_as_of": 0,
+   "lines": 2,
+   "loaded": 2,
+   "present": true,
+   "skipped": 0
+  },
+  "trials.jsonl": {
+   "after_as_of": 0,
+   "lines": 0,
+   "loaded": 0,
+   "present": false,
+   "skipped": 0
+  }
+ },
+ "issues": [],
+ "policy": {
+  "curriculum": {
+   "hi": "0.60",
+   "lo": "0.20",
+   "target": "0.40"
+  },
+  "curriculum_source": "policy policy-0001",
+  "epoch_id": "epoch-0001",
+  "families": {
+   "avoid-word": {
+    "assessment": "training",
+    "entropy_bits": 8,
+    "group": "bootstrap-avoid-word-design",
+    "role": "design"
+   },
+   "avoid-word-attack": {
+    "assessment": "training",
+    "entropy_bits": 8,
+    "group": "bootstrap-avoid-word-cryptanalysis",
+    "role": "cryptanalysis"
+   }
+  },
+  "max_bytes": 32768,
+  "max_tokens": 4096,
+  "policy_id": "policy-0001",
+  "source": "policy",
+  "tokenizer": "proxy-bytes-div-3 v1"
+ },
+ "roles": {
+  "cryptanalysis": {
+   "allocation": {
+    "planned": [],
+    "rows": [],
+    "trials_with_unknown_contract": []
+   },
+   "anchors": {
+    "excluded": [],
+    "series": []
+   },
+   "compression": {
+    "rows": []
+   },
+   "difficulty": {
+    "hi": "0.60",
+    "lo": "0.20",
+    "panels": [],
+    "source": "policy policy-0001",
+    "target": "0.40"
+   },
+   "diversity": {
+    "panels": [
+     {
+      "family_id": "avoid-word-attack",
+      "segments": [
+       {
+        "equivalence": null,
+        "family_revision": "sha256:dfffff48d90f029ecb874127afc43c7e1c0be917afe0f9dace572c10b57adf35",
+        "points": [
+         {
+          "certified_lower_bound_bits": 8,
+          "created_at": "2026-11-28T08:49:48Z",
+          "date": "2026-11-28",
+          "equivalence": null,
+          "family_revision": "sha256:dfffff48d90f029ecb874127afc43c7e1c0be917afe0f9dace572c10b57adf35",
+          "generator_id": "seed-word",
+          "h_over_k": 1.0,
+          "record_ids": [
+           "sha256:f342bec16824b2b2100a5362ad57d20730b6b8c78291f56b3ca3deffbb3945c6"
+          ],
+          "required_bits": 8,
+          "required_source": "certification record",
+          "seed_bits": 8,
+          "version": 1
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "generators": {
+    "rows": [
+     {
+      "author": "SoraSuegami",
+      "bootstrap": true,
+      "eligible": false,
+      "entropy_bits": 8,
+      "equivalence": null,
+      "family_id": "avoid-word-attack",
+      "first_certified_at": "2026-11-28T08:49:48Z",
+      "generator_id": "seed-word",
+      "head": "1be08c137cd163325e35b7d447b1cca9553600a5",
+      "latest_at": "2026-11-28T08:49:48Z",
+      "levels": 1,
+      "pr": 199,
+      "reason": "universal certificate checked; smoke samples ok",
+      "record_ids": [
+       "sha256:f342bec16824b2b2100a5362ad57d20730b6b8c78291f56b3ca3deffbb3945c6"
+      ],
+      "required_bits": 8,
+      "seed_bits": 8,
+      "status": "certified",
+      "version": 1
+     }
+    ]
+   },
+   "library": {
+    "points": [
+     {
+      "certified_versions": 1,
+      "created_at": "2026-11-28T08:49:48Z",
+      "current_status_counts": {
+       "certified": 1,
+       "other": 0,
+       "quarantined": 0,
+       "rejected": 0,
+       "superseded": 0
+      },
+      "date": "2026-11-28",
+      "event": "certified",
+      "families": 1,
+      "family_id": "avoid-word-attack",
+      "generator_id": "seed-word",
+      "record_ids": [
+       "sha256:f342bec16824b2b2100a5362ad57d20730b6b8c78291f56b3ca3deffbb3945c6"
+      ],
+      "unique_generators": 1,
+      "version": 1
+     }
+    ]
+   },
+   "pareto": {
+    "excluded": [],
+    "groups": []
+   },
+   "performance": {
+    "points": []
+   },
+   "summary": {
+    "activations_applied": 0,
+    "active_notebook": null,
+    "current_certified_families": 1,
+    "current_certified_generators": 1,
+    "current_certified_versions": 1,
+    "current_quarantined_versions": 0,
+    "current_superseded_versions": 0,
+    "eligible_versions": 0,
+    "evaluation_record_ids": [],
+    "evaluations_by_verdict": {
+     "awaiting_evaluator": 0,
+     "fail": 0,
+     "inconclusive": 0,
+     "infra_error": 0,
+     "other": 0,
+     "pass_compression": 0,
+     "pass_performance": 0,
+     "stale": 0
+    },
+    "evaluations_failed": 0,
+    "evaluations_pending": 0,
+    "ever_certified_families": 1,
+    "ever_certified_generators": 1,
+    "ever_certified_versions": 1,
+    "last_anchor_result": null,
+    "last_comparable_paired_result": null,
+    "record_counts": {
+     "activations": 0,
+     "calibrations": 0,
+     "certifications": 1,
+     "comparisons": 0,
+     "contracts": 0,
+     "trials": 0
+    },
+    "record_ids": [
+     "sha256:f342bec16824b2b2100a5362ad57d20730b6b8c78291f56b3ca3deffbb3945c6"
+    ],
+    "rejected_versions": 0,
+    "usage": {
+     "record_ids": [],
+     "totals": {
+      "cached_tokens": 0,
+      "input_tokens": 0,
+      "lean_seconds": 0,
+      "model_calls": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "wall_seconds": 0
+     },
+     "trials": 0,
+     "unavailable_counts": {
+      "cached_tokens": 0,
+      "input_tokens": 0,
+      "lean_seconds": 0,
+      "model_calls": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "wall_seconds": 0
+     }
+    },
+    "verified_source_nodes": 0
+   }
+  },
+  "design": {
+   "allocation": {
+    "planned": [],
+    "rows": [],
+    "trials_with_unknown_contract": []
+   },
+   "anchors": {
+    "excluded": [],
+    "series": []
+   },
+   "compression": {
+    "rows": []
+   },
+   "difficulty": {
+    "hi": "0.60",
+    "lo": "0.20",
+    "panels": [],
+    "source": "policy policy-0001",
+    "target": "0.40"
+   },
+   "diversity": {
+    "panels": [
+     {
+      "family_id": "avoid-word",
+      "segments": [
+       {
+        "equivalence": null,
+        "family_revision": "sha256:6facd80ba216ccfcaa27f26511db72e1a9933450e50376c3630236a07eb475d2",
+        "points": [
+         {
+          "certified_lower_bound_bits": 8,
+          "created_at": "2026-11-28T08:52:59Z",
+          "date": "2026-11-28",
+          "equivalence": null,
+          "family_revision": "sha256:6facd80ba216ccfcaa27f26511db72e1a9933450e50376c3630236a07eb475d2",
+          "generator_id": "seed-word",
+          "h_over_k": 1.0,
+          "record_ids": [
+           "sha256:348f7f9ee3a9152199eb31b2bf761fcff71f56b01c373e8d9a99e9565de0d43c"
+          ],
+          "required_bits": 8,
+          "required_source": "certification record",
+          "seed_bits": 8,
+          "version": 1
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "generators": {
+    "rows": [
+     {
+      "author": "SoraSuegami",
+      "bootstrap": true,
+      "eligible": false,
+      "entropy_bits": 8,
+      "equivalence": null,
+      "family_id": "avoid-word",
+      "first_certified_at": "2026-11-28T08:52:59Z",
+      "generator_id": "seed-word",
+      "head": "1be08c137cd163325e35b7d447b1cca9553600a5",
+      "latest_at": "2026-11-28T08:52:59Z",
+      "levels": 2,
+      "pr": 198,
+      "reason": "universal certificate checked; smoke samples ok",
+      "record_ids": [
+       "sha256:348f7f9ee3a9152199eb31b2bf761fcff71f56b01c373e8d9a99e9565de0d43c"
+      ],
+      "required_bits": 8,
+      "seed_bits": 8,
+      "status": "certified",
+      "version": 1
+     }
+    ]
+   },
+   "library": {
+    "points": [
+     {
+      "certified_versions": 1,
+      "created_at": "2026-11-28T08:52:59Z",
+      "current_status_counts": {
+       "certified": 1,
+       "other": 0,
+       "quarantined": 0,
+       "rejected": 0,
+       "superseded": 0
+      },
+      "date": "2026-11-28",
+      "event": "certified",
+      "families": 1,
+      "family_id": "avoid-word",
+      "generator_id": "seed-word",
+      "record_ids": [
+       "sha256:348f7f9ee3a9152199eb31b2bf761fcff71f56b01c373e8d9a99e9565de0d43c"
+      ],
+      "unique_generators": 1,
+      "version": 1
+     }
+    ]
+   },
+   "pareto": {
+    "excluded": [],
+    "groups": []
+   },
+   "performance": {
+    "points": []
+   },
+   "summary": {
+    "activations_applied": 0,
+    "active_notebook": null,
+    "current_certified_families": 1,
+    "current_certified_generators": 1,
+    "current_certified_versions": 1,
+    "current_quarantined_versions": 0,
+    "current_superseded_versions": 0,
+    "eligible_versions": 0,
+    "evaluation_record_ids": [],
+    "evaluations_by_verdict": {
+     "awaiting_evaluator": 0,
+     "fail": 0,
+     "inconclusive": 0,
+     "infra_error": 0,
+     "other": 0,
+     "pass_compression": 0,
+     "pass_performance": 0,
+     "stale": 0
+    },
+    "evaluations_failed": 0,
+    "evaluations_pending": 0,
+    "ever_certified_families": 1,
+    "ever_certified_generators": 1,
+    "ever_certified_versions": 1,
+    "last_anchor_result": null,
+    "last_comparable_paired_result": null,
+    "record_counts": {
+     "activations": 0,
+     "calibrations": 0,
+     "certifications": 1,
+     "comparisons": 0,
+     "contracts": 0,
+     "trials": 0
+    },
+    "record_ids": [
+     "sha256:348f7f9ee3a9152199eb31b2bf761fcff71f56b01c373e8d9a99e9565de0d43c"
+    ],
+    "rejected_versions": 0,
+    "usage": {
+     "record_ids": [],
+     "totals": {
+      "cached_tokens": 0,
+      "input_tokens": 0,
+      "lean_seconds": 0,
+      "model_calls": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "wall_seconds": 0
+     },
+     "trials": 0,
+     "unavailable_counts": {
+      "cached_tokens": 0,
+      "input_tokens": 0,
+      "lean_seconds": 0,
+      "model_calls": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "wall_seconds": 0
+     }
+    },
+    "verified_source_nodes": 0
+   }
+  }
+ },
+ "schema": "sigaba.learning.report.v1"
+}

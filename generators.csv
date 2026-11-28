@@ -1,0 +1,3 @@
+role,family_id,generator_id,version,status,reason,seed_bits,entropy_bits,required_bits,levels,equivalence,bootstrap,eligible,first_certified_at,latest_at,pr,head,author,record_ids
+design,avoid-word,seed-word,1,certified,universal certificate checked; smoke samples ok,8,8,8,2,,true,false,2026-11-28T08:52:59Z,2026-11-28T08:52:59Z,198,1be08c137cd163325e35b7d447b1cca9553600a5,SoraSuegami,sha256:348f7f9ee3a9152199eb31b2bf761fcff71f56b01c373e8d9a99e9565de0d43c
+cryptanalysis,avoid-word-attack,seed-word,1,certified,universal certificate checked; smoke samples ok,8,8,8,1,,true,false,2026-11-28T08:49:48Z,2026-11-28T08:49:48Z,199,1be08c137cd163325e35b7d447b1cca9553600a5,SoraSuegami,sha256:f342bec16824b2b2100a5362ad57d20730b6b8c78291f56b3ca3deffbb3945c6

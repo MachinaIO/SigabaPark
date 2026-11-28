@@ -1,0 +1,1 @@
+role,series_id,anchor_epoch,profile_id,model,profile_digest,mixture_digest,created_at,contract_id,n,active_sha256,baseline_sha256,active_successes,baseline_successes,active_rate,baseline_rate,active_ci,baseline_ci,delta_pp,lower_bound_pp,verdict,baseline_identified_by,notes,record_ids
