@@ -1,0 +1,4 @@
+{
+  "name": "OffsetRingCellTree",
+  "title": "Fixed decision Ring-LWE expander for exclusive cell keys and a witness-accessible parent key"
+}
