@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TableauAudit.miss_error","proof_type":"prove","explanation":"A miss on a common simulated issuer path entails a decryption error in at least one message world"}
