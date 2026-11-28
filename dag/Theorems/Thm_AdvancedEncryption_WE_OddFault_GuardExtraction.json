@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.OddFault.GuardExtraction","title":"Extraction of every exceptional scalar from an unmasked range gap","statement":"If the clean coefficient vector is outside the image, one linear form recovers the scalar from the entire masked guard for every choice of the mask."}

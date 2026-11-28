@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.OddFault.MaskRange","title":"Exact range criterion for the exceptional clean row","statement":"A clean-row perturbation can be added by translating all randomness for every payload exactly when its coefficient vector is in the mask range."}
