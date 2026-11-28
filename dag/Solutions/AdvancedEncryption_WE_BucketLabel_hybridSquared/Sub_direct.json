@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.hybridSquared",
+  "proof_type": "prove",
+  "explanation": "A finite hybrid path transfers squared decision gain with the precise number-of-banks loss"
+}

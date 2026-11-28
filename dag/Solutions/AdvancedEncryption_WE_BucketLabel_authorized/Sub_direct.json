@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.authorized",
+  "proof_type": "prove",
+  "explanation": "An authorized witness reconstruction removes all LWE mask residues"
+}

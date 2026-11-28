@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.rowSmallBall",
+  "proof_type": "prove",
+  "explanation": "A nonzero ternary secret difference leaves at most six acceptable coefficients modulo sixteen"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.BucketLabel.publicMasks",
+  "proof_type": "prove",
+  "explanation": "Public recovery of all masks yields the secret from any authorized shares"
+}
