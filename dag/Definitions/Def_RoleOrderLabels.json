@@ -1,0 +1,9 @@
+{
+  "name": "RoleOrderLabels",
+  "title": "First differences and role-restricted terminal label masks",
+  "description": "Bit-prefix leakage and a group translation of a complete bank of tie masks.",
+  "tags": [
+    "witness-encryption",
+    "order-revealing-encryption"
+  ]
+}

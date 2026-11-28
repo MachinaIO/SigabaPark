@@ -1,0 +1,5 @@
+{
+  "theorem": "RoleOrderLabels.missingMass",
+  "proof_type": "prove",
+  "explanation": "A variance bound controls the fraction of headers without any legal preimage."
+}

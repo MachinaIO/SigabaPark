@@ -1,0 +1,5 @@
+{
+  "theorem": "RoleOrderLabels.linearShift",
+  "proof_type": "prove",
+  "explanation": "A reachable joint key shift is equivalent to equality of the complete output supports."
+}

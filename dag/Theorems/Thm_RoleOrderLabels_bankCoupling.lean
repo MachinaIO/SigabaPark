@@ -1,0 +1,8 @@
+import Definitions.Def_RoleOrderLabels
+import Mathlib.Tactic
+
+theorem RoleOrderLabels.bankCoupling {C G : Type*} [AddCommGroup G] (L R : Set C) (sep : Disjoint L R)
+    (b : G) (k : C → G) :
+    (∀ c ∈ L, RoleOrderLabels.rekey R b k c = k c) ∧
+    (∀ c ∈ R, RoleOrderLabels.rekey R b k c = k c + b) := by
+  sorry
