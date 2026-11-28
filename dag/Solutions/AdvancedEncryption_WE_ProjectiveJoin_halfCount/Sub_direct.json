@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ProjectiveJoin.halfCount",
+  "proof_type": "prove",
+  "explanation": "Every nonzero three-bit target has exactly four obstructing binary dual combinations"
+}
