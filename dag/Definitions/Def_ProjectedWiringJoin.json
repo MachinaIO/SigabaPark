@@ -1,0 +1,10 @@
+{
+  "name": "ProjectedWiringJoin",
+  "title": "Complete public-key coupling and collision separation for projected wiring joins",
+  "description": "Two independently computed local eligibility tables, an involution of all coins, exact recovery at common labels, and disjoint supports at a common compressed label.",
+  "tags": [
+    "witness-encryption",
+    "wiring",
+    "coupling"
+  ]
+}
