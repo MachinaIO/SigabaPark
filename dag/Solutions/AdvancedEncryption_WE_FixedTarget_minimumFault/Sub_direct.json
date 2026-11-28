@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.minimumFault",
+  "proof_type": "prove",
+  "explanation": "A fault site costs at most the average live weight"
+}

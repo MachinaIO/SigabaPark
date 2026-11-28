@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.scaledFrame",
+  "proof_type": "prove",
+  "explanation": "A nonzero public multiple determines the frame on a modular target"
+}

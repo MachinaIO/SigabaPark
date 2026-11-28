@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.gateMetric",
+  "proof_type": "prove",
+  "explanation": "The four universal gate coordinates cost one or three mismatches"
+}
