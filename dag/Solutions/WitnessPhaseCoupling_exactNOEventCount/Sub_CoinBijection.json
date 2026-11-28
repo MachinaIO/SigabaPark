@@ -1,0 +1,5 @@
+{
+  "theorem": "WitnessPhaseCoupling.exactNOEventCount",
+  "proof_type": "prove",
+  "explanation": "Apply the explicit front permutation, then translate each independent capsule mask in the NO dual direction by the actual phase difference. The resulting tape bijection preserves the entire publicly observed view; its restriction bijects every observation fiber."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "CyclicProgrammedLaw",
+  "title": "Adaptive self-programmed columns and known-residue GSW encodings",
+  "description": "Finite permutations for same-secret adaptive affine LWE rejection and two-stage headers, directional GSW algebra, and an exact mixed-radix lift for secret-digit messages.",
+  "tags": [
+    "witness-encryption",
+    "lattice",
+    "reduction"
+  ]
+}

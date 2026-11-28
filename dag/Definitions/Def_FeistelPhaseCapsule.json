@@ -1,0 +1,10 @@
+{
+  "name": "FeistelPhaseCapsule",
+  "title": "Feistel feedback and witness-gated four-level phase hints",
+  "description": "Finite feedback permutations, nonlinear share combination, robust two-bit phase recovery at both inclusive error endpoints, NO tag translation, and the projected 10-column accounting.",
+  "tags": [
+    "witness-encryption",
+    "lattice",
+    "finite-accounting"
+  ]
+}
