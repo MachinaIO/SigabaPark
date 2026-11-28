@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.idealShares",
+  "proof_type": "prove",
+  "explanation": "A share-preserving mask toggle identifies the two entire ideal laws"
+}

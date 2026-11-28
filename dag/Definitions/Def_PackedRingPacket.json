@@ -1,0 +1,5 @@
+{
+  "name": "PackedRingPacket",
+  "title": "Fixed ring low-digit packets and scalar bank dimensions",
+  "description": "Uniform lower and upper digit equivalence, exact full-sample registered parameters and packed lengths."
+}

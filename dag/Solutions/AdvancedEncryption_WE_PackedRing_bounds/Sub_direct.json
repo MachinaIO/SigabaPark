@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.bounds",
+  "proof_type": "prove",
+  "explanation": "Packed selector dimensions and serial traversal floors"
+}

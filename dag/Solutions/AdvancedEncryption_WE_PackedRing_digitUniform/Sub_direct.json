@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.digitUniform",
+  "proof_type": "prove",
+  "explanation": "A uniform double-modulus residue splits into jointly uniform digits"
+}
