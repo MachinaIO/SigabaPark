@@ -1,0 +1,9 @@
+{
+  "name": "TwoTraceEnergy",
+  "title": "Independent trace NAND energies",
+  "description": "Bi-affine local and aggregate penalties for two Boolean traces and quadratic correction for integral lifts.",
+  "tags": [
+    "witness-encryption",
+    "circuit-sat"
+  ]
+}
