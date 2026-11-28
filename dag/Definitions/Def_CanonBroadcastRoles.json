@@ -1,0 +1,5 @@
+{
+  "name": "CanonBroadcastRoles",
+  "title": "Canonical framed broadcast orbit and tagged slot role pairs",
+  "description": "Two explicit clocked role pairs on the actual WE circuit encoding, including a K90 template with both positive and negative profiles."
+}
