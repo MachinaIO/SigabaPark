@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.pivot_step",
+  "title": "One normalized column projection preserves existential consistency",
+  "statement": "Zero or normalized pivot columns can be dropped after applying their annihilating projection to the target and suffix."
+}

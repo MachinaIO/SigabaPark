@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SourcePads.unique_collision",
+  "proof_type": "prove",
+  "explanation": "For distinct scalar inputs and arbitrary fixed payload offsets exactly one public affine slope equalizes the two shifted outputs."
+}

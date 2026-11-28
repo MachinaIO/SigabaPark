@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.AffineAgg.shared_child_packet","title":"Split and reassemble a literal affine child ciphertext","statement":"A pair of issuers can reconstruct a fixed-tape affine encoder on a concatenation by separate evaluations at (x,0), (0,y), and (0,0), using one shared opposite mask."}

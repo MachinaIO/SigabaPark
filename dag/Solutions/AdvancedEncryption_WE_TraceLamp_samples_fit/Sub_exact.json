@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceLamp.samples_fit","proof_type":"prove","explanation":"Induct on the list of gates, checking the length and the head NAND before extending the history."}

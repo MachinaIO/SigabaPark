@@ -1,0 +1,1 @@
+{"name":"WE_TraceLampSamples","title":"Gate triples for the registered trace walk","description":"Expand a claimed list against past wires, defaulting every missing index to true. Length agreement is checked separately.","tags":["witness-encryption","circuit-sat"]}

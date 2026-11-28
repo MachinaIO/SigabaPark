@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DensityTrials.trial_bound",
+  "proof_type": "prove",
+  "explanation": "Bound the reject fraction by cross multiplication before taking powers and cancelling the common positive factor."
+}

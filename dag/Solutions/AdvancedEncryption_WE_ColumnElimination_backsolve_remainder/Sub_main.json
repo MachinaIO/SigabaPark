@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.backsolve_remainder",
+  "proof_type": "prove",
+  "explanation": "Traverse the list with the updated linear map, then lift the scalar using the residual before the pivot. Linearity and additive cancellation telescope the remainders."
+}

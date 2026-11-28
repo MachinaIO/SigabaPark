@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.variable_rank",
+  "proof_type": "prove",
+  "explanation": "Induct over arbitrary remaining columns and initial maps, using zero-safe one-column consistency at each stage."
+}

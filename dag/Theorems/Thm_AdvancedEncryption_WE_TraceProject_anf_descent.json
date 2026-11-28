@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.TraceProject.anf_descent","title":"Strict-degree Boolean polynomials have no isolated top corner","statement":"In a Boolean support cube over GF(2), every weighted multilinear monomial of support strictly smaller than the cube has even multiplicity. If their sum is nonzero at the top, it is nonzero at a strictly smaller corner."}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.additive_view",
+  "proof_type": "prove",
+  "explanation": "Subtract the public equations in the ambient abelian group."
+}

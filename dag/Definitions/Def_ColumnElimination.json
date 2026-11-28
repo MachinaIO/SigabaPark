@@ -1,0 +1,9 @@
+{
+  "name": "ColumnElimination",
+  "title": "Rank-adaptive column projection and explicit back-substitution",
+  "description": "Defines reachable targets, pivot projections, an iterative terminal map, ordered weighted witnesses, reverse coefficients, and a normalizing first-one selector on binary row vectors.",
+  "tags": [
+    "witness-encryption",
+    "linear-algebra"
+  ]
+}

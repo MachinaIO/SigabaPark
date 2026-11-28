@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IndexedIssuer.private_subspace_shares",
+  "proof_type": "prove",
+  "explanation": "Private shares from two smaller coordinate spaces can be simulated from their combined packet."
+}

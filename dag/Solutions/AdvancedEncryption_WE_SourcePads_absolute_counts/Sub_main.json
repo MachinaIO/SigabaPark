@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SourcePads.absolute_counts",
+  "proof_type": "prove",
+  "explanation": "Finite Cauchy-Schwarz bounds the square of the absolute deviation sum by the number of cells times the centered second moment."
+}

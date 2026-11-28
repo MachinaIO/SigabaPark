@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.IndexedIssuer.native_free_frame",
+  "proof_type": "prove",
+  "explanation": "The free coordinates of the structured native packet give a triangular tape bijection."
+}

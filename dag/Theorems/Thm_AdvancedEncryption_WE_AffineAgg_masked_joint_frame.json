@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.AffineAgg.masked_joint_frame","title":"Complete finite joint frame simulation by opposite masks","statement":"If all packed child outputs agree, the two opposite masked share arrays induce a bijection on the tapes producing every observable result. It applies to all rows and all output positions simultaneously."}

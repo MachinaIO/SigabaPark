@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceProject.chart_projection","proof_type":"prove","explanation":"When private coordinates admit an invertible conditioned chart and a joint output-preserving restriction, old witnesses project to child witnesses and every child evaluation lifts to the old relation for an arbitrary external predicate."}

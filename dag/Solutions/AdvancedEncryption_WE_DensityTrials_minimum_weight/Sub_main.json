@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DensityTrials.minimum_weight",
+  "proof_type": "prove",
+  "explanation": "Split on equal halves. For unequal halves apply dimension induction to the nonzero lower-degree difference, bounded in weight by the sum of the two halves."
+}

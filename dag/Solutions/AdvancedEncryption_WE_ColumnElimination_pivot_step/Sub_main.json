@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.pivot_step",
+  "proof_type": "prove",
+  "explanation": "Lift any reachable projected target through linearity and recover the missing scalar as the difference of the pivot functionals."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SourcePads.unique_collision",
+  "title": "Uniqueness of a colliding affine hash slope with source-dependent offsets",
+  "statement": "For distinct scalar inputs and arbitrary fixed payload offsets exactly one public affine slope equalizes the two shifted outputs."
+}

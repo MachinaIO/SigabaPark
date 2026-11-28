@@ -1,0 +1,373 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "The learning precheck's routing decision (trusted, no pull request code run)",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "route",
+  "ok",
+  "accepted",
+  "evaluate",
+  "problems",
+  "revision",
+  "author",
+  "permission",
+  "pr",
+  "event",
+  "draft",
+  "policy_sha256",
+  "generator",
+  "notebook"
+ ],
+ "properties": {
+  "schema": {
+   "const": "sigaba.learning.route.v1"
+  },
+  "route": {
+   "enum": [
+    "math",
+    "generator",
+    "notebook",
+    "rejected",
+    "skipped"
+   ]
+  },
+  "ok": {
+   "type": "boolean"
+  },
+  "accepted": {
+   "type": "boolean"
+  },
+  "evaluate": {
+   "type": "boolean"
+  },
+  "problems": {
+   "$ref": "#/$defs/problems"
+  },
+  "revision": {
+   "$ref": "#/$defs/git_sha_or_null"
+  },
+  "author": {
+   "$ref": "#/$defs/login"
+  },
+  "permission": {
+   "type": "string",
+   "maxLength": 32
+  },
+  "pr": {
+   "$ref": "#/$defs/pr"
+  },
+  "event": {
+   "type": "string",
+   "maxLength": 64
+  },
+  "draft": {
+   "type": "boolean"
+  },
+  "policy_sha256": {
+   "$ref": "#/$defs/sha256_or_null"
+  },
+  "generator": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "role",
+      "family_id",
+      "generator_id",
+      "version",
+      "dir",
+      "files",
+      "manifest",
+      "generate_module",
+      "certificate_module",
+      "namespace",
+      "lean_family",
+      "lean_module",
+      "family_revision",
+      "seed_bits",
+      "levels",
+      "entropy_bits",
+      "max_descriptor_bits",
+      "bootstrap",
+      "source_refs",
+      "generate_decl",
+      "certificate_decl"
+     ],
+     "properties": {
+      "role": {
+       "$ref": "#/$defs/role"
+      },
+      "family_id": {
+       "$ref": "#/$defs/ident"
+      },
+      "generator_id": {
+       "$ref": "#/$defs/ident"
+      },
+      "version": {
+       "$ref": "#/$defs/version"
+      },
+      "dir": {
+       "type": "string",
+       "maxLength": 300
+      },
+      "files": {
+       "$ref": "#/$defs/files"
+      },
+      "manifest": {
+       "type": "object"
+      },
+      "generate_module": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "certificate_module": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "namespace": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "lean_family": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "lean_module": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "family_revision": {
+       "$ref": "#/$defs/sha256"
+      },
+      "seed_bits": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 4096
+      },
+      "levels": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 64
+      },
+      "entropy_bits": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 4096
+      },
+      "max_descriptor_bits": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1048576
+      },
+      "bootstrap": {
+       "type": "boolean"
+      },
+      "source_refs": {
+       "type": "array",
+       "maxItems": 32,
+       "items": {
+        "$ref": "#/$defs/source_ref"
+       }
+      },
+      "generate_decl": {
+       "$ref": "#/$defs/lean_name"
+      },
+      "certificate_decl": {
+       "$ref": "#/$defs/lean_name"
+      }
+     }
+    }
+   ]
+  },
+  "notebook": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "role",
+      "path",
+      "status",
+      "sha256",
+      "bytes",
+      "tokens",
+      "tokenizer",
+      "incumbent_sha256",
+      "incumbent_bytes",
+      "incumbent_tokens"
+     ],
+     "properties": {
+      "role": {
+       "$ref": "#/$defs/role"
+      },
+      "path": {
+       "enum": [
+        "notebooks/design.md",
+        "notebooks/cryptanalysis.md"
+       ]
+      },
+      "status": {
+       "enum": [
+        "added",
+        "modified"
+       ]
+      },
+      "sha256": {
+       "$ref": "#/$defs/sha256"
+      },
+      "bytes": {
+       "$ref": "#/$defs/count"
+      },
+      "tokens": {
+       "$ref": "#/$defs/count"
+      },
+      "tokenizer": {
+       "$ref": "#/$defs/tokenizer"
+      },
+      "incumbent_sha256": {
+       "$ref": "#/$defs/sha256"
+      },
+      "incumbent_bytes": {
+       "$ref": "#/$defs/count"
+      },
+      "incumbent_tokens": {
+       "$ref": "#/$defs/count"
+      }
+     }
+    }
+   ]
+  }
+ },
+ "$defs": {
+  "count": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 1000000000
+  },
+  "files": {
+   "type": "object",
+   "maxProperties": 8,
+   "additionalProperties": {
+    "$ref": "#/$defs/sha256"
+   }
+  },
+  "git_sha": {
+   "type": "string",
+   "pattern": "[0-9a-f]{40}"
+  },
+  "git_sha_or_null": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "[0-9a-f]{40}"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "ident": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9-]{0,62}"
+  },
+  "lean_name": {
+   "type": "string",
+   "pattern": "[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*",
+   "maxLength": 512
+  },
+  "login": {
+   "type": "string",
+   "pattern": "[A-Za-z0-9][A-Za-z0-9-]{0,38}(\\[bot\\])?"
+  },
+  "pr": {
+   "anyOf": [
+    {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100000000
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "problems": {
+   "type": "array",
+   "maxItems": 500,
+   "items": {
+    "type": "string",
+    "maxLength": 4000
+   }
+  },
+  "role": {
+   "enum": [
+    "design",
+    "cryptanalysis"
+   ]
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "sha256:[0-9a-f]{64}"
+  },
+  "sha256_or_null": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "sha256:[0-9a-f]{64}"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "source_ref": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "node_id",
+    "commit",
+    "content_sha256"
+   ],
+   "properties": {
+    "node_id": {
+     "type": "string",
+     "pattern": "(theorem|definition):[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*|solution:[A-Za-z_][A-Za-z0-9_']*/Sub_[A-Za-z0-9_]{1,64}",
+     "maxLength": 600
+    },
+    "commit": {
+     "$ref": "#/$defs/git_sha"
+    },
+    "content_sha256": {
+     "$ref": "#/$defs/sha256"
+    }
+   }
+  },
+  "tokenizer": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "kind",
+    "version"
+   ],
+   "properties": {
+    "kind": {
+     "type": "string",
+     "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+    },
+    "version": {
+     "type": "string",
+     "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,31}"
+    }
+   }
+  },
+  "version": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 9999
+  }
+ }
+}

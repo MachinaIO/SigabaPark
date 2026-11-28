@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.extension_representation",
+  "proof_type": "prove",
+  "explanation": "Split on whether the new vector was used on either side and cancel the equal-membership cases."
+}

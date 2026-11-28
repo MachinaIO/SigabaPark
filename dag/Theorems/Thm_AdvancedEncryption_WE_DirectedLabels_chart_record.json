@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.chart_record",
+  "title": "Coefficient corrections are unchanged by an intertwining label translation",
+  "statement": "An intertwiner between public state and label maps makes the entire published linear correction matrix invariant under the corresponding gauge translation."
+}

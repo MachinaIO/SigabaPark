@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.two_trace_endpoint",
+  "proof_type": "prove",
+  "explanation": "Two different public energies interpolate to the hidden affine zero-energy endpoint."
+}

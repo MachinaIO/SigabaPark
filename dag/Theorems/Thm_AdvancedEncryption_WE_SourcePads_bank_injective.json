@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SourcePads.bank_injective",
+  "title": "Injective power maps give injective diagonal source addresses",
+  "statement": "A coordinatewise injective map stays injective under publicly fixed invertible diagonal scaling and translation."
+}

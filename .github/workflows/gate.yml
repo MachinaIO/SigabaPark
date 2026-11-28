@@ -23,7 +23,7 @@
 # the merge queue runs the full gate again on the merged candidate.
 #
 # Nothing closes a pull request: a decision is about one commit, and a newer commit gets its
-# own run. Require the check `gate / decide` (from the GitHub Actions app) in the ruleset of `main`, with
+# own run. Require the check the gate's `decide` (from the GitHub Actions app) in the ruleset of `main`, with
 # the merge queue.
 name: gate
 
@@ -59,6 +59,7 @@ jobs:
       author: ${{ steps.who.outputs.author }}
       pr: ${{ steps.who.outputs.pr }}
       revision: ${{ steps.precheck.outputs.revision }}
+      learning: ${{ steps.kind.outputs.learning }}
     steps:
       - name: Check out the base branch (never the pull request)
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -129,8 +130,41 @@ jobs:
         run: |
           python3 core/python/dag_tools.py fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
             --head "$HEAD_SHA" --out fetched
+      - name: Learning pull requests (checked by the learning workflow)
+        id: kind
+        # A pull request whose every changed path is under generators/ or notebooks/ is a
+        # learning pull request: `learning-decide` checks it (ci/learning/), and this gate only
+        # defers to it. Any other path keeps the gate's own precheck, which rejects everything
+        # outside dag/ (so ci/, .github/, meta/ and env/ need an administrator's bypass).
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: |
+          if [ -f base/ci/learning/cli.py ]; then
+            (cd base && python3 -m ci.learning.cli fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
+              --head "$HEAD_SHA" --out ../learning-fetched)
+            EVENT="${{ github.event_name }}" python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          L = ("generators/", "notebooks/")
+          rows = json.load(open("learning-fetched/files.json"))["files"]
+          learning = bool(rows) and all(r["filename"].startswith(L) for r in rows)
+          print(f"learning={'true' if learning else 'false'}")
+          # A merge group combines pull requests that each passed their checks: when it holds
+          # both nodes and learning files (and nothing else), the gate checks the nodes and
+          # `learning-decide` the learning files, so the latter leave this precheck's listing.
+          if os.environ["EVENT"] == "merge_group" and not learning and \
+                  all(r["filename"].startswith(L + ("dag/",)) for r in rows):
+              f = json.load(open("fetched/files.json"))
+              f["files"] = [r for r in f["files"] if not r["filename"].startswith(L)]
+              json.dump(f, open("fetched/files.json", "w"), indent=1)
+          PY
+          else
+            echo "learning=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Precheck
         id: precheck
+        if: steps.kind.outputs.learning != 'true'
         env:
           AUTHOR: ${{ steps.who.outputs.author }}
           PERMISSION: ${{ steps.perm.outputs.permission }}
@@ -231,12 +265,17 @@ jobs:
           EVENT: ${{ github.event_name }}
           ENV_ID: ${{ needs.precheck.outputs.env_id }}
           REVISION: ${{ needs.precheck.outputs.revision }}
+          LEARNING: ${{ needs.precheck.outputs.learning }}
         run: |
           mkdir -p fetched result
+          if [ "$LEARNING" = true ]; then
+            echo '{"conclusion": "success", "automerge": false, "labels": [], "comment": "Learning pull request: checked by `learning-decide`."}' > decision.json
+          else
           [ -f fetched/precheck.json ] || echo '{"ok": false, "accepted": true, "automerge": false, "problems": ["the precheck did not finish"], "added": []}' > fetched/precheck.json
           python3 core/python/dag_tools.py decide --precheck fetched/precheck.json \
             --result result/result.json --exit-code result/exit --env "$ENV_ID" \
             --revision "$REVISION" --author "$AUTHOR" --event "$EVENT" --out decision.json || true
+          fi
           python3 - <<'PY'
           import json
           d = json.load(open("decision.json"))
@@ -268,7 +307,8 @@ jobs:
     needs: [precheck, decide]
     if: >-
       always() && github.event_name == 'pull_request_target' &&
-      needs.precheck.result != 'skipped' && needs.precheck.outputs.pr != ''
+      needs.precheck.result != 'skipped' && needs.precheck.outputs.pr != '' &&
+      needs.precheck.outputs.learning != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

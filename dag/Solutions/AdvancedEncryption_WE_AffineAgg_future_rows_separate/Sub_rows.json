@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.AffineAgg.future_rows_separate","proof_type":"prove","explanation":"Test zero to determine the intercept, then test each standard coordinate vector to determine all slopes."}

@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.AffineAgg.future_rows_separate","title":"Future affine queries separate an entire packet","statement":"If all possible coefficient rows can later be used, equality of their evaluations forces both the intercept and every slope entry to coincide."}

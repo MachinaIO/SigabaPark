@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.TraceLamp.nand_trace_word","proof_type":"prove","explanation":"For every list of claimed gate values and every accumulator in a commutative additive group, executing all five updates per constraint returns the ternary scratch to zero and accumulates exactly the number of NAND mismatches."}
