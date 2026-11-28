@@ -1,0 +1,5 @@
+{
+  "theorem": "RoleOrderLabels.prefixLeakage",
+  "proof_type": "prove",
+  "explanation": "Distinct equal-width high words fix their first difference and order for arbitrary suffixes."
+}

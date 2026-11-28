@@ -1,0 +1,5 @@
+{
+  "name": "RoleOrderLabels.missingMass",
+  "title": "A variance bound controls the fraction of headers without any legal preimage",
+  "statement": "A variance bound controls the fraction of headers without any legal preimage."
+}

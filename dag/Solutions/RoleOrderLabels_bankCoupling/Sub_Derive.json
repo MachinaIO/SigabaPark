@@ -1,0 +1,5 @@
+{
+  "theorem": "RoleOrderLabels.bankCoupling",
+  "proof_type": "prove",
+  "explanation": "Disjoint reachable colors absorb a common right-role shift by a bijection of every mask."
+}

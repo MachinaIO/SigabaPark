@@ -1,0 +1,5 @@
+{
+  "name": "RoleOrderLabels.prefixLeakage",
+  "title": "Distinct equal-width high words fix their first difference and order for arbitrary suffixes",
+  "statement": "Distinct equal-width high words fix their first difference and order for arbitrary suffixes."
+}
