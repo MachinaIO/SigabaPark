@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.dimension",
+  "proof_type": "prove",
+  "explanation": "Exact field-valued two-party isolation requires full intermediate dimension"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.fault",
+  "proof_type": "prove",
+  "explanation": "Each defective transformed product attains both residual target values"
+}
