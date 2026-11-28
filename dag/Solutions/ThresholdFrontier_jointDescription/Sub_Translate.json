@@ -1,0 +1,5 @@
+{
+  "theorem": "ThresholdFrontier.jointDescription",
+  "proof_type": "prove",
+  "explanation": "Induct on the suffix path. Equal-state traversals accumulate identical increments, so the prescribed offset commutes with every step. Function extensionality yields a single equality for the complete key and all requested restricted states."
+}
