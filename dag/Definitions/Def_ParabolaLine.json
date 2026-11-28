@@ -1,0 +1,10 @@
+{
+ "name": "ParabolaLine",
+ "title": "Reversible full-view charts and exact shifted-square overlap",
+ "description": "For the rank-two non-singleton gate projection, the complete public intercept and slope data have explicit algebraic charts. The shifted-square overlap follows by an exact difference-of-squares fiber count.",
+ "tags": [
+  "witness-encryption",
+  "cost",
+  "statistical-distance"
+ ]
+}
