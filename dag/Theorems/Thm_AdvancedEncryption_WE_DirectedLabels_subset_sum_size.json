@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DirectedLabels.subset_sum_size",
+  "title": "Distinct subset sums bound the cardinality of a real-point dictionary",
+  "statement": "An injective subset-sum map into a finite additive group implies that two to the dictionary size is at most the group order."
+}

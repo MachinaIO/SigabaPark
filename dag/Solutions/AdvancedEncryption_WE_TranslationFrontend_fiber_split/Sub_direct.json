@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TranslationFrontend.fiber_split",
+  "proof_type": "prove",
+  "explanation": "A section of constant syndrome translations splits every projected zero fiber."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "WE_CBDWirePad",
+  "title": "Executable CBD ring generator and framed-to-packed ring-sample converter",
+  "description": "Bit writers, a total bounded converter, and the rank-one one-sample generator using the registered sample map."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TagBank.linear_omission",
+  "proof_type": "prove",
+  "explanation": "Arbitrary public linear combinations of issued monomials have zero missing coefficient."
+}

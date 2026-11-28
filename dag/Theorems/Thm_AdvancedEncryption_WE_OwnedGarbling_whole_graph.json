@@ -1,0 +1,5 @@
+{
+ "name": "AdvancedEncryption.WE.OwnedGarbling.whole_graph",
+ "title": "Every topological prefix exposes exactly the structural reference map",
+ "statement": "Projection of the full compiler state to public base-wire identifiers commutes with any list of topologically processed gate updates, independently of all local truth maps."
+}

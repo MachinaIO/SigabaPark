@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LiftedProduct.folded_bound",
+  "proof_type": "prove",
+  "explanation": "Choosing the better centered public representative bounds every ternary product coefficient."
+}

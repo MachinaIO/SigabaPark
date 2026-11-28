@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.QuadraticResidual.gauss_pivot","proof_type":"prove","explanation":"Expand both sums over Bool and check the eight values of the remaining three Boolean bits. The outer finite sum is arbitrary."}

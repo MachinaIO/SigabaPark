@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.OwnedGarbling.affine_view",
+ "proof_type": "prove",
+ "explanation": "After idealizing the inactive pad at each parent, all emitted slope corrections are independent uniform bits and the baseline is determined by the opened output, active pads and physical colors, even for a test of the whole packet."
+}

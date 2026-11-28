@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.AffineFiberScan.scan_sound",
+  "title": "Two-fiber NAND scanning contains the registered output on every witness",
+  "statement": "Any locally sound abstract NAND operation, started from wire labels containing the input bits, gives a final label containing the actual registered output, for every gate list including forward reads."
+}

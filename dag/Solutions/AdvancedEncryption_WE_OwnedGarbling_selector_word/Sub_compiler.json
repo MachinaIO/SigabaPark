@@ -1,0 +1,5 @@
+{
+ "theorem": "AdvancedEncryption.WE.OwnedGarbling.selector_word",
+ "proof_type": "prove",
+ "explanation": "Bitwise evaluation of the one-word selector depends only on the selected physical operand, with slope one in the corrected color coordinate. The hidden-difference maps for suffix and color are bijections for each selector."
+}

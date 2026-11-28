@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.SourcePads.bank_injective",
+  "proof_type": "prove",
+  "explanation": "A coordinatewise injective map stays injective under publicly fixed invertible diagonal scaling and translation."
+}

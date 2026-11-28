@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.quadratic_and_bounded",
+  "proof_type": "prove",
+  "explanation": "The nonnegative NAND energy is a quadratic of range at most three per gate plus one."
+}

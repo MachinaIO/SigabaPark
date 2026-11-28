@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.PublicSlices.joint_slice_shifts","title":"Exact simultaneous mask-shift criterion for public matrix slices","statement":"All disclosed slice pairings vanish exactly when one can translate every slice mask to preserve all row and column shares across a change of secret."}

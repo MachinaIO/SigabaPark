@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.subset_sum_size",
+  "proof_type": "prove",
+  "explanation": "Apply the cardinality bound for an injection from the powerset."
+}

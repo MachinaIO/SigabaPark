@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.PublicSlices.anf_attainable_span","proof_type":"prove","explanation":"Induct on proper subsets and isolate the coefficient at the support by subtracting all proper-subset contributions. The reverse follows by closure of a subspace under sums."}

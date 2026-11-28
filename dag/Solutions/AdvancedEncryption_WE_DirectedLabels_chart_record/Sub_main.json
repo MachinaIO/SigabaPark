@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.chart_record",
+  "proof_type": "prove",
+  "explanation": "Evaluate the two maps at arbitrary input and use linearity and the intertwiner."
+}

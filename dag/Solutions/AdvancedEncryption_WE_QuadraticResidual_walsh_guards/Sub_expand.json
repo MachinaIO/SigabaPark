@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.QuadraticResidual.walsh_guards","proof_type":"prove","explanation":"Expand the product of one plus each sign over all subsets. A violated guard gives a zero factor. Summing the pointwise identity over witnesses gives the exact common-zero numerator."}

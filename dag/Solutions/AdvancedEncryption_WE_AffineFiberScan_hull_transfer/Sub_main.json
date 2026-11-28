@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.AffineFiberScan.hull_transfer",
+  "proof_type": "prove",
+  "explanation": "Split on both concrete input values and use the corresponding inclusion or pair of witnesses."
+}

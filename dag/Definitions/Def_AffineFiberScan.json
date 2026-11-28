@@ -1,0 +1,9 @@
+{
+  "name": "AffineFiberScan",
+  "title": "Two-fiber abstractions for registered NAND evaluation",
+  "description": "Defines sound abstract NAND transfer, a wire-state step with default true for forward references, and the hull/intersection transfer on two concrete fibers.",
+  "tags": [
+    "witness-encryption",
+    "circuit-sat"
+  ]
+}
