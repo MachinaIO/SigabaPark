@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Serpentine.negation",
+  "proof_type": "prove",
+  "explanation": "The streamed complement after the low one negates every nibble"
+}

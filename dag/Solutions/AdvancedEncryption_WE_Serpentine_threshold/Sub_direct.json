@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Serpentine.threshold",
+  "proof_type": "prove",
+  "explanation": "Row-count frontiers of the native key issuer at the stated pool size"
+}

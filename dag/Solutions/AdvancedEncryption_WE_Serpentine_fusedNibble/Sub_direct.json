@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Serpentine.fusedNibble",
+  "proof_type": "prove",
+  "explanation": "Four native data transitions compute every four-bit product in both directions"
+}
