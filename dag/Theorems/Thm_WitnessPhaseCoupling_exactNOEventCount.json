@@ -1,0 +1,5 @@
+{
+  "name": "WitnessPhaseCoupling.exactNOEventCount",
+  "title": "Identical observation counts for aligned NO phase capsules",
+  "statement": "If two finite front samplers agree after permuting their uniform input coins and every linear capsule coordinate has a mask direction that holds its public part fixed while shifting its tag by one, then even arbitrarily correlated phase functions give exactly equal coin counts for every decidable observation of the whole public record."
+}
