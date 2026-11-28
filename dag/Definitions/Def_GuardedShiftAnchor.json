@@ -1,0 +1,10 @@
+{
+  "name": "GuardedShiftAnchor",
+  "title": "Guarded scalar shift and public anchor reconstruction",
+  "description": "Integer noise radius and literal width bounds for a guarded scalar shift, plus exact correction-vector simulation and recovery for anchored trapdoor hashing.",
+  "tags": [
+    "witness-encryption",
+    "lattice",
+    "finite-accounting"
+  ]
+}
