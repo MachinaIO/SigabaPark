@@ -1,0 +1,5 @@
+{
+  "theorem": "QuarterPhaseFiber.clearCarry",
+  "proof_type": "prove",
+  "explanation": "The prescribed quotient bit cancels the full mod-four carry for any support weight."
+}

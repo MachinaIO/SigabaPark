@@ -1,0 +1,5 @@
+{
+  "theorem": "QuarterPhaseFiber.mixedDerivative",
+  "proof_type": "prove",
+  "explanation": "Mixed derivatives vanish when the individual differences lie in disjoint column directions."
+}

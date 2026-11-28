@@ -1,0 +1,9 @@
+{
+  "name": "QuarterPhaseFiber",
+  "title": "Signed Boolean pairs for phase-conditioned quaternary errors",
+  "description": "Binary signs and the two-coordinate bent phase used in the exact correlator calculation.",
+  "tags": [
+    "witness-encryption",
+    "fourier-analysis"
+  ]
+}
