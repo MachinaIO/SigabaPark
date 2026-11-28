@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.LegalBranch.FoldPayload","proof_type":"prove","explanation":"The final output-port difference vanishes for an accepted trace; on a rejected trace it supplies precisely one fair mask."}

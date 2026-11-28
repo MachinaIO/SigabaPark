@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.LegalBranch.FullViewCount","proof_type":"prove","explanation":"A mask permutation preserving the complete auxiliary view and negating the marked bit gives equal numbers of tapes at each observed view and bit."}
