@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.NullSampler.sparseQueries",
+  "proof_type": "prove",
+  "explanation": "Aggregate point-payload distinguishing advantage needs visits on the two zero traces"
+}

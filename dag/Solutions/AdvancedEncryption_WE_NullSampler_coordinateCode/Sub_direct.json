@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.NullSampler.coordinateCode",
+  "proof_type": "prove",
+  "explanation": "A short reusable coordinate code must incur many total probe errors"
+}
