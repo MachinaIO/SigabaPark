@@ -1,0 +1,5 @@
+{
+  "name": "GuardedBinaryProjection.eliminate",
+  "title": "Forgetting a guarded pivot preserves every possible future constraint",
+  "statement": "Forgetting a guarded pivot preserves every possible future constraint."
+}

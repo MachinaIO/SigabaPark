@@ -1,0 +1,9 @@
+{
+  "name": "GuardedBinaryProjection",
+  "title": "Guarded binary elimination and relative trace blocks",
+  "description": "Exact semantics for a bucket of binary constraints and a block-oriented encoding of raw wire traces.",
+  "tags": [
+    "witness-encryption",
+    "circuit-sat"
+  ]
+}
