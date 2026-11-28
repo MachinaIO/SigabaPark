@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_FourSupportAlgebra", "title": "Four-input exact support after subtracting all proper connected supports.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.FourSupportAlgebra on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}
