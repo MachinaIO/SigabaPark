@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.forcedFrequency",
+  "proof_type": "prove",
+  "explanation": "Every collision forced by a current Fourier subspace lies in any feasible larger subspace"
+}

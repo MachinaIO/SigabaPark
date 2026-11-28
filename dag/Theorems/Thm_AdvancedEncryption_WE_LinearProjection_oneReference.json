@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.LinearProjection.oneReference",
+  "title": "A single scalar Boolean reference cancels the same row secret",
+  "statement": "A single scalar Boolean reference cancels the same row secret"
+}

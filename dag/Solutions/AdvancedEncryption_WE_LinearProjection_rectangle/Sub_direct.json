@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.rectangle",
+  "proof_type": "prove",
+  "explanation": "Disjoint observation classes require one monochromatic rectangle each"
+}

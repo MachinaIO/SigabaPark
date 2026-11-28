@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.costs",
+  "proof_type": "prove",
+  "explanation": "Exact costs of the 4096-gate projected truth-table role pair"
+}
