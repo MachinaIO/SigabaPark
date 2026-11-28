@@ -1,0 +1,10 @@
+{
+  "name": "BoundaryEncodingAudit",
+  "title": "Registered input coding and squared-gain accounting",
+  "description": "The registered Ring-LWE word parser has a concrete clock-plus-description bound. Native NAND framing gives a 24578-bit common prefix and an exact zero-gap region; a conditional machine-level ratio lemma quantifies the remaining reduction budget.",
+  "tags": [
+    "witness-encryption",
+    "ring-lwe",
+    "audit"
+  ]
+}
