@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.ConditionalAffine.common_anchor_iff","proof_type":"prove","explanation":"A common scalar functional can shift the anchor by one while fixing every public basis observation exactly iff the anchor lies outside their span"}
