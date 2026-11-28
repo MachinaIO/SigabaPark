@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.StreamBank.SentinelWord","title":"A seventh sentinel times exactly six least-significant-bit writes","statement":"The sentinel in an initial word of six data bits is still present before the last native tick and is alone after six right shifts."}

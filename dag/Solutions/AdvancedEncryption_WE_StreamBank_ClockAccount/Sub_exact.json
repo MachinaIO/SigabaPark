@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.StreamBank.ClockAccount","proof_type":"prove","explanation":"The initialization, every row, its two full-bank traversals and the final share words add to the declared clock."}
