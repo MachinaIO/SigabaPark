@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.polarity",
+  "proof_type": "prove",
+  "explanation": "Compatible favorable extensions preserve both Boolean child predicates"
+}

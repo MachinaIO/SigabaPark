@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.glue",
+  "proof_type": "prove",
+  "explanation": "Kernel sum exactly characterizes compatible observations on an affine witness fiber"
+}

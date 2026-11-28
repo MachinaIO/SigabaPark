@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.LinearProjection.fourGroups",
+  "proof_type": "prove",
+  "explanation": "The two shared parity maps have exactly one common bit"
+}
