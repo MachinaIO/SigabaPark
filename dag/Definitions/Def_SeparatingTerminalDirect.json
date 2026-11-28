@@ -1,0 +1,6 @@
+{
+ "name": "SeparatingTerminalDirect",
+ "title": "Dense correction encoder with a one-step transition per input bit",
+ "description": "SeparatingTerminalMachine.Direct.dense emits the same 798336 bits as encCorrection on every valid private word. Its exact cost is 1035607808, including its zero-tape transition table. It keeps the position and three bits in finite control.",
+ "tags": ["witness-encryption", "cost", "machine"]
+}
