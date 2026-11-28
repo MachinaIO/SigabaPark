@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.StreamBank.ClockAccount","title":"Phase accounting of the finite streaming loop","statement":"The initialization, every row, its two full-bank traversals and the final share words add to the declared clock."}

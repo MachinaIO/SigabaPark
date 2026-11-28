@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.StreamBank.IssuerCost","proof_type":"prove","explanation":"The clock, state count, canonical transition-table length and total cost evaluate on the actual fixed machine."}
