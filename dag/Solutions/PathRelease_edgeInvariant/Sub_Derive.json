@@ -1,0 +1,5 @@
+{
+  "theorem": "PathRelease.edgeInvariant",
+  "proof_type": "prove",
+  "explanation": "Matching source and edge label translations fix the complete edge correction."
+}

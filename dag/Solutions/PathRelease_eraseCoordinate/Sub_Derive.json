@@ -1,0 +1,5 @@
+{
+  "theorem": "PathRelease.eraseCoordinate",
+  "proof_type": "prove",
+  "explanation": "An unread nonzero backward coefficient can absorb the entire terminal shift."
+}

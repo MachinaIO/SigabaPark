@@ -1,0 +1,9 @@
+{
+  "name": "TwoLayerPath",
+  "title": "Two-layer polynomial residual issuer and streaming parity witness reader",
+  "description": "A zero-work-tape pair for the two fixed NAND templates, with predecoded mode and raw witness interface.",
+  "tags": [
+    "witness-encryption",
+    "turing-machine"
+  ]
+}
