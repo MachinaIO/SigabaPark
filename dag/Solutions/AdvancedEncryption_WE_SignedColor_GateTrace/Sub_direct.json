@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SignedColor.GateTrace","proof_type":"prove","explanation":"Exhaust the local palette permutations in the three triangles, then induct through the original evaluator including its default-true reads."}
