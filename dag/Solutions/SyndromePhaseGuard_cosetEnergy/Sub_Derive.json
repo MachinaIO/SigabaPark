@@ -1,0 +1,5 @@
+{
+  "theorem": "SyndromePhaseGuard.cosetEnergy",
+  "proof_type": "prove",
+  "explanation": "Energy on each public fiber equals the sum of its in-fiber shift correlations."
+}

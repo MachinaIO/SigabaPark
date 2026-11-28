@@ -1,0 +1,9 @@
+{
+  "name": "SyndromePhaseGuard",
+  "title": "A dyadic table on the four legal NAND-character coordinates",
+  "description": "Radix-four coordinates, positive integer cell weights and a projected-histogram function for a one-gate correlated phase guard.",
+  "tags": [
+    "witness-encryption",
+    "fourier-analysis"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "SyndromePhaseGuard.rankThreshold",
+  "proof_type": "prove",
+  "explanation": "A syndrome-assisted scalar variation of at least one half forces projected binary rank at most three."
+}
