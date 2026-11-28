@@ -1,0 +1,9 @@
+{
+  "name": "InventoryCircuit",
+  "title": "A registered 4096-gate color inventory obstruction",
+  "description": "An explicit registered NAND circuit compares all 136 pairs of seventeen four-bit words. Its last gate is false on every 128-bit input.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

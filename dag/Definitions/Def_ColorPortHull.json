@@ -1,0 +1,9 @@
+{
+  "name": "ColorPortHull",
+  "title": "Affine hull of injective color incidence tables",
+  "description": "For r<q the affine hull of injective color tables over any field is exactly the row-normalized space. At q=r=16 each named color occurs once. Seventeen leave-one-out equations over GF(2) are inconsistent.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

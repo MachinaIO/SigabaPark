@@ -1,0 +1,9 @@
+{
+  "name": "ColorInventoryDecision",
+  "title": "Certified color inequalities on registered NAND words",
+  "description": "A diagonal abstract NAND interpreter proves candidate inequalities from the decoded gate list. A rechecked 17-clique certifies rejection for every 128-bit assignment.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

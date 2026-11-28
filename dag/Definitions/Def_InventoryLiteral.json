@@ -1,0 +1,9 @@
+{
+  "name": "InventoryLiteral",
+  "title": "A costed encoded-statement inventory fixture identifier",
+  "description": "A one-pass exact-word machine recognizes the encoded registered obstruction on every registered input with cost below 2^40, including its transition description. A match certifies unsatisfiability.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}
