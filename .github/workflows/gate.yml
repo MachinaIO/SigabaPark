@@ -144,12 +144,20 @@ jobs:
           if [ -f base/ci/learning/cli.py ]; then
             (cd base && python3 -m ci.learning.cli fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
               --head "$HEAD_SHA" --out ../learning-fetched)
-            python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
+            EVENT="${{ github.event_name }}" python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          L = ("generators/", "notebooks/")
           rows = json.load(open("learning-fetched/files.json"))["files"]
-          learning = bool(rows) and all(r["filename"].startswith(("generators/", "notebooks/"))
-                                        for r in rows)
+          learning = bool(rows) and all(r["filename"].startswith(L) for r in rows)
           print(f"learning={'true' if learning else 'false'}")
+          # A merge group combines pull requests that each passed their checks: when it holds
+          # both nodes and learning files (and nothing else), the gate checks the nodes and
+          # `learning-decide` the learning files, so the latter leave this precheck's listing.
+          if os.environ["EVENT"] == "merge_group" and not learning and \
+                  all(r["filename"].startswith(L + ("dag/",)) for r in rows):
+              f = json.load(open("fetched/files.json"))
+              f["files"] = [r for r in f["files"] if not r["filename"].startswith(L)]
+              json.dump(f, open("fetched/files.json", "w"), indent=1)
           PY
           else
             echo "learning=false" >> "$GITHUB_OUTPUT"

@@ -396,3 +396,20 @@ class Fetch(TempCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MergeGroups(TempCase):
+    """A merge group may combine a mathematical pull request with a learning one: the gate checks
+    the nodes, and the learning route sees only the learning files. A pull request itself still
+    may not mix them."""
+
+    def test_merge_group_mixing(self):
+        import json as _json
+        self.make_base(notebooks={"design": b""})
+        rows = [("dag/Notes/x.md", "added", b"---\ntitle: x\n---\n"),
+                ("notebooks/design.md", "modified", b"a better note\n")]
+        f = self.make_fetched(rows)
+        r = RT.route(self.base, f, "listed", "write", event="merge_group", pr=1)
+        self.assertEqual(r["route"], "notebook", r)
+        r = RT.route(self.base, f, "listed", "write", event="pull_request_target", pr=1)
+        self.assertEqual(r["route"], "rejected")

@@ -255,6 +255,11 @@ def route(base: Path, fetched: Path, author: str, permission: str | None, draft:
         kinds.setdefault(k, []).append(r)
     if set(kinds) == {"math"}:
         return _result("math", **common)
+    # A merge group combines pull requests that each passed their own checks: its mathematical
+    # nodes are the gate's, and only the learning files are routed here.
+    if event == "merge_group" and "math" in kinds and len(kinds) > 1:
+        nodes = kinds.pop("math")
+        rows = [r for r in rows if r not in nodes]
     if "maintainer" in kinds:
         names = sorted({str(r.get("filename")) for r in kinds["maintainer"]})
         return _result("rejected", problems=[
