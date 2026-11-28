@@ -1,0 +1,5 @@
+{
+  "theorem": "SeparatorGrant.missingChild",
+  "proof_type": "prove",
+  "explanation": "Each allowed grant for an unreachable separator has an unreachable required child."
+}
