@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.NoisyFiber.FiberFlip","title":"A fair error-bit flip preserves the header and translates the anchor","statement":"For a direction changing the header by one error unit and the anchor by a half turn, complementing the error and shifting the uniform seed preserves the header, translates the anchor and is reversible."}

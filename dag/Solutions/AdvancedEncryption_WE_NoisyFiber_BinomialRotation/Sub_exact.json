@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.NoisyFiber.BinomialRotation","proof_type":"prove","explanation":"The two-coordinate signed recurrence for fair quarter-turn errors scales its l1 norm by one half after two steps, at every starting signed mass."}
