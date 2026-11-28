@@ -1,0 +1,1 @@
+{"name":"VariableTagFront","title":"Raw variable local NAND block parser, fixed-source encoder and full witness decoder","description":"Actual three-tape fused encoder and no-work-tape decoder with a public variable first-role directory; the local programs are not hardcoded."}

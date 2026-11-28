@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.VariableTag.GateAddress","title":"A primary or local gate parent decodes to its own role and local offset","statement":"The arithmetic used to reject cross-role wires and map earlier gate outputs is independent of the arbitrary data in that block."}

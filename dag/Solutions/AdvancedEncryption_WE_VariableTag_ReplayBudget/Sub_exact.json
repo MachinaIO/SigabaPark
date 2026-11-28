@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.VariableTag.ReplayBudget","proof_type":"prove","explanation":"A charged upper bound for the unary input, 819200 scalar NAND steps, per-assignment rewinds, parser, suffix verification, and framed bank fits the actual clock."}

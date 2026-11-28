@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.VariableTag.ScalarProgram",
+  "title": "Native scalar replay accepts exactly backward byte operands and computes every registered NAND wire",
+  "statement": "For every byte-addressed gate program and every initial list, the scalar subroutine succeeds exactly on backward addresses, and its entire wire vector then equals the registered estep fold."
+}

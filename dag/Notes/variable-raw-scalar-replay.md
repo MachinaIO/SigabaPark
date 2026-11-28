@@ -1,0 +1,11 @@
+---
+title: Exact native scalar lookup and replay for every local byte-addressed NAND program
+refs: [definition:VariableTagFront, definition:VariableLocalReplay, theorem:AdvancedEncryption.WE.VariableTag.ScalarProgram]
+tags: [witness-encryption, bounded-support, turing-machine]
+---
+
+At the entrance to the scalar lookup phase, the start state is 77000 + 256k + i with mode k in {0,1,2} and index i in [0,255]. The S head is at the start of the populated truth array. The solution computes the full native action on every possible symbol at the three other heads. On each occupied cell with positive remaining index it moves S one cell right and decrements the state. On blank it rejects immediately. At zero index it holds its position and switches to the mode determined by the first value, or to the NAND write state after the second value. No other head moves or tape writes occur. Induction on i proves this law for any array, including the empty array and an index exactly equal to its length. At the blank append cell the accepted transition writes exactly the computed NAND value.
+
+The scalar interpreter stages those native lookups at the array origin and reads the genuine writer at its append location. On every list of eight-bit operand pairs and every starting wire array, it succeeds exactly when both operands precede their gate. When it succeeds its entire resulting wire sequence equals the standard-library estep fold. This applies to all 200-gate local programs on all 256 private assignments. The registered gate evaluator supplies true for any out-of-range reference; this front end rejects such references, so the backward condition is essential. The program theorem compares complete wire arrays, including the four final tag bits.
+
+Between these measured sections the interpreter prepares the starting offset, rewinds to the array origin, and locates the append blank by list operations. The theorem does not yet prove that the raw clocked machine reaches those boundaries for every gate, propagates the role marker or exhausts precisely 256 assignments. The previous two full physical traces and the encoder/decoder cost accounting apply to the same unmodified native machines. No cryptographic assumption or additional honest cost is introduced; arbitrary shared-wire NAND circuits still require a separate compiler.

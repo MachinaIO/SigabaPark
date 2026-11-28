@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.VariableTag.ScalarProgram",
+  "proof_type": "prove",
+  "explanation": "Symbolic reduction of all actual lookup transitions, induction on the address, case analysis on the native mode and append actions, then induction on arbitrary gate lists."
+}

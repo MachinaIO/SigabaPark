@@ -1,0 +1,5 @@
+{
+  "name": "VariableLocalReplay",
+  "title": "Scalar reachability interpreter using native indexed lookup transitions",
+  "description": "The scalar array and a byte gate list expose actual front-end seek, NAND mode and writer actions."
+}

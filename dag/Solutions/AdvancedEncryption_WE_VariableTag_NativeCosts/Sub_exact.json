@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.VariableTag.NativeCosts","proof_type":"prove","explanation":"The native parser, truth-table evaluator, directory writer, streamed bank and original-witness decoder together satisfy the measured strict size target."}
