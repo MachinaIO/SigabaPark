@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.LegalBranch.FoldPayload","title":"Correcting a pinned output with a single unused mask leaves an affine leaf packet","statement":"The final output-port difference vanishes for an accepted trace; on a rejected trace it supplies precisely one fair mask."}
