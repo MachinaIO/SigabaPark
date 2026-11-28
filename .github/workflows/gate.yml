@@ -313,8 +313,7 @@ jobs:
     needs: [precheck, decide]
     if: >-
       always() && github.event_name == 'pull_request_target' &&
-      needs.precheck.result != 'skipped' && needs.precheck.outputs.pr != '' &&
-      needs.precheck.outputs.learning != 'true'
+      needs.precheck.result != 'skipped' && needs.precheck.outputs.pr != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -337,9 +336,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ needs.precheck.outputs.pr }}
           REVISION: ${{ needs.precheck.outputs.revision }}
+          LEARNING: ${{ needs.precheck.outputs.learning }}
         run: |
           read -r conclusion automerge < flags.txt
-          gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file comment.md
+          # A learning pull request gets its comment from `learning-decide`; the gate only keeps
+          # its own labels current (clearing those of an earlier decision).
+          [ "$LEARNING" = true ] || gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file comment.md
           # The gate's labels follow the latest decision (others are left alone); a missing label
           # is created, and a failure to label is a failure of this step, never silent.
           current=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]')
