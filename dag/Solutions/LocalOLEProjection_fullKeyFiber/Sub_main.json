@@ -1,0 +1,5 @@
+{
+  "theorem": "LocalOLEProjection.fullKeyFiber",
+  "proof_type": "prove",
+  "explanation": "Translate the second output through the CRT isomorphism and use the unique generating residue to count the entire fiber."
+}
