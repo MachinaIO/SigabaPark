@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Serpentine.budgetCosts",
+  "proof_type": "prove",
+  "explanation": "Exact machine costs of independent row sampling and shared-key preparation"
+}

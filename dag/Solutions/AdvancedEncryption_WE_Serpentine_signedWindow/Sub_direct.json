@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Serpentine.signedWindow",
+  "proof_type": "prove",
+  "explanation": "The signed coefficient window is the registered negacyclic product"
+}
