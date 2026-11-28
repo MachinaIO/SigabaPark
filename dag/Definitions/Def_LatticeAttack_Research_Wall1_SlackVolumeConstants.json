@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_SlackVolumeConstants", "title": "Exact unit-ball constants at the two dimensions used in the slack certificate.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.SlackVolumeConstants on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

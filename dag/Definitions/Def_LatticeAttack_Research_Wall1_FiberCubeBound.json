@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_FiberCubeBound", "title": "Fiber-cube bounds using the maximum fiber and the actual total size.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.FiberCubeBound on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

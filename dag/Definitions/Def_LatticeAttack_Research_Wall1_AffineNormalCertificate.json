@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_AffineNormalCertificate", "title": "Kernel-checked short primitive normals for all nontrivial affine relations mod3329.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.AffineNormalCertificate on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

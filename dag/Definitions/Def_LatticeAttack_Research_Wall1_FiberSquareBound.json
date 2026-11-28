@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_FiberSquareBound", "title": "A finite fiber-square bound that retains the actual total candidate count.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.FiberSquareBound on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

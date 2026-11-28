@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_AffineQuadrupleRank", "title": "Exact rank and compatibility decomposition for affine quadruple families.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.AffineQuadrupleRank on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

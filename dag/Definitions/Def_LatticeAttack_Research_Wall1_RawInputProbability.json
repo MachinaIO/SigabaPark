@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_RawInputProbability", "title": "The actual single-input hit probability is the centered fiber size divided by q^400.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.RawInputProbability on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

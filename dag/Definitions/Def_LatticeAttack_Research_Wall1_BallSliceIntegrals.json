@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_BallSliceIntegrals", "title": "Exact radial slice integrals, obtained from volumes rather than special functions.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.BallSliceIntegrals on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

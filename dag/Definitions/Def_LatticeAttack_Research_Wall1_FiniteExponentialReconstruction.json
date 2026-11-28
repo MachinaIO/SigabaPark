@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_FiniteExponentialReconstruction", "title": "Exact reconstruction by a finite exponential sum through its truncation degree.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.FiniteExponentialReconstruction on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}
