@@ -1,0 +1,5 @@
+{
+  "name": "RectangleGrant",
+  "title": "Coherent endpoint rows and one-use masks for biclique separator grants",
+  "description": "A shared local row for all of a vertex\u2019s incident rectangle tests and finite Boolean grant masking."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.RectangleGrant.reconstruct",
+  "proof_type": "prove",
+  "explanation": "A witness holding both certified incidence pads recovers the one-bit payload"
+}
