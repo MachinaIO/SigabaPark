@@ -1,0 +1,5 @@
+{
+  "name": "ThresholdFrontier.jointDescription",
+  "title": "Reconstruct every external descendant and the entire disclosed threshold key jointly",
+  "statement": "At synchronized frontiers whose accumulator differences are known, the full-key and all descendant-state descriptions are exactly one deterministic function of the disclosed key, even when their suffix paths overlap."
+}

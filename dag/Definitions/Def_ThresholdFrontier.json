@@ -1,0 +1,9 @@
+{
+  "name": "ThresholdFrontier",
+  "title": "Public descendant states of a synchronized threshold frontier",
+  "description": "State transitions depend only on the shared seed, control and public path or words; an additive accumulator records the threshold share.",
+  "tags": [
+    "witness-encryption",
+    "function-secret-sharing"
+  ]
+}
