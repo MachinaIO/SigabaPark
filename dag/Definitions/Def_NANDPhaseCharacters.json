@@ -1,0 +1,9 @@
+{
+  "name": "NANDPhaseCharacters",
+  "title": "Two characters of correlated NAND error products",
+  "description": "Modulo-eight residues, their multiplicative characters, a deterministic two-trace raw-product decoder, and a simultaneous coin translation on the hiding-character quotient.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

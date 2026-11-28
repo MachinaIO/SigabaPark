@@ -1,0 +1,9 @@
+{
+  "name": "NANDShiftedSupport",
+  "title": "Exponential coefficient support at every Boolean input center",
+  "description": "Translated four-bit EXACTLY-TWO has ten or eleven canonical terms. Across 32 disjoint blocks, every center leaves more than 2^106 nonconstant terms in the explicit Cartesian expansion.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

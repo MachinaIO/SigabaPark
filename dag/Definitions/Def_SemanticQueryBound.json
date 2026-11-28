@@ -1,0 +1,9 @@
+{
+  "name": "SemanticQueryBound",
+  "title": "Tight black-box predicate query bound for perfect witness encryption",
+  "description": "On a common zero-oracle ciphertext the two queried position sets cover the input domain. A balanced partition realizes the bound of 2^127 predicate queries for 128 Boolean inputs under perfect YES correctness and exact NO hiding.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}
