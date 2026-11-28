@@ -1,0 +1,9 @@
+{
+  "name": "NANDTraceWeights",
+  "title": "Reverse discrepancy weights for native NAND traces",
+  "description": "A finite-support reverse pass telescopes every native NAND trace, including shared inputs and unavailable wires. The resulting identity gives a functional refutation on all NO instances.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

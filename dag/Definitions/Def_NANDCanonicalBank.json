@@ -1,0 +1,9 @@
+{
+  "name": "NANDCanonicalBank",
+  "title": "Canonical NAND coefficient ciphertext and exact coset criterion",
+  "description": "A native gate library of square-free coefficients is correct on every accepting assignment. Full finite-coin counts coincide iff the constant belongs to the mask span. Otherwise a public linear functional returns the message.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

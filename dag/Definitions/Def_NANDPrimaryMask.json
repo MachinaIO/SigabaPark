@@ -1,0 +1,9 @@
+{
+  "name": "NANDPrimaryMask",
+  "title": "Global refutation aggregated in primary-input coordinates",
+  "description": "Canonicalize the entire functional refutation in primary coordinates. Native symbolic execution is correct on all assignments, the polynomial vanishes exactly on semantic zero, and a coin translation gives all-NO equality without a size or clock bound.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}
