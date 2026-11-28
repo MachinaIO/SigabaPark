@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SharedSignedDigit.RadixRead","proof_type":"prove","explanation":"A base-four digit whose local count is positive identifies the bit even when all other digits come from an invalid address."}

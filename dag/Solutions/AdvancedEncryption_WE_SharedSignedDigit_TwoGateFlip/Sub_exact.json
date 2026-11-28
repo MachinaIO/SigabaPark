@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SharedSignedDigit.TwoGateFlip","proof_type":"prove","explanation":"For every sign pair on a rejected addressed NAND composition a fixed XOR on one coordinate translates the residual by a half-turn."}
