@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.SuccinctPacket.label_count","title":"Counting the independent label strings consistent with a fixed-size public predictor family","statement":"Even arbitrary predictors indexed by d bits cover at most a 2^(-κ) fraction of m-bit labels if m ≥ d+κ."}

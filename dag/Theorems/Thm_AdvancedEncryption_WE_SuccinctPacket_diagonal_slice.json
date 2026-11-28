@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.SuccinctPacket.diagonal_slice","title":"A separable expansion of a diagonal tensor forces every supported unit into the row space","statement":"Extract each nonzero diagonal coordinate by a coefficient slice."}
