@@ -1,0 +1,5 @@
+{
+  "name": "PacketTraceBasis.sameSpan",
+  "title": "Virtual packet generators preserve and reflect equality of every released coefficient",
+  "statement": "Two linear forms agree on every actual packet exactly when they agree on any family spanning its row module over a commutative ring, including composite residue rings."
+}

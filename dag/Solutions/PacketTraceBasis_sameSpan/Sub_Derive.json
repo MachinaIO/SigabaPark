@@ -1,0 +1,5 @@
+{
+  "theorem": "PacketTraceBasis.sameSpan",
+  "proof_type": "prove",
+  "explanation": "Translate agreement into containment in the kernel of the difference of the two linear forms, then apply equality of the spans."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "PacketTraceBasis.traceConstant",
+  "title": "The trace over a shifted primitive-root orbit selects the constant coefficient",
+  "statement": "Summing every slot evaluation of a degree below S polynomial over a field yields S times its constant coefficient."
+}
