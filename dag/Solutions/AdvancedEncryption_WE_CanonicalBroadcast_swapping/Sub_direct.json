@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CanonicalBroadcast.swapping",
+  "proof_type": "prove",
+  "explanation": "Independent parent swaps preserve the registered NAND evaluation"
+}

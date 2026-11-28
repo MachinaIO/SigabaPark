@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CanonicalBroadcast.costs",
+  "proof_type": "prove",
+  "explanation": "Exact registered clocks and description costs for both corrected role pairs"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CanonicalBroadcast.frameCircuit",
+  "proof_type": "prove",
+  "explanation": "True physical parent run lengths for every registered circuit statement"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CanonicalBroadcast.oldDisjoint",
+  "proof_type": "prove",
+  "explanation": "The predecessor has no admissible canonical first gate"
+}
