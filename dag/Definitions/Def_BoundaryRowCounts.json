@@ -1,0 +1,10 @@
+{
+  "name": "BoundaryRowCounts",
+  "title": "Reachable clean paths and fixed challenge-row counts",
+  "description": "For 42 width-two layers with a reachable state in each, at most 253 rows need programming when there are six dead-source slots per state and one dead terminal. The XOR NO criterion forces constant clean updates and reduces the bound to 169.",
+  "tags": [
+    "witness-encryption",
+    "ring-lwe",
+    "audit"
+  ]
+}

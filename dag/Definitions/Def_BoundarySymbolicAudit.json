@@ -1,0 +1,10 @@
+{
+  "name": "BoundarySymbolicAudit",
+  "title": "Reachability covers and affine terminal views",
+  "description": "Root-containing edge-closed supersets separate classes exactly when reachable classes separate. Uniform affine terminal masks across all live coordinates have equal two-world laws exactly for offsets in the image, and invariant auxiliary metadata preserves the coupling.",
+  "tags": [
+    "witness-encryption",
+    "ring-lwe",
+    "audit"
+  ]
+}

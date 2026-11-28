@@ -1,0 +1,10 @@
+{
+  "name": "BoundaryFullView",
+  "title": "Fixed Ring-LWE whole-bank transport",
+  "description": "Exact PMF equivalences at the registered 548-row RingLWE.decision real and ideal words for dead-source key transport, with shifted public headers, shared keys and arbitrary row observations.",
+  "tags": [
+    "witness-encryption",
+    "ring-lwe",
+    "audit"
+  ]
+}

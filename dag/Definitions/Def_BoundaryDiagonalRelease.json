@@ -1,0 +1,10 @@
+{
+  "name": "BoundaryDiagonalRelease",
+  "title": "Ordinary Ring-LWE transport for diagonal-affine symbolic keys",
+  "description": "Characterization of target functions along a shared secret translation, two full-law permutations with mask-dependent header offsets, and a unit-slope extension to nonlinear source keys.",
+  "tags": [
+    "witness-encryption",
+    "ring-lwe",
+    "audit"
+  ]
+}
