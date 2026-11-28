@@ -95,6 +95,7 @@ class LocalCliProvider:
         t0 = time.monotonic()
         try:
             p = subprocess.run([sys.executable, "-I", str(SOLVERS_DIR / prog)], cwd=work,
+                               start_new_session=True,
                                env=env, input=json.dumps(self.request(req)), text=True,
                                capture_output=True, timeout=wall)
         except subprocess.TimeoutExpired:
