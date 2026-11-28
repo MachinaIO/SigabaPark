@@ -130,6 +130,12 @@ jobs:
         run: |
           python3 core/python/dag_tools.py fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
             --head "$HEAD_SHA" --out fetched
+      - name: Check out the learning CI (the default branch's at this run)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.sha }}
+          path: learning-ci
+          persist-credentials: false
       - name: Learning pull requests (checked by the learning workflow)
         id: kind
         # A pull request whose every changed path is under generators/ or notebooks/ is a
@@ -141,8 +147,8 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
         run: |
-          if [ -f base/ci/learning/cli.py ]; then
-            (cd base && python3 -m ci.learning.cli fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
+          if [ -f learning-ci/ci/learning/cli.py ]; then
+            (cd learning-ci && python3 -m ci.learning.cli fetch --repo "$GITHUB_REPOSITORY" --base "$BASE_SHA" \
               --head "$HEAD_SHA" --out ../learning-fetched)
             EVENT="${{ github.event_name }}" python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os
