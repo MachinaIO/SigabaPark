@@ -1,0 +1,5 @@
+{
+  "name": "SeparatorGrant.missingChild",
+  "title": "Each allowed grant for an unreachable separator has an unreachable required child",
+  "statement": "Each allowed grant for an unreachable separator has an unreachable required child."
+}

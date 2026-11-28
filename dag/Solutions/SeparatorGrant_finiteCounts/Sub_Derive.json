@@ -1,0 +1,5 @@
+{
+  "theorem": "SeparatorGrant.finiteCounts",
+  "proof_type": "prove",
+  "explanation": "Exact finite seed, public header, packet width and raw convolution counts of the overlapping separator fixture."
+}
