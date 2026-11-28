@@ -1,0 +1,5 @@
+{
+  "theorem": "SeparatorGrant.simultaneousPad",
+  "proof_type": "prove",
+  "explanation": "Distinct uniform pad columns jointly hide every translated grant row."
+}

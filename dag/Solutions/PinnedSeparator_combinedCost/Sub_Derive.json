@@ -1,0 +1,5 @@
+{
+  "theorem": "PinnedSeparator.combinedCost",
+  "proof_type": "prove",
+  "explanation": "Evaluate both registered machine cost expressions exactly."
+}

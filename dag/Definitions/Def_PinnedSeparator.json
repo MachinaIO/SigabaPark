@@ -1,0 +1,9 @@
+{
+  "name": "PinnedSeparator",
+  "title": "Single-tape variable-width separator emitter and streaming witness decoder on two pinned circuits",
+  "description": "Declared Sigaba machines for the decoded mode/payload and mode/witness/ciphertext interfaces of the two 4096-gate NAND fixtures.",
+  "tags": [
+    "witness-encryption",
+    "turing-machine"
+  ]
+}

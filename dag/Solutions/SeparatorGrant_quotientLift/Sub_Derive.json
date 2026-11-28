@@ -1,0 +1,5 @@
+{
+  "theorem": "SeparatorGrant.quotientLift",
+  "proof_type": "prove",
+  "explanation": "A reachable quotient state opens at every separator representative when extension is invariant."
+}
