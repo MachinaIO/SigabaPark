@@ -1,0 +1,10 @@
+{
+  "name": "CompareReference",
+  "title": "Adaptive public reference profiles for a Boolean oracle",
+  "description": "Finite branching oracle-query trees, recorded addresses and predicted bits, coordinate flips, and unseen-address prediction events.",
+  "tags": [
+    "witness-encryption",
+    "prf",
+    "oracle"
+  ]
+}
