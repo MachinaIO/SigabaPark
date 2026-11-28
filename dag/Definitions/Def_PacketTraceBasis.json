@@ -1,0 +1,9 @@
+{
+  "name": "PacketTraceBasis",
+  "title": "Agreement on rows of a packet-feature module",
+  "description": "Agreement of two linear output forms on every row of a prescribed family.",
+  "tags": [
+    "witness-encryption",
+    "linear-algebra"
+  ]
+}

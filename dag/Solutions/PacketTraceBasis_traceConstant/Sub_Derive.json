@@ -1,0 +1,5 @@
+{
+  "theorem": "PacketTraceBasis.traceConstant",
+  "proof_type": "prove",
+  "explanation": "Exchange the finite sums. Nonconstant powers of the primitive root have vanishing geometric sum, while the degree-zero part is repeated S times."
+}
