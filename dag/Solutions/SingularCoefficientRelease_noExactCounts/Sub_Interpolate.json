@@ -1,0 +1,5 @@
+{
+  "theorem": "SingularCoefficientRelease.noExactCounts",
+  "proof_type": "prove",
+  "explanation": "Interpolate a polynomial of bounded degree that vanishes at zero and is one on the actual nonzero image. Translating the uniformly sampled mask by a scalar multiple aligns the entire function for both messages. Its inverse translation gives a bijection on every finite observation fiber."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "SingularCoefficientRelease",
+  "title": "A public singularity release with finite-range mask translation",
+  "description": "Finite coin space for bounded-degree zero-constant polynomials, a finite-set separator, exact whole-description coupling, singular decoding, and determinant-one adjugate masking.",
+  "tags": [
+    "witness-encryption",
+    "linear-algebra",
+    "finite-accounting"
+  ]
+}

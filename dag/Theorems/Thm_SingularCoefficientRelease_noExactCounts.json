@@ -1,0 +1,5 @@
+{
+  "name": "SingularCoefficientRelease.noExactCounts",
+  "title": "Exact NO counts for every observation of a canonical public pole release",
+  "statement": "On a nonzero finite image of size at most the chosen degree bound, all message representatives induce identical counts for every observable event of any deterministic serialization of the released function, under uniform bounded-degree polynomial masks with zero constant coefficient."
+}
