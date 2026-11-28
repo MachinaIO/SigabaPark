@@ -64,7 +64,7 @@ the branch `learning-report`. The records format is `ci/learning/RECORDS.md`.
 
 Maintainers' setup:
 
-1. Require `learning / decide` next to `gate / decide` in the ruleset of `main`, with the merge
+1. Require `learning-decide` next to the gate's `decide` in the ruleset of `main`, with the merge
    queue (one pull request per merge group). Protect `learning-records` and `learning-report`
    (no force push, no deletion, writes by the `learning` workflow and administrators only).
 2. Create the Environment `learning-evaluator` (required reviewers, `main` only). Evaluation

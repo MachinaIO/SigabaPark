@@ -23,7 +23,7 @@
 # the merge queue runs the full gate again on the merged candidate.
 #
 # Nothing closes a pull request: a decision is about one commit, and a newer commit gets its
-# own run. Require the check `gate / decide` (from the GitHub Actions app) in the ruleset of `main`, with
+# own run. Require the check the gate's `decide` (from the GitHub Actions app) in the ruleset of `main`, with
 # the merge queue.
 name: gate
 
@@ -133,7 +133,7 @@ jobs:
       - name: Learning pull requests (checked by the learning workflow)
         id: kind
         # A pull request whose every changed path is under generators/ or notebooks/ is a
-        # learning pull request: `learning / decide` checks it (ci/learning/), and this gate only
+        # learning pull request: `learning-decide` checks it (ci/learning/), and this gate only
         # defers to it. Any other path keeps the gate's own precheck, which rejects everything
         # outside dag/ (so ci/, .github/, meta/ and env/ need an administrator's bypass).
         env:
@@ -261,7 +261,7 @@ jobs:
         run: |
           mkdir -p fetched result
           if [ "$LEARNING" = true ]; then
-            echo '{"conclusion": "success", "automerge": false, "labels": [], "comment": "Learning pull request: checked by `learning / decide`."}' > decision.json
+            echo '{"conclusion": "success", "automerge": false, "labels": [], "comment": "Learning pull request: checked by `learning-decide`."}' > decision.json
           else
           [ -f fetched/precheck.json ] || echo '{"ok": false, "accepted": true, "automerge": false, "problems": ["the precheck did not finish"], "added": []}' > fetched/precheck.json
           python3 core/python/dag_tools.py decide --precheck fetched/precheck.json \

@@ -14,8 +14,8 @@
 #             evaluator; otherwise the pull request is `awaiting_evaluator`. It runs in the
 #             `learning-evaluator` Environment, which maintainers protect and give the provider
 #             configuration; pull request code never sees it.
-#   decide    runs no pull request code; the check `learning / decide` (require it with
-#             `gate / decide`). Learning pull requests are never merged automatically: a passing
+#   decide    runs no pull request code; the check `learning-decide` (require it with the gate's
+#             `decide`). Learning pull requests are never merged automatically: a passing
 #             check is not permission to merge, a maintainer merges.
 #   report    comments the decision and sets the `learning:*` labels.
 #   post-merge  on `main`: records the certification of a merged generator, the activation of a
@@ -254,7 +254,8 @@ jobs:
           git add -A
           git diff --cached --quiet || { git commit -q -m "Evaluation records" && git push -q; }
 
-  decide:
+  # Its check name is `learning-decide` (the gate's is `decide`): require both, by name.
+  learning-decide:
     needs: [route, certify, evaluate]
     if: always() && needs.route.result != 'skipped'
     runs-on: ubuntu-latest
@@ -318,7 +319,7 @@ jobs:
           [ "$conclusion" = success ]
 
   report:
-    needs: [route, decide]
+    needs: [route, learning-decide]
     if: >-
       always() && github.event_name == 'pull_request_target' &&
       needs.route.result != 'skipped' && needs.route.outputs.pr != ''
