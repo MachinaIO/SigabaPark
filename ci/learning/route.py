@@ -275,7 +275,11 @@ def route(base: Path, fetched: Path, author: str, permission: str | None, draft:
         info, probs = generator_route(base, fetched, rows, pol, records)
         return _result("generator", problems=probs, generator=info, **common)
     info, probs = notebook_route(base, fetched, rows, pol)
-    return _result("notebook", problems=probs, notebook=info, **common)
+    out = _result("notebook", problems=probs, notebook=info, **common)
+    # `evaluate`: whether the trusted evaluator should run (and ask for its Environment's
+    # approval) at all. With the evaluator disabled the decision is `awaiting_evaluator` at once.
+    out["evaluate"] = bool(out["evaluate"] and pol["evaluator"]["enabled"])
+    return out
 
 
 def _regular(r: dict) -> str | None:

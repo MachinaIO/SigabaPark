@@ -67,6 +67,7 @@ jobs:
       pull-requests: read
     outputs:
       route: ${{ steps.route.outputs.route }}
+      evaluate: ${{ steps.route.outputs.evaluate }}
       env_id: ${{ steps.env.outputs.env_id }}
       image: ${{ steps.env.outputs.image }}
       pr: ${{ steps.who.outputs.pr }}
@@ -148,7 +149,7 @@ jobs:
           python3 -m ci.learning.cli route --base . --fetched ../fetched --author "$AUTHOR" \
             --permission "$PERMISSION" --draft false --event "$EVENT" --pr "$PR" \
             --records ../records --out ../fetched/route.json
-          python3 -c 'import json; print("route=" + json.load(open("../fetched/route.json"))["route"])' >> "$GITHUB_OUTPUT"
+          python3 -c 'import json; r = json.load(open("../fetched/route.json")); print("route=" + r["route"]); print("evaluate=" + ("true" if r.get("evaluate") else "false"))' >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
@@ -208,7 +209,9 @@ jobs:
 
   evaluate:
     needs: route
-    if: needs.route.outputs.route == 'notebook'
+    # Only when meta/learning.json enables the evaluator: otherwise nothing waits for the
+    # Environment's approval and the decision is `awaiting_evaluator`.
+    if: needs.route.outputs.route == 'notebook' && needs.route.outputs.evaluate == 'true'
     # The evaluator needs the pinned core built (Lean) and the model's CLI: a runner the
     # maintainers provide (variable LEARNING_EVALUATOR_RUNNER, e.g. a self-hosted runner label).
     # Maintainers protect this Environment (required reviewers, `main` only) and set in it
