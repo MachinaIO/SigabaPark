@@ -3,9 +3,9 @@
  "policy_id": "policy-0001",
  "epoch": {
   "id": "epoch-0001",
-  "dag_snapshot": "12e6ffec9975d4d4b92c3a2fc1ddde2293efb6f3",
+  "dag_snapshot": "fa3fa31397be4e5c1fab73bf4454a7a109a39778",
   "environment_id": "env-2",
-  "core_revision": "7b137188e51b2bfa3453ecfeaf7c8f78001bd660",
+  "core_revision": "e2c934bd69781f0aa43da09484ee8d1c63b21cdd",
   "strength_digest": "sha256:91eaeaac96fb538eb1fab799f99cb93ace0544197840dbe49c745766fadbfdcb"
  },
  "families": [
