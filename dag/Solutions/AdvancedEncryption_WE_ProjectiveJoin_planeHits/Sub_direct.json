@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ProjectiveJoin.planeHits",
+  "proof_type": "prove",
+  "explanation": "No four distinct omitted inner vectors form a binary affine plane"
+}

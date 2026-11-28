@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ProjectiveJoin.compatible",
+  "proof_type": "prove",
+  "explanation": "A target-sensitive projective polynomial root budget covers every compatible range target"
+}

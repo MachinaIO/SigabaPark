@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ProjectiveJoin.sharedLift",
+  "proof_type": "prove",
+  "explanation": "Private center replacements lift simultaneously while preserving all shared separator values"
+}
