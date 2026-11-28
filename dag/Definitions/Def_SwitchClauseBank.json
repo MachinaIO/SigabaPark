@@ -1,0 +1,9 @@
+{
+  "name": "SwitchClauseBank",
+  "title": "Minimal supports and majority for signed-literal clause banks",
+  "description": "Defines the obligatory coordinates of a support family at one coordinate and the Boolean median used for closure of binary clauses.",
+  "tags": [
+    "circuit-sat",
+    "witness-encryption"
+  ]
+}

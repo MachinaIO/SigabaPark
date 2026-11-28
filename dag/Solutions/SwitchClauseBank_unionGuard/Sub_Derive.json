@@ -1,0 +1,5 @@
+{
+  "theorem": "SwitchClauseBank.unionGuard",
+  "proof_type": "prove",
+  "explanation": "Exact union containment is equivalent to ruling out a pair of violated clauses."
+}
