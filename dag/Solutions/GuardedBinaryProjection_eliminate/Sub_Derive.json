@@ -1,0 +1,5 @@
+{
+  "theorem": "GuardedBinaryProjection.eliminate",
+  "proof_type": "prove",
+  "explanation": "Forgetting a guarded pivot preserves every possible future constraint."
+}

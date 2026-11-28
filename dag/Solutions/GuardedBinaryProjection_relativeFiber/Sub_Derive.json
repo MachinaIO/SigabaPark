@@ -1,0 +1,5 @@
+{
+  "theorem": "GuardedBinaryProjection.relativeFiber",
+  "proof_type": "prove",
+  "explanation": "Missing block orientations parameterize exactly the traces with the stated relative bits."
+}
