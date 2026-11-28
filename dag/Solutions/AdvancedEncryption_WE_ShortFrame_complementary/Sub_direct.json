@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ShortFrame.complementary",
+  "proof_type": "prove",
+  "explanation": "One of two complementary integer roundings lies inside the honest ball"
+}
