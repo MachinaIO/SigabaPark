@@ -1,0 +1,5 @@
+{
+  "theorem": "SwitchClauseBank.forcedBlock",
+  "proof_type": "prove",
+  "explanation": "The difference between a minimal support and its strict predecessors is precisely its coordinate block."
+}

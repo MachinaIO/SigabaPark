@@ -1,0 +1,5 @@
+{
+  "theorem": "SwitchClauseBank.sharedKey",
+  "proof_type": "prove",
+  "explanation": "A certificate for the constant one translates every public affine row by the payload flip."
+}
