@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.SharedBent.SchurDecode","proof_type":"prove","explanation":"When a joint matrix has an inner inverse, the same randomness used in its two offset hints exactly reconstructs its bilinear phase with both linear targets."}
