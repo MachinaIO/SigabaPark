@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.WalshBox.fullViewEnergy",
+  "proof_type": "prove",
+  "explanation": "Few surviving small odd Walsh coefficients bound the entire message shift distance"
+}
