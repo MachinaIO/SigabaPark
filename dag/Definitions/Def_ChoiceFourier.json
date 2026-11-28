@@ -1,0 +1,9 @@
+{
+  "name": "ChoiceFourier",
+  "title": "Correlated error signs for one-or-three choice filters",
+  "description": "Finite joint sign distributions satisfy a tensor Fourier inequality. The registered 128-group specialization bounds the common honest bias, and a six-outcome local law realizes the exact one-group moments.",
+  "tags": [
+    "witness-encryption",
+    "short-sum"
+  ]
+}

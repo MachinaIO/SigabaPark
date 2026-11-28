@@ -1,0 +1,9 @@
+{
+  "name": "ShortDefect",
+  "title": "Quadratic coefficient defect and joint restricted field release",
+  "description": "Integer defect determines binary membership, centered distance lower bounds, and a bounded signed target domain. A scalar field indicator yields complete-table equality by coin translation. A normalized scalar polynomial has a matching degree lower bound.",
+  "tags": [
+    "witness-encryption",
+    "short-sum"
+  ]
+}

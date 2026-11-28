@@ -1,0 +1,9 @@
+{
+  "name": "SignedNANDFixture",
+  "title": "Simultaneous signed replacements in the registered constant-NAND fixture",
+  "description": "Every mask on the 4095 earlier constant NAND gates preserves the integer target in the exact specialized ledger. Squared norm is 4225 plus twice the number of replacements including the final compulsory replacement.",
+  "tags": [
+    "witness-encryption",
+    "short-sum"
+  ]
+}

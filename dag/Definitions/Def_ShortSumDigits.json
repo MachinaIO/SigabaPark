@@ -1,0 +1,9 @@
+{
+  "name": "ShortSumDigits",
+  "title": "Fixed cardinality, marker and mixed-radix wire fields",
+  "description": "Bounding the fanout radix product, exact marker and high-field decoding, fixed target and bit counts for the registered short-sum reduction.",
+  "tags": [
+    "witness-encryption",
+    "short-sum"
+  ]
+}

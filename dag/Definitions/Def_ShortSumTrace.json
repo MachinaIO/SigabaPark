@@ -1,0 +1,9 @@
+{
+  "name": "ShortSumTrace",
+  "title": "Unique native NAND trace from exact wire digits",
+  "description": "Aggregate wire-count equality forces every selected parent bit to match its producer. Consistent terminal choices reconstruct the native evalGates trace, including default-true references.",
+  "tags": [
+    "witness-encryption",
+    "short-sum"
+  ]
+}
