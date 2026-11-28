@@ -1,0 +1,9 @@
+{
+  "name": "PathRelease",
+  "title": "Layered additive transfer with vertex corrections",
+  "description": "Propagate an initial vector along additive maps and inject one correction per layer.",
+  "tags": [
+    "witness-encryption",
+    "linear-algebra"
+  ]
+}

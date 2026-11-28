@@ -1,0 +1,5 @@
+{
+  "theorem": "TwoLayerPath.coreCost",
+  "proof_type": "prove",
+  "explanation": "Evaluate both native machine costs."
+}
