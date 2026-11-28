@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.Demand.forward",
+  "title": "Forward wire ranges overapproximate the registered evaluation on every assignment",
+  "statement": "Forward wire ranges overapproximate the registered evaluation on every assignment"
+}

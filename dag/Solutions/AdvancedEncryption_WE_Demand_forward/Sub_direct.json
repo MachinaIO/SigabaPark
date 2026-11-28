@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Demand.forward",
+  "proof_type": "prove",
+  "explanation": "Forward wire ranges overapproximate the registered evaluation on every assignment"
+}

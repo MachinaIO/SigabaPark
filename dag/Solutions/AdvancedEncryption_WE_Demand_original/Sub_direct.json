@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Demand.original",
+  "proof_type": "prove",
+  "explanation": "A locally closed backward certificate suffices for acceptance in the registered fold"
+}

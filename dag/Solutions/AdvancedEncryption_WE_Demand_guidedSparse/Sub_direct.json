@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Demand.guidedSparse",
+  "proof_type": "prove",
+  "explanation": "Compatible valuations provide guided replays that read only genuine branch ties"
+}
