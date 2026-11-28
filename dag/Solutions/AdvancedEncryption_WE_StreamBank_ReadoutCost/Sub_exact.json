@@ -1,0 +1,1 @@
+{"theorem":"AdvancedEncryption.WE.StreamBank.ReadoutCost","proof_type":"prove","explanation":"The four-frame decoder table length is independent of the chosen first-role function even on the original 128-bit witness interface."}
