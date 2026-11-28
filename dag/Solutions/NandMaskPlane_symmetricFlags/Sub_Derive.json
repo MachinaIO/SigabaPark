@@ -1,0 +1,5 @@
+{
+  "theorem": "NandMaskPlane.symmetricFlags",
+  "proof_type": "prove",
+  "explanation": "Equal row and column marginal masses force joint erased flags to be invariant under simultaneous swap."
+}
