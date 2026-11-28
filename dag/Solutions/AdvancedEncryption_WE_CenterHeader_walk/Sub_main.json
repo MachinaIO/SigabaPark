@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CenterHeader.walk",
+  "proof_type": "prove",
+  "explanation": "An oriented path recovers the complete endpoint difference"
+}

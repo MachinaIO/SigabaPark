@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.CenterHeader.dense",
+  "proof_type": "prove",
+  "explanation": "Literal dense trapdoor serialization exceeds the local 32-bit exponent cap under explicit inequalities"
+}
