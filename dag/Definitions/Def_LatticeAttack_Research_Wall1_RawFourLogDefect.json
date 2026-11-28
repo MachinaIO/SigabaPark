@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_RawFourLogDefect", "title": "Actual four-input log correction, retaining and subtracting triple dependencies.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.RawFourLogDefect on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

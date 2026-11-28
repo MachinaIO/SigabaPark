@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_RawTripleLogDefect", "title": "Identify actual three-input exact supports with the cubic log-defect series.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.RawTripleLogDefect on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}

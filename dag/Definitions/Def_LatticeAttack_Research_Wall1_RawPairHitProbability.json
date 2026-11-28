@@ -1,0 +1,1 @@
+{"name": "LatticeAttack_Research_Wall1_RawPairHitProbability", "title": "Actual pair-hit probabilities factor for distinct centered inputs.", "description": "Moved from SigabaNeo.Lib.Lattices.Research.Wall1.RawPairHitProbability on branch t3/revise-lwe-assumptions-cost-models (commit 8214a015).", "tags": ["lattice-attack", "wall1"]}
