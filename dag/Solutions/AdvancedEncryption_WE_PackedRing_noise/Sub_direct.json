@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.noise",
+  "proof_type": "prove",
+  "explanation": "A uniform binary-digit convolution bound for every operand"
+}

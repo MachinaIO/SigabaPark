@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.frameBound",
+  "proof_type": "prove",
+  "explanation": "The actual registered frame of the binary 26-bit scalar bank exceeds two to the 32 bits"
+}

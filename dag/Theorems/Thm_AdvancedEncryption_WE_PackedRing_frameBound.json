@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.PackedRing.frameBound",
+  "title": "The actual registered frame of the binary 26-bit scalar bank exceeds two to the 32 bits",
+  "statement": "The actual registered frame of the binary 26-bit scalar bank exceeds two to the 32 bits"
+}

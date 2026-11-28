@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.singleCoeff",
+  "proof_type": "prove",
+  "explanation": "A monomial plaintext times the low polynomial isolates every selected scalar coefficient"
+}

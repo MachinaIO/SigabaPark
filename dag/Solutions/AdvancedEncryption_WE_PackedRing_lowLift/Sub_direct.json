@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.lowLift",
+  "proof_type": "prove",
+  "explanation": "Joint low-digit lifting preserves the real ring phase"
+}

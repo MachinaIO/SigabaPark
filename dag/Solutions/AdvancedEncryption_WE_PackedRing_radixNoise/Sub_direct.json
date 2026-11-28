@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.PackedRing.radixNoise",
+  "proof_type": "prove",
+  "explanation": "One blockwise error bound covers all signed radix operands"
+}

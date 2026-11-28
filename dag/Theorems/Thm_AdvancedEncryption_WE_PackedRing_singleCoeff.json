@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.PackedRing.singleCoeff",
+  "title": "A monomial plaintext times the low polynomial isolates every selected scalar coefficient",
+  "statement": "A monomial plaintext times the low polynomial isolates every selected scalar coefficient"
+}
