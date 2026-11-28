@@ -1,0 +1,5 @@
+{
+  "theorem": "QuarterPhaseFiber.kernelRead",
+  "proof_type": "prove",
+  "explanation": "All sign-lift differences in the binary kernel are exactly readable from public low bits."
+}

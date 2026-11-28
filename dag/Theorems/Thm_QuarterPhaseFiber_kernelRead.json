@@ -1,0 +1,5 @@
+{
+  "name": "QuarterPhaseFiber.kernelRead",
+  "title": "All sign-lift differences in the binary kernel are exactly readable from public low bits",
+  "statement": "All sign-lift differences in the binary kernel are exactly readable from public low bits."
+}

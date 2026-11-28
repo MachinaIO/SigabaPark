@@ -1,0 +1,5 @@
+{
+  "theorem": "QuarterPhaseFiber.bentPair",
+  "proof_type": "prove",
+  "explanation": "The exact signed Walsh sum of one quadratic bent pair has magnitude two."
+}
