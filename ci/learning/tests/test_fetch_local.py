@@ -56,3 +56,32 @@ class FetchLocal(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SplitVersions(unittest.TestCase):
+    """A push may land several generator versions (and nodes): one listing per version."""
+
+    def test_split(self):
+        with tempfile.TemporaryDirectory() as t:
+            f = Path(t) / "merged"
+            rows = []
+            for d in ("generators/design/a/g/v0001", "generators/cryptanalysis/b/g/v0001"):
+                for n in ("manifest.json", "Generate.lean", "Certificate.lean"):
+                    p = f / "files" / d / n
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_text(n)
+                    rows.append({"filename": f"{d}/{n}", "status": "added", "type": "blob",
+                                 "mode": "100644", "size": len(n)})
+            rows.append({"filename": "dag/Notes/x.md", "status": "added", "type": "blob",
+                         "mode": "100644", "size": 1})
+            (f / "files.json").write_text(json.dumps({"revision": "a" * 40, "files": rows}))
+            out = fetch.split_versions(f, Path(t) / "split")
+            self.assertEqual([o["version_dir"] for o in out],
+                             ["generators/cryptanalysis/b/g/v0001", "generators/design/a/g/v0001"])
+            for o in out:
+                listing = json.loads((Path(o["dir"]) / "files.json").read_text())
+                self.assertEqual(len(listing["files"]), 3)
+                self.assertTrue(all(r["filename"].startswith(o["version_dir"])
+                                    for r in listing["files"]))
+                self.assertTrue((Path(o["dir"]) / "files" / o["version_dir"] /
+                                 "manifest.json").is_file())
