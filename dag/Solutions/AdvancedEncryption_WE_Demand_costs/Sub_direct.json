@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.Demand.costs",
+  "proof_type": "prove",
+  "explanation": "Exact four-tape demand publisher and single-pass framed decoder costs"
+}
