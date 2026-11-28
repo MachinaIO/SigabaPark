@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.reduction",
+  "proof_type": "prove",
+  "explanation": "Eliminating the linear syndrome and testing its residual preserves each assignment"
+}

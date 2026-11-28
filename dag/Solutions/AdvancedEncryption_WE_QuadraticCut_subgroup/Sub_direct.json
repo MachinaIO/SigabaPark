@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.subgroup",
+  "proof_type": "prove",
+  "explanation": "Exact additive selectors force all subset sums to be distinct"
+}

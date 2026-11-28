@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.pivot",
+  "proof_type": "prove",
+  "explanation": "Summing a Boolean quadratic pivot pair leaves one lower-dimensional quadratic phase"
+}

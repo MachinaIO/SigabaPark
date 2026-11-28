@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.shear",
+  "proof_type": "prove",
+  "explanation": "Dual Boolean shears preserve the quadratic dot product on each pair"
+}

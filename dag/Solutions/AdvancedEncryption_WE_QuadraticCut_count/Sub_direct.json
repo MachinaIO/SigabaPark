@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.QuadraticCut.count",
+  "proof_type": "prove",
+  "explanation": "Character cancellation counts exactly one common assignment space"
+}
