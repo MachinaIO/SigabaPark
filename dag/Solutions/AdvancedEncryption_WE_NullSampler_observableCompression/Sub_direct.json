@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.NullSampler.observableCompression",
+  "proof_type": "prove",
+  "explanation": "Comparing two observable exact compressed values decides witness existence"
+}

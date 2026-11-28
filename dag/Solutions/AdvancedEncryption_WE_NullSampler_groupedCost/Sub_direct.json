@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.NullSampler.groupedCost",
+  "proof_type": "prove",
+  "explanation": "Covering the witness space costs at least 2^120 dense tensor-opening entries"
+}

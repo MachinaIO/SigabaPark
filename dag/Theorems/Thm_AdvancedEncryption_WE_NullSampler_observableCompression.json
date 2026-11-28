@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.NullSampler.observableCompression",
+  "title": "Comparing two observable exact compressed values decides witness existence",
+  "statement": "Comparing two observable exact compressed values decides witness existence"
+}
