@@ -1,0 +1,5 @@
+{
+  "name": "CompactRowMachines",
+  "title": "Original and packed native shifted-LWE terminal machines",
+  "description": "Three-tape full matrix issuer and two-tape recovered-secret decoder at dimension 512 and sample count 1025, with exact dense costs for the original and phase-packed controls."
+}

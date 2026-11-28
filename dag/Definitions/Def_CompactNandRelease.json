@@ -1,0 +1,5 @@
+{
+  "name": "CompactNandRelease",
+  "title": "Registered NAND role envelopes for a three-witness release class",
+  "description": "Real Impl WE.sig using an actual forward-reference NAND parser, the packed terminal, fixed public probe recognition and a full joint false-view interface. Its combined cost is 3082388174. Correctness for the unrecognized YES class is open."
+}
