@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.WalshBox.classification",
+  "proof_type": "prove",
+  "explanation": "The six forbidden NAND Fourier coefficients define exactly the rational order-four Birkhoff polytope"
+}

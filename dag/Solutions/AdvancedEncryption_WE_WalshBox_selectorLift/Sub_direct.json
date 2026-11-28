@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.WalshBox.selectorLift",
+  "proof_type": "prove",
+  "explanation": "Two exact-one constraints lift every NAND gate uniquely with affine pin relations"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.WalshBox.flagBound",
+  "proof_type": "prove",
+  "explanation": "Conditional equality outside tractable flags bounds every payload acceptance gap"
+}
