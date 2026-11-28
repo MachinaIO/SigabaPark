@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TranslationFrontend.guarded_pivot",
+  "proof_type": "prove",
+  "explanation": "Erasing a guarded pivot bit is a bijection on satisfying witnesses."
+}

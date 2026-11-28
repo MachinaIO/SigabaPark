@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.zero_iff_registered",
+  "proof_type": "prove",
+  "explanation": "A zero-energy trace exists on a given assignment exactly when the registered gate evaluator accepts."
+}

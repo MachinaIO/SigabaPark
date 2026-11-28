@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TagBank.uniform_view",
+  "proof_type": "prove",
+  "explanation": "Uniform label messages and uniform replacement bodies have a bijective joint public reparameterization."
+}

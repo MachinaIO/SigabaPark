@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.TranslationFrontend.ideal_certificate",
+  "proof_type": "prove",
+  "explanation": "Polynomial multiples of residual guards certify a pivot on the residual zero set."
+}

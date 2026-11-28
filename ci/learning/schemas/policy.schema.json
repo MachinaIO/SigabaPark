@@ -1,0 +1,452 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "The learning policy (meta/learning.json, maintainers only)",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "policy_id",
+  "epoch",
+  "families",
+  "bootstrap_generators",
+  "notebooks",
+  "curriculum",
+  "promotion",
+  "profiles",
+  "evaluator"
+ ],
+ "properties": {
+  "schema": {
+   "const": "sigaba.learning.policy.v1"
+  },
+  "policy_id": {
+   "type": "string",
+   "pattern": "policy-[0-9]{4,8}"
+  },
+  "epoch": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "id",
+    "dag_snapshot",
+    "environment_id",
+    "core_revision",
+    "strength_digest"
+   ],
+   "properties": {
+    "id": {
+     "type": "string",
+     "pattern": "epoch-[0-9]{4,8}"
+    },
+    "dag_snapshot": {
+     "$ref": "#/$defs/git_sha"
+    },
+    "environment_id": {
+     "$ref": "#/$defs/env_id"
+    },
+    "core_revision": {
+     "$ref": "#/$defs/git_sha"
+    },
+    "strength_digest": {
+     "$ref": "#/$defs/sha256"
+    }
+   }
+  },
+  "families": {
+   "type": "array",
+   "maxItems": 256,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "family_id",
+     "role",
+     "lean_module",
+     "lean_family",
+     "revision",
+     "group",
+     "seed_bits",
+     "entropy_bits",
+     "max_levels",
+     "max_descriptor_bits",
+     "assessment",
+     "bootstrap",
+     "approved_by"
+    ],
+    "properties": {
+     "family_id": {
+      "$ref": "#/$defs/ident"
+     },
+     "role": {
+      "$ref": "#/$defs/role"
+     },
+     "lean_module": {
+      "$ref": "#/$defs/lean_name"
+     },
+     "lean_family": {
+      "$ref": "#/$defs/lean_name"
+     },
+     "revision": {
+      "$ref": "#/$defs/sha256"
+     },
+     "group": {
+      "$ref": "#/$defs/ident"
+     },
+     "seed_bits": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+     },
+     "entropy_bits": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+     },
+     "max_levels": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+     },
+     "max_descriptor_bits": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048576
+     },
+     "assessment": {
+      "enum": [
+       "training",
+       "reserved",
+       "future"
+      ]
+     },
+     "bootstrap": {
+      "type": "boolean"
+     },
+     "approved_by": {
+      "$ref": "#/$defs/login"
+     }
+    }
+   }
+  },
+  "bootstrap_generators": {
+   "type": "array",
+   "maxItems": 256,
+   "uniqueItems": true,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "family_id",
+     "generator_id",
+     "version"
+    ],
+    "properties": {
+     "family_id": {
+      "$ref": "#/$defs/ident"
+     },
+     "generator_id": {
+      "$ref": "#/$defs/ident"
+     },
+     "version": {
+      "$ref": "#/$defs/version"
+     }
+    }
+   }
+  },
+  "notebooks": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "max_tokens",
+    "max_bytes",
+    "tokenizer"
+   ],
+   "properties": {
+    "max_tokens": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 1000000
+    },
+    "max_bytes": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 4194304
+    },
+    "tokenizer": {
+     "$ref": "#/$defs/tokenizer"
+    }
+   }
+  },
+  "curriculum": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "target",
+    "lo",
+    "hi",
+    "min_samples",
+    "exploration_fraction",
+    "stale_after_days"
+   ],
+   "properties": {
+    "target": {
+     "$ref": "#/$defs/prob"
+    },
+    "lo": {
+     "$ref": "#/$defs/prob"
+    },
+    "hi": {
+     "$ref": "#/$defs/prob"
+    },
+    "min_samples": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100000
+    },
+    "exploration_fraction": {
+     "$ref": "#/$defs/prob"
+    },
+    "stale_after_days": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 3650
+    }
+   }
+  },
+  "promotion": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "screen_pairs",
+    "confirm_pairs",
+    "alpha",
+    "delta_ni",
+    "infra_retries",
+    "provisional_within_family",
+    "require_family_disjoint"
+   ],
+   "properties": {
+    "screen_pairs": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100000
+    },
+    "confirm_pairs": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100000
+    },
+    "alpha": {
+     "$ref": "#/$defs/prob"
+    },
+    "delta_ni": {
+     "$ref": "#/$defs/prob"
+    },
+    "infra_retries": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 5
+    },
+    "provisional_within_family": {
+     "type": "boolean"
+    },
+    "require_family_disjoint": {
+     "type": "boolean"
+    }
+   }
+  },
+  "profiles": {
+   "type": "array",
+   "maxItems": 64,
+   "items": {
+    "$ref": "#/$defs/profile"
+   }
+  },
+  "evaluator": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "enabled",
+    "provider",
+    "max_trials_per_run"
+   ],
+   "properties": {
+    "enabled": {
+     "type": "boolean"
+    },
+    "provider": {
+     "anyOf": [
+      {
+       "type": "string",
+       "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "max_trials_per_run": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 1000000
+    }
+   }
+  }
+ },
+ "$defs": {
+  "env_id": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+  },
+  "git_sha": {
+   "type": "string",
+   "pattern": "[0-9a-f]{40}"
+  },
+  "ident": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9-]{0,62}"
+  },
+  "lean_name": {
+   "type": "string",
+   "pattern": "[A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_][A-Za-z0-9_']*)*",
+   "maxLength": 512
+  },
+  "login": {
+   "type": "string",
+   "pattern": "[A-Za-z0-9][A-Za-z0-9-]{0,38}(\\[bot\\])?"
+  },
+  "prob": {
+   "anyOf": [
+    {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    {
+     "type": "string",
+     "pattern": "(0(\\.[0-9]{1,12})?|1(\\.0{1,12})?|0?\\.[0-9]{1,12})"
+    }
+   ]
+  },
+  "profile": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "profile_id",
+    "role",
+    "provider",
+    "model",
+    "settings",
+    "budget"
+   ],
+   "properties": {
+    "profile_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "role": {
+     "$ref": "#/$defs/role"
+    },
+    "provider": {
+     "type": "string",
+     "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+    },
+    "model": {
+     "type": "string",
+     "pattern": "[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}"
+    },
+    "settings": {
+     "type": "object",
+     "maxProperties": 32,
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 256
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "budget": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "max_model_calls",
+      "max_input_tokens",
+      "max_output_tokens",
+      "wall_seconds",
+      "lean_seconds"
+     ],
+     "properties": {
+      "max_model_calls": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "max_input_tokens": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "max_output_tokens": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "wall_seconds": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      },
+      "lean_seconds": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000000000000
+      }
+     }
+    }
+   }
+  },
+  "role": {
+   "enum": [
+    "design",
+    "cryptanalysis"
+   ]
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "sha256:[0-9a-f]{64}"
+  },
+  "tokenizer": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "kind",
+    "version"
+   ],
+   "properties": {
+    "kind": {
+     "type": "string",
+     "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+    },
+    "version": {
+     "type": "string",
+     "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,31}"
+    }
+   }
+  },
+  "version": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 9999
+  }
+ }
+}

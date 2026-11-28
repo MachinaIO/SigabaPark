@@ -1,0 +1,1 @@
+{"name":"AdvancedEncryption.WE.AffineAgg.point_orientation","title":"The actual affine point baseline carries the generated orientation","statement":"In the ordinary branch at child control zero the point intercept is the generated orientation; the entire remaining baseline offset is a function of the stored child affine master."}

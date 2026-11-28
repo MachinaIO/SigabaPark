@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.ColumnElimination.image_reach",
+  "proof_type": "prove",
+  "explanation": "Induct on the columns and map the leading scalar contribution by linearity."
+}

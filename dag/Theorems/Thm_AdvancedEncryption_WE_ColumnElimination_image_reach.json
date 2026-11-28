@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.image_reach",
+  "title": "Linear images commute with finite column reachability",
+  "statement": "A target is reachable from linearly transformed columns exactly when it is the image of some target reachable from the source list."
+}

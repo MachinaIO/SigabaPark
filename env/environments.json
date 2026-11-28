@@ -17,11 +17,11 @@
    "lean": "leanprover/lean4:v4.36.0-rc2",
    "mathlib": "69552756cd8a2d2d48763cf7279fd814d6a1224d",
    "cslib_frontier": "d25e68fd262c7aef49179602e784804fb790ced6",
-   "core": "v0.3.0",
+   "core": "v0.4.0",
    "core_url": "https://github.com/MachinaIO/SigabaNeo",
-   "image": "ghcr.io/machinaio/sigaba-neo-env@sha256:b9d331143a898776207c498d81e32a90a438266dfbdcdaa186cdd71f7482e5ae",
-   "fingerprint": "a66409f5041df574459eeef301f806a2720e3351723480cd53a6361c61813314",
-   "std": "v0.2.0",
+   "image": "ghcr.io/machinaio/sigaba-neo-env@sha256:1fedc3afe0de705adbc23b227ea861428a4d5d1feb298353bc555c38bf862ebb",
+   "fingerprint": "6c6349f1bd9e74201233d4c6cbb260ae2703c271cf968f8775ddcca5fc11b670",
+   "std": "v0.4.0",
    "state": "default"
   }
  ]

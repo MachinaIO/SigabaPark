@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DensityTrials.minimum_weight",
+  "title": "Every nonzero bounded-degree Boolean table has large support",
+  "statement": "For a degree-at-most-d recursively represented Boolean function of n bits with positive support, weight times two to the d is at least two to the n."
+}

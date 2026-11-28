@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.SourcePads.absolute_counts",
+  "title": "Absolute occupancy deviations from squared energy",
+  "statement": "Finite Cauchy-Schwarz bounds the square of the absolute deviation sum by the number of cells times the centered second moment."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DensityTrials.fair_error_count",
+  "title": "Count failing trial tuples with an independent fair fallback bit",
+  "statement": "The number of tuples in which all trials reject and the fallback bit is wrong equals the number of rejecting witnesses raised to the number of trials."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.backsolve_remainder",
+  "title": "Explicit ordered back-substitution recovers exactly the terminal remainder",
+  "statement": "For any sequence of possibly rank-dependent selectors, subtracting the reconstructed column sum from the target after the initial map gives exactly the terminal remainder."
+}

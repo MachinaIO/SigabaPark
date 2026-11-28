@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.public_group_direction",
+  "proof_type": "prove",
+  "explanation": "Publicly gauge-masked zero and one edges expose same-frame generator directions and commutators."
+}

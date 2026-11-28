@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DensityTrials.minimal_coefficient",
+  "proof_type": "prove",
+  "explanation": "Remove the top subset and sum the subgroup-valued coefficients. Subtract this sum for the forward implication and add it for the converse."
+}

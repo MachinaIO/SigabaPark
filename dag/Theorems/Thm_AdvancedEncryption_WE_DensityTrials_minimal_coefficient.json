@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.DensityTrials.minimal_coefficient",
+  "title": "A minimal coefficient outside the rejecting span gives an accepting Boolean input",
+  "statement": "If every strict-subset coefficient belongs to an additive subgroup, the subset zeta evaluation lies inside the subgroup exactly if its top coefficient does."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.DirectedLabels.point_gap",
+  "proof_type": "prove",
+  "explanation": "Unfold absolute value inequalities and combine the upper and lower estimates."
+}

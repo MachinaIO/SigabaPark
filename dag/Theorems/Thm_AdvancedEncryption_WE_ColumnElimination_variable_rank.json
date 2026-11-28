@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.ColumnElimination.variable_rank",
+  "title": "Exact consistency of iterative variable-rank column elimination",
+  "statement": "For a selector normalized on nonzero columns, the final projected target vanishes precisely when the initial target lies in the span of the given columns after the initial map."
+}

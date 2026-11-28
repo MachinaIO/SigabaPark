@@ -1,0 +1,289 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "The generator certifier's output (from the sandbox: untrusted data)",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "revision",
+  "env",
+  "generator",
+  "files",
+  "build",
+  "lean_result",
+  "smoke",
+  "reveal",
+  "problems",
+  "status"
+ ],
+ "properties": {
+  "schema": {
+   "const": "sigaba.learning.certify-result.v1"
+  },
+  "revision": {
+   "$ref": "#/$defs/git_sha_or_null"
+  },
+  "env": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/env_id"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "generator": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "role",
+    "family_id",
+    "generator_id",
+    "version"
+   ],
+   "properties": {
+    "role": {
+     "$ref": "#/$defs/role"
+    },
+    "family_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "generator_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "version": {
+     "$ref": "#/$defs/version"
+    }
+   }
+  },
+  "files": {
+   "$ref": "#/$defs/files"
+  },
+  "build": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "ok",
+    "log"
+   ],
+   "properties": {
+    "ok": {
+     "type": "boolean"
+    },
+    "log": {
+     "type": "string",
+     "maxLength": 20000
+    }
+   }
+  },
+  "lean_result": {
+   "$ref": "#/$defs/lean_result"
+  },
+  "smoke": {
+   "$ref": "#/$defs/smoke"
+  },
+  "reveal": {
+   "type": "array",
+   "maxItems": 512,
+   "items": {
+    "$ref": "#/$defs/reveal_item"
+   }
+  },
+  "problems": {
+   "$ref": "#/$defs/problems"
+  },
+  "status": {
+   "enum": [
+    "certified",
+    "rejected"
+   ]
+  }
+ },
+ "$defs": {
+  "count": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 1000000000
+  },
+  "env_id": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9.-]{0,63}"
+  },
+  "files": {
+   "type": "object",
+   "maxProperties": 8,
+   "additionalProperties": {
+    "$ref": "#/$defs/sha256"
+   }
+  },
+  "git_sha_or_null": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "[0-9a-f]{40}"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "ident": {
+   "type": "string",
+   "pattern": "[a-z0-9][a-z0-9-]{0,62}"
+  },
+  "lean_result": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "verdict",
+    "problems"
+   ],
+   "properties": {
+    "verdict": {
+     "enum": [
+      "verified",
+      "rejected",
+      "error"
+     ]
+    },
+    "problems": {
+     "$ref": "#/$defs/problems"
+    }
+   }
+  },
+  "level": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 63
+  },
+  "problems": {
+   "type": "array",
+   "maxItems": 500,
+   "items": {
+    "type": "string",
+    "maxLength": 4000
+   }
+  },
+  "reveal_item": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "pair_id",
+    "family_id",
+    "generator_id",
+    "version",
+    "level",
+    "seed_bits",
+    "salt",
+    "seed_commitment",
+    "descriptor_bits"
+   ],
+   "properties": {
+    "pair_id": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/count"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "family_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "generator_id": {
+     "$ref": "#/$defs/ident"
+    },
+    "version": {
+     "$ref": "#/$defs/version"
+    },
+    "level": {
+     "$ref": "#/$defs/level"
+    },
+    "seed_bits": {
+     "type": "string",
+     "pattern": "[01]{1,4096}"
+    },
+    "salt": {
+     "type": "string",
+     "pattern": "[0-9a-f]{64}"
+    },
+    "seed_commitment": {
+     "$ref": "#/$defs/sha256"
+    },
+    "descriptor_bits": {
+     "anyOf": [
+      {
+       "type": "string",
+       "pattern": "[01]{0,1048576}"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   }
+  },
+  "role": {
+   "enum": [
+    "design",
+    "cryptanalysis"
+   ]
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "sha256:[0-9a-f]{64}"
+  },
+  "sha256_or_null": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "sha256:[0-9a-f]{64}"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "smoke": {
+   "type": "array",
+   "maxItems": 512,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "level",
+     "seed_commitment",
+     "descriptor_sha256",
+     "status"
+    ],
+    "properties": {
+     "level": {
+      "$ref": "#/$defs/level"
+     },
+     "seed_commitment": {
+      "$ref": "#/$defs/sha256"
+     },
+     "descriptor_sha256": {
+      "$ref": "#/$defs/sha256_or_null"
+     },
+     "status": {
+      "enum": [
+       "ok",
+       "failed",
+       "timeout",
+       "malformed"
+      ]
+     }
+    }
+   }
+  },
+  "version": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 9999
+  }
+ }
+}

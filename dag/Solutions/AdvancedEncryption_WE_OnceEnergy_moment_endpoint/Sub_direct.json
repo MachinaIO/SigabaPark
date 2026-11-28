@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.OnceEnergy.moment_endpoint",
+  "proof_type": "prove",
+  "explanation": "A single family of public weights transports all bounded-degree energy readouts to zero."
+}
