@@ -1,0 +1,5 @@
+{
+  "theorem": "TraceSpectrum.conditionalGap",
+  "proof_type": "prove",
+  "explanation": "The conditional signed single-character gap averages exactly over the public syndrome."
+}
