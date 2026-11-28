@@ -1,0 +1,5 @@
+{
+  "name": "CompareReference.unqueriedCounts",
+  "title": "Exact equality of success and failure counts at a reference address never queried",
+  "statement": "For a finite Boolean function table and any adaptive deterministic preprocessing and prediction tree, among runs not querying the designated address exactly as many functions are predicted correctly as incorrectly at that address."
+}

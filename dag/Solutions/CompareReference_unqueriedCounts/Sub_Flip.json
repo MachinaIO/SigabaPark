@@ -1,0 +1,5 @@
+{
+  "theorem": "CompareReference.unqueriedCounts",
+  "proof_type": "prove",
+  "explanation": "Flip the function bit at the unqueried coordinate. Induction preserves the path and predicted bit, exchanging the two events. The coordinate flip is its own inverse."
+}
