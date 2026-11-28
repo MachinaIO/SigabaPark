@@ -1,0 +1,5 @@
+{
+  "theorem": "TraceSpectrum.capCounts",
+  "proof_type": "prove",
+  "explanation": "The unique-witness separating family fits the exact gate cap and square-root exponent."
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "TraceSpectrum.weightedBessel",
+  "proof_type": "prove",
+  "explanation": "Bessel bounds the sum of squared distinguishing gaps dominated by normalized orthogonal tests."
+}
