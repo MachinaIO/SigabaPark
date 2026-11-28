@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.gapWitness",
+  "proof_type": "prove",
+  "explanation": "Public five-to-three distance transfers an explicit parity bias"
+}

@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.shortLift",
+  "proof_type": "prove",
+  "explanation": "A narrow integer target is determined by its scaled congruence"
+}

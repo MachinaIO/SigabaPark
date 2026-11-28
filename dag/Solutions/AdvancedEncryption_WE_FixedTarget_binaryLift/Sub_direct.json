@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.binaryLift",
+  "proof_type": "prove",
+  "explanation": "An even lattice lift cannot bring two different binary coordinates closer"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "FixedTargetGeometry",
+  "title": "Fixed-lattice frames and binary parity geometry",
+  "description": "Definitions for the common rate parity majority, the NAND distance gadget, and the signed mass of a two-bit block."
+}

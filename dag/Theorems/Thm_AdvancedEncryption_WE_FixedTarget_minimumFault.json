@@ -1,0 +1,5 @@
+{
+  "name": "AdvancedEncryption.WE.FixedTarget.minimumFault",
+  "title": "A fault site costs at most the average live weight",
+  "statement": "A fault site costs at most the average live weight"
+}

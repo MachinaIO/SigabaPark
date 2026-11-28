@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.scaledMajority",
+  "proof_type": "prove",
+  "explanation": "Attenuating vote bias preserves at least the same fraction of majority response"
+}

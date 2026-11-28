@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.FixedTarget.twoParity",
+  "proof_type": "prove",
+  "explanation": "Exact leakage from both observed parity cases in a repetition block"
+}
