@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.RectangleGrant.transcript",
+  "proof_type": "prove",
+  "explanation": "One-use masks simultaneously couple every grant and disclosed pad across overlapping rectangles"
+}

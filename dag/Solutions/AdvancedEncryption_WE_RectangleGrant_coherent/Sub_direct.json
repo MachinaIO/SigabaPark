@@ -1,0 +1,5 @@
+{
+  "theorem": "AdvancedEncryption.WE.RectangleGrant.coherent",
+  "proof_type": "prove",
+  "explanation": "Coherent rectangle certificates are exact across all edges incident to each local row"
+}
